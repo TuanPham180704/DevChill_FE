@@ -133,3 +133,72 @@ npm run dev
 
 
 
+```
+
+### 🖥 Backend
+
+```bash
+git clone https://github.com/TuanPham180704/DevChill_BE.git
+
+cd DevChill_BE
+npm install
+npm run dev
+
+
+```
+
+## 📂 Project Structure
+
+### 🎨 Frontend
+
+```bash
+src/
+├── api/           # Handle API calls & Axios configuration (base URL, interceptors, auth token)
+├── assets/        # Static assets (images, icons, fonts, videos)
+├── components/    # Reusable UI components (buttons, cards, modals, chat box, etc.)
+├── layouts/       # Layout wrappers (MainLayout, AuthLayout, AdminLayout)
+├── pages/         # Application pages (Home, Login, MovieDetail, Profile, Admin pages)
+├── routes/        # Route definitions & access control (private routes, role-based routing)
+├── schemas/       # Form validation schemas (Yup/Zod for login, register, etc.)
+├── utils/         # Utility/helper functions (format date, handle errors, constants, etc.)
+├── App.jsx        # Root component (routing + global providers)
+├── main.jsx       # Entry point (render React app)
+
+```
+
+### 🛠 Backend
+
+```bash
+src/
+├── controllers/    # Handle HTTP requests & responses (receive input, return output)
+├── services/       # Business logic layer (process data, call models, handle core logic)
+├── models/         # Database models (Sequelize schemas, table definitions)
+├── routes/         # Define API endpoints and map to controllers
+├── middlewares/    # Custom middleware (auth, error handling, logging, validation)
+├── configs/        # Configuration files (database, environment, app settings)
+├── utils/          # Helper functions (formatting, constants, reusable logic)
+├── app.js          # Express app setup (middlewares, routes initialization)
+├── server.js       # Entry point (start server, connect database)
+
+```
+
+---
+
+## 🏗 System Architecture
+
+- Client–Server architecture
+- RESTful API communication
+- WebSocket (Socket.IO) for real-time features
+- AI-powered recommendation module
+
+---
+
+## 👨‍💻 Team
+
+- **Pham Tuan** — Team Leader
+- **Le Tat Thang**
+- **Pham Duc Tuan**
+- **Pham Ngoc Tai**
+- **Nguyen Van Nhat Tan**
+
+---
