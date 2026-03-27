@@ -3,106 +3,123 @@
 <p align="center"> <b>A modern movie streaming platform with AI-powered recommendations 🎥✨</b> </p> <p align="center"> <img src="https://img.shields.io/badge/Frontend-React%20(Vite)-blue?style=for-the-badge&logo=react"> <img src="https://img.shields.io/badge/Backend-Node.js%20%2B%20Express-green?style=for-the-badge&logo=node.js"> <img src="https://img.shields.io/badge/Database-PostgreSQL-blue?style=for-the-badge&logo=postgresql"> <img src="https://img.shields.io/badge/Realtime-Socket.IO-black?style=for-the-badge"> <img src="https://img.shields.io/badge/Auth-JWT-orange?style=for-the-badge"> </p>
 📖 Overview
 
-DevChill is a full-stack movie streaming platform that enables users to:
+📖 Overview
+
+DevChill is a modern movie streaming platform that allows users to:
 
 🎬 Watch movies online
 🎥 Join live premiere rooms
 💬 Chat in real-time while watching
 🤖 Receive AI-powered movie recommendations
-
-Built with a focus on performance, scalability, and user experience
-
 🚀 Tech Stack
 🎨 Frontend
-Technology Description
-React (Vite) Fast and modern UI framework
-Tailwind CSS Utility-first CSS framework
-React Router v6 Client-side routing
-Axios API communication
-Framer Motion Animations
-React Icons UI icons
+React (Vite)
+Fast and modern UI development
+Tailwind CSS
+Clean and responsive design
+React Router v6
+Client-side routing
+Axios
+API communication
+Framer Motion
+Smooth animations
+React Icons
+UI icon library
 🛠 Backend
-Technology Description
-Node.js + Express RESTful API
-PostgreSQL Database
-JWT Authentication
-bcrypt Password hashing
-Socket.IO Real-time communication
-Helmet + CORS Security
+Node.js + Express.js
+RESTful API development
+PostgreSQL
+Relational database management
+JWT (JSON Web Token)
+Authentication & authorization
+bcrypt
+Password hashing
+Socket.IO
+Real-time communication
+Helmet & CORS
+Security and protection
 🤖 AI Features
 🎯 Personalized movie recommendations
 🔍 Smart suggestion system
 📊 Behavior-based learning
-🔐 Authentication & Security
+🔐 Authentication
 User registration & login
-JWT authentication
+JWT-based authentication
 Protected routes
-RBAC (Role-Based Access Control)
-🎬 Core Features
-🎥 Movie Streaming
-Browse & search movies
+Role-based access control (RBAC)
+🎬 Movie Streaming Features
+Browse and search movies
 View movie details
 Watch movies online
 Join live premiere rooms
-💬 Real-time Interaction
-Live chat during streaming
-WebSocket-based communication
-🛠 Admin Dashboard
+Real-time chat during streaming
+🛠 Admin Features
 🎬 Manage movies
 📅 Manage streaming schedules
 👥 Manage users
 📞 Manage support
-💳 Manage subscriptions
-📊 Reports & analytics
+💳 Manage subscription packages
+📊 Reports & statistics
 🌍 Additional Features
-📱 Fully responsive (mobile & desktop)
+📱 Responsive UI (desktop & mobile)
 ⚡ Smooth animations
 🔄 Real-time updates
-🤖 AI recommendation system
+🤖 AI-powered recommendation system
 ⚡ Getting Started
 🖥 Frontend
 git clone https://github.com/TuanPham180704/DevChill_FE.git
+
+
 cd DevChill_FE
+
+
 npm install
+
+
 npm run dev
 
-👉 Open at:
+👉 Open in browser:
 http://localhost:5173
 
 🖥 Backend
 cd backend
+
+
 npm install
+
+
 npm start
 
-👉 Runs at:
+👉 Backend runs at:
 http://localhost:8080
 
 ⚙️ Environment Variables
 
-Create .env in frontend:
+Create a .env file in frontend:
 
 VITE_API_URL=http://localhost:8080
 📂 Project Structure (Frontend)
 src/
-├── api/ # API calls & config
-├── assets/ # Static files
-├── components/ # Reusable components
-├── layouts/ # Layout system
-├── pages/ # Pages
-├── routes/ # Routing & guards
-├── schemas/ # Validation schemas
-├── utils/ # Helper functions
+│
+├── api/           # API calls & configuration
+├── assets/        # Static assets
+├── components/    # Reusable UI components
+├── layouts/       # Layout structure
+├── pages/         # Application pages
+├── routes/        # Routing & access control
+├── schemas/       # Validation logic
+├── utils/         # Helper functions
+│
 ├── App.jsx
 ├── main.jsx
 🏗 System Architecture
 Client–Server architecture
-RESTful API
-WebSocket (real-time chat)
+RESTful API communication
+WebSocket for real-time chat
 AI recommendation module
 👨‍💻 Team
-Name Role
-Pham Tuan Team Leader
-Le Tat Thang Developer
-Pham Duc Tuan Developer
-Pham Ngoc Tai Developer
-Nguyen Van Nhat Tan Developer
+Pham Tuan – Team Leader
+Le Tat Thang
+Pham Duc Tuan
+Pham Ngoc Tai
+Nguyen Van Nhat Tan
