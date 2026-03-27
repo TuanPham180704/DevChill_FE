@@ -8,7 +8,7 @@ The system is built using **React (Vite)** for the frontend and **Node.js + Expr
 
 🚀 Technologies Used
 
-## 🎨 Frontend
+### 🎨 Frontend
 React.js (Vite) — Fast and modern UI development
 Tailwind CSS — Responsive and clean design
 React Router v6 — Client-side routing
@@ -18,7 +18,7 @@ React Icons — UI icons
 
 ---
 
-## 🛠 Backend
+### 🛠 Backend
 Node.js + Express.js — RESTful API
 PostgreSQL — Database management
 JWT — Authentication & authorization
@@ -70,7 +70,7 @@ AI-powered recommendation system
 ---
 
 ## ⚡ Getting Started
-# 🖥 Frontend (Vite)
+### 🖥 Frontend (Vite)
 git clone https://github.com/TuanPham180704/DevChill_FE.git
 cd DevChill_FE
 npm install
@@ -79,7 +79,7 @@ npm run dev
 ## 👉 Open in browser:
 
 http://localhost:5173
-# 🖥 Backend
+### 🖥 Backend
 cd backend
 npm install
 npm start
@@ -92,7 +92,7 @@ http://localhost:8080
 ## Create a .env file in the frontend:
 
 VITE_API_URL=http://localhost:8080
-## 📂 Project Structure (Frontend)
+ 📂 Project Structure (Frontend)
 src/
 ├── api/ # API calls & configuration
 ├── assets/ # Static assets
