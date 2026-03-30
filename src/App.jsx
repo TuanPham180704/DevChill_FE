@@ -1,12 +1,10 @@
-
+import AppRouter from "./routes/AppRouter";
 function App() {
-  
-
   return (
-    <>
-     <h1 className="bg-blue-300">DevChill</h1>
-      </>
-  )
+    <div className="min-h-screen bg-gray-900 text-white">
+      <AppRouter />
+    </div>
+  );
 }
 
-export default App
+export default App;
