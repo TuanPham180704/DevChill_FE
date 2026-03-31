@@ -117,7 +117,7 @@ export default function Login() {
                   title="Chưa làm trang này"
                   className="text-dc-cyan hover:underline"
                 >
-                  Quên mật khẩu?
+                  Quên mật khẩu hihi?
                 </Link>
               </div>
 

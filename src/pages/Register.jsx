@@ -11,7 +11,6 @@ export default function Register() {
         className="fixed top-8 left-8 z-50 flex items-center gap-2 bg-white/5 backdrop-blur-md border border-white/10 px-6 py-4 rounded-full text-white/70 hover:text-[#00F2FF] hover:border-[#00F2FF]/40 hover:shadow-[0_0_20px_rgba(0,242,255,0.15)] transition-all duration-300 group"
       >
         <FiHome className="text-xl group-hover:text-[#00F2FF] transition-colors duration-300" />
-        
       </Link>
 
       <div className="flex-1 flex items-center justify-center px-6 py-12 bg-dc-dark relative overflow-hidden">
