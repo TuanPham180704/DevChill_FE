@@ -1,18 +1,18 @@
 import { Link } from "react-router-dom";
-import { FiMail, FiLock, FiEye, FiUser, FiFilm, FiHome } from "react-icons/fi";
+import { FiMail, FiLock, FiEye, FiUser, FiFilm, FiHome, FiEyeOff } from "react-icons/fi";
 import devchilllogo from "../assets/devchill-logo.png";
+import { useState } from "react";
 
 export default function Register() {
+  const [showPassword, setShowPassword] = useState(false);
   return (
     <div className="min-h-screen flex bg-dc-darker page-enter relative">
-      {/* Home Navigation */}
       <Link
         to="/"
         className="fixed top-8 left-8 z-50 flex items-center gap-2 bg-white/5 backdrop-blur-md border border-white/10 px-6 py-4 rounded-full text-white/70 hover:text-[#00F2FF] hover:border-[#00F2FF]/40 hover:shadow-[0_0_20px_rgba(0,242,255,0.15)] transition-all duration-300 group"
       >
         <FiHome className="text-xl group-hover:text-[#00F2FF] transition-colors duration-300" />
       </Link>
-
       <div className="flex-1 flex items-center justify-center px-6 py-12 bg-dc-dark relative overflow-hidden">
         <div className="absolute -top-30 -left-20 w-75 h-75 bg-dc-cyan/5 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-25 -right-15 w-62.5 h-62.5 bg-dc-teal/5 rounded-full blur-3xl pointer-events-none" />
@@ -38,13 +38,13 @@ export default function Register() {
             <form className="space-y-4">
               <div className="animate-float-in delay-2">
                 <label className="block text-sm font-medium text-dc-text mb-1.5">
-                  Họ và tên
+                  Username
                 </label>
                 <div className="relative">
                   <FiUser className="absolute left-3.5 top-1/2 -translate-y-1/2 text-dc-text-muted" />
                   <input
                     type="text"
-                    placeholder="Nguyễn Văn A"
+                    placeholder="username"
                     className="w-full pl-10 pr-4 py-3 bg-dc-input-bg border border-dc-input-border rounded-xl text-dc-text placeholder:text-dc-text-muted/50 outline-none transition-all duration-250 input-glow"
                   />
                 </div>
@@ -71,15 +71,16 @@ export default function Register() {
                 <div className="relative">
                   <FiLock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-dc-text-muted" />
                   <input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     placeholder="password"
                     className="w-full pl-10 pr-12 py-3 bg-dc-input-bg border border-dc-input-border rounded-xl text-dc-text placeholder:text-dc-text-muted/50 outline-none transition-all duration-250 input-glow"
                   />
                   <button
                     type="button"
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-dc-text-muted"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-dc-text-muted hover:text-dc-cyan"
                   >
-                    <FiEye />
+                    {showPassword ? <FiEyeOff /> : <FiEye />}
                   </button>
                 </div>
               </div>
@@ -97,9 +98,10 @@ export default function Register() {
                   />
                   <button
                     type="button"
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-dc-text-muted"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-dc-text-muted hover:text-dc-cyan"
                   >
-                    <FiEye />
+                    {showPassword ? <FiEyeOff /> : <FiEye />}
                   </button>
                 </div>
               </div>
