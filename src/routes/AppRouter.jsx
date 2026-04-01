@@ -9,10 +9,12 @@ import NotFound from "../pages/NotFound";
 import VerifyOtp from "../pages/VerifyOtp";
 import ForgotPassword from "../components/Forgotpassword";
 import ResetPassword from "../components/Resetpassword";
-import Profile from "../pages/Profile";
-import HistoryView from "../pages/HistoryView";
-import PremiumHistory from "../pages/PremiumHistory";
-import Support from "../pages/Support";
+import Profile from "../pages/Client/Profile/Profile";
+import HistoryView from "../pages/Client/Profile/HistoryView";
+import PremiumHistory from "../pages/Client/Profile/PremiumHistory";
+import Support from "../pages/Client/Profile/Support";
+import CustomerList from "../pages/Admin/CustomerList";
+import AdminLayout from "../layouts/AdminLayout";
 
 export default function AppRouter() {
   return (
@@ -31,6 +33,9 @@ export default function AppRouter() {
           <Route path="/support" element={<Support />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route element={<AdminLayout />}>
+            <Route path="/admin/customers" element={<CustomerList />} />
+          </Route>
           <Route element={<NotFound />} path="*" />
         </Routes>
       </BrowserRouter>
