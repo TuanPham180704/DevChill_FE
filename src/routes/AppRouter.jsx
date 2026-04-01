@@ -9,6 +9,10 @@ import NotFound from "../pages/NotFound";
 import VerifyOtp from "../pages/VerifyOtp";
 import ForgotPassword from "../components/Forgotpassword";
 import ResetPassword from "../components/Resetpassword";
+import Profile from "../pages/Profile";
+import HistoryView from "../pages/HistoryView";
+import PremiumHistory from "../pages/PremiumHistory";
+import Support from "../pages/Support";
 
 export default function AppRouter() {
   return (
@@ -19,8 +23,12 @@ export default function AppRouter() {
             <Route index element={<Home />} />
           </Route>
           <Route path="/login" element={<Login />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/register" element={<Register />} />
           <Route path="/verify-otp" element={<VerifyOtp />} />
+          <Route path="/history" element={<HistoryView />} />
+          <Route path="/my-premium" element={<PremiumHistory />} />
+          <Route path="/support" element={<Support />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route element={<NotFound />} path="*" />
