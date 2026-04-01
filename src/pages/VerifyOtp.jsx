@@ -142,6 +142,8 @@ export default function VerifyOtp() {
                 <input
                   key={index}
                   type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   maxLength={1}
                   ref={(el) => (inputsRef.current[index] = el)}
                   onChange={(e) => handleChange(e.target.value, index)}
