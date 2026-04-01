@@ -22,14 +22,14 @@ export const verifyOtpApi = async ({ email, code }) => {
   return res.data;
 };
 
-export const resendOtpApi = async (email) => {
+export const resendOtpApi = async ({ email }) => {
   const res = await axios.post(`${API_URL}/resend-otp`, { email });
   return res.data;
 };
 
 export const loginApi = async ({ email, password }) => {
   const res = await axios.post(`${API_URL}/login`, { email, password });
-  return res.data; 
+  return res.data;
 };
 export const forgotPasswordApi = async (email) => {
   const res = await axios.post(`${API_URL}/forgot-password`, { email });

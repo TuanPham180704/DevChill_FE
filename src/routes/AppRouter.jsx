@@ -6,6 +6,9 @@ import Home from "../pages/Home";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import NotFound from "../pages/NotFound";
+import VerifyOtp from "../pages/VerifyOtp";
+import ForgotPassword from "../components/Forgotpassword";
+import ResetPassword from "../components/Resetpassword";
 
 export default function AppRouter() {
   return (
@@ -17,6 +20,9 @@ export default function AppRouter() {
           </Route>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/verify-otp" element={<VerifyOtp />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route element={<NotFound />} path="*" />
         </Routes>
       </BrowserRouter>

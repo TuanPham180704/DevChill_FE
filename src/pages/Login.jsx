@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   FiMail,
   FiLock,
@@ -10,12 +10,56 @@ import {
 } from "react-icons/fi";
 import devchilllogo from "../assets/devchill-logo.png";
 
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { loginSchema } from "../schemas/auth";
+
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { loginApi } from "../api/authApi";
+import { setToken } from "../utils/auth";
+import { toast } from "react-toastify";
+
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // TODO: xử lý login
+  const navigate = useNavigate();
+  const qc = useQueryClient();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+  const mutation = useMutation({
+    mutationFn: loginApi,
+    onSuccess(data) {
+      const token = data?.token;
+      const user = data?.user;
+      if (token) {
+        setToken(token);
+        qc.invalidateQueries({ queryKey: ["me"] });
+        toast.success(`Chào mừng ${user?.username || "bạn"} quay lại!`);
+        if (user?.role === "admin") {
+          navigate("/admin", { replace: true });
+        } else {
+          navigate("/", { replace: true });
+        }
+      } else {
+        toast.error("Đăng nhập thất bại, vui lòng thử lại");
+      }
+    },
+    onError(err) {
+      toast.error(
+        err?.response?.data?.error || "Email hoặc mật khẩu không đúng",
+      );
+    },
+  });
+  const onSubmit = (data) => {
+    mutation.mutate(data);
   };
 
   return (
@@ -74,8 +118,11 @@ export default function Login() {
                 Chào mừng trở lại! Hãy đăng nhập để tiếp tục.
               </p>
             </div>
-
-            <form className="space-y-5" onSubmit={handleSubmit}>
+            <form
+              className="space-y-5"
+              onSubmit={handleSubmit(onSubmit)}
+              noValidate
+            >
               <div className="animate-float-in delay-2">
                 <label className="block text-sm font-medium text-dc-text mb-1.5">
                   Email
@@ -84,11 +131,17 @@ export default function Login() {
                   <FiMail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-dc-text-muted" />
                   <input
                     type="email"
-                    required
+                    {...register("email")}
+                    className={`w-full pl-10 pr-4 py-3 bg-dc-input-bg border rounded-xl text-dc-text placeholder:text-dc-text-muted/50 outline-none transition-all duration-250 input-glow
+                      ${errors.email ? "border-red-500" : "border-dc-input-border"}`}
                     placeholder="you@example.com"
-                    className="w-full pl-10 pr-4 py-3 bg-dc-input-bg border border-dc-input-border rounded-xl text-dc-text placeholder:text-dc-text-muted/50 outline-none transition-all duration-250 input-glow"
                   />
                 </div>
+                {errors.email && (
+                  <p className="text-sm text-red-400 mt-1">
+                    {errors.email.message}
+                  </p>
+                )}
               </div>
               <div className="animate-float-in delay-3">
                 <label className="block text-sm font-medium text-dc-text mb-1.5">
@@ -98,9 +151,11 @@ export default function Login() {
                   <FiLock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-dc-text-muted" />
                   <input
                     type={showPassword ? "text" : "password"}
-                    required
+                    {...register("password")}
+                    className={`w-full pl-10 pr-12 py-3 bg-dc-input-bg border rounded-xl text-dc-text placeholder:text-dc-text-muted/50 outline-none transition-all duration-250 input-glow
+                      ${errors.password ? "border-red-500" : "border-dc-input-border"}`}
                     placeholder="password"
-                    className="w-full pl-10 pr-12 py-3 bg-dc-input-bg border border-dc-input-border rounded-xl text-dc-text placeholder:text-dc-text-muted/50 outline-none transition-all duration-250 input-glow"
+                    autoComplete="new-password"
                   />
                   <button
                     type="button"
@@ -110,6 +165,11 @@ export default function Login() {
                     {showPassword ? <FiEyeOff /> : <FiEye />}
                   </button>
                 </div>
+                {errors.password && (
+                  <p className="text-sm text-red-400 mt-1">
+                    {errors.password.message}
+                  </p>
+                )}
               </div>
               <div className="flex items-center justify-between text-sm animate-float-in delay-4">
                 <label className="flex items-center gap-2 text-dc-text-muted cursor-pointer">
@@ -129,9 +189,12 @@ export default function Login() {
               </div>
               <button
                 type="submit"
+                disabled={mutation.isLoading || isSubmitting}
                 className="btn-cinematic w-full py-3.5 rounded-xl text-base flex items-center justify-center gap-2 animate-float-in delay-5"
               >
-                Đăng nhập
+                {mutation.isLoading || isSubmitting
+                  ? "Đang đăng nhập..."
+                  : "Đăng nhập"}
               </button>
             </form>
             <div className="flex items-center gap-3 my-6 animate-float-in delay-5">
@@ -141,7 +204,7 @@ export default function Login() {
             </div>
             <button
               type="button"
-              className="w-full py-3 rounded-xl border border-dc-input-border bg-dc-input-bg text-dc-text hover:border-dc-cyan/30 hover:bg-dc-cyan/5 transition-all duration-250 flex items-center justify-center gap-2 text-sm font-medium animate-float-in delay-6"
+              className="w-full py-3 rounded-xl border border-dc-input-border bg-dc-input-bg text-dc-text hover:border-dc-cyan/30 hover:bg-dc-cyan/5 transition-all duration-200 flex items-center justify-center gap-2 text-sm font-medium"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path
@@ -163,8 +226,6 @@ export default function Login() {
               </svg>
               Đăng nhập với Google
             </button>
-
-            {/* Register */}
             <p className="text-center text-dc-text-muted text-sm mt-6 animate-float-in delay-6">
               Chưa có tài khoản?{" "}
               <Link

@@ -23,11 +23,23 @@ export const registerSchema = z
     path: ["confirmPassword"],
     message: "Mật khẩu nhập lại không khớp",
   });
-
+export const forgotPasswordSchema = z.object({
+  email: z.string().email("Email không hợp lệ"),
+});
 export const loginSchema = z.object({
   email: z.string().email("Email không hợp lệ"),
   password: z.string().min(1, "Vui lòng nhập mật khẩu"),
 });
+export const resetPasswordSchema = z
+  .object({
+    password: passwordRules,
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Mật khẩu nhập lại không khớp",
+  });
 
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
