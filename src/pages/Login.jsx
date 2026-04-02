@@ -53,9 +53,7 @@ export default function Login() {
       }
     },
     onError(err) {
-      toast.error(
-        err?.response?.data?.error || "Email hoặc mật khẩu không đúng",
-      );
+      toast.error(err?.response?.data?.message || "Đăng nhập thất bại");
     },
   });
   const onSubmit = (data) => {

@@ -25,27 +25,19 @@ export default function ChangePassword({ isOpen, onClose, onSubmit }) {
       newPassword,
       confirmPassword,
     });
-
-    // ❌ Nếu validate FAIL thì xử lý ở đây
     if (!result.success) {
       const fieldErrors = Object.fromEntries(
         result.error.issues.map((err) => [err.path[0], err.message]),
       );
-
       setErrors(fieldErrors);
-      return; // ⛔ CHẶN KHÔNG CHO CHẠY XUỐNG
+      return;
     }
-
-    // ✅ Nếu validate PASS thì mới gọi API
     try {
       setLoading(true);
-
       const res = await onSubmit(result.data);
-
       setOldPassword("");
       setNewPassword("");
       setConfirmPassword("");
-
       toast.success(res?.message || "Đổi mật khẩu thành công!");
       onClose();
     } catch (err) {
@@ -55,7 +47,6 @@ export default function ChangePassword({ isOpen, onClose, onSubmit }) {
       setLoading(false);
     }
   };
-
   const renderPasswordInput = (
     value,
     setValue,
@@ -86,7 +77,6 @@ export default function ChangePassword({ isOpen, onClose, onSubmit }) {
       )}
     </div>
   );
-
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm transition-opacity"
@@ -109,7 +99,6 @@ export default function ChangePassword({ isOpen, onClose, onSubmit }) {
             <FiX className="text-2xl" />
           </button>
         </div>
-
         <div className="px-8 py-6 space-y-5">
           {renderPasswordInput(
             oldPassword,
