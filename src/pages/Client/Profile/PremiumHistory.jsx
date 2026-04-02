@@ -1,6 +1,6 @@
 import { FaCrown } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import Sidebar from "../../../components/SideBar";
+import Sidebar from "../../../components/Client/SideBar";
 
 export default function PremiumHistory() {
   return (
@@ -10,7 +10,9 @@ export default function PremiumHistory() {
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-white text-3xl font-bold mb-1">Gói đã mua</h1>
-            <p className="text-dc-text-muted text-sm">Quản lý các tư cách thành viên và lịch sử giao dịch của bạn</p>
+            <p className="text-dc-text-muted text-sm">
+              Quản lý các tư cách thành viên và lịch sử giao dịch của bạn
+            </p>
           </div>
         </div>
         <div className="flex flex-col gap-4">
@@ -19,13 +21,16 @@ export default function PremiumHistory() {
               <div className="absolute inset-0 bg-[#00F2FF]/5 blur-xl"></div>
               <FaCrown className="text-4xl text-[#334155]" />
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">Chưa có gói Premium nào</h3>
+            <h3 className="text-xl font-bold text-white mb-2">
+              Chưa có gói Premium nào
+            </h3>
             <p className="text-dc-text-muted max-w-sm mb-8 leading-relaxed">
-              Bạn chưa đăng ký gói Premium nào. Hãy nâng cấp để trải nghiệm không giới hạn kho phim bom tấn với chất lượng 4K sắc nét!
+              Bạn chưa đăng ký gói Premium nào. Hãy nâng cấp để trải nghiệm
+              không giới hạn kho phim bom tấn với chất lượng 4K sắc nét!
             </p>
-            
-            <Link 
-              to="/upgrade" 
+
+            <Link
+              to="/upgrade"
               className="btn-cinematic px-8 py-3.5 rounded-xl text-base flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(0,242,255,0.15)] hover:shadow-[0_0_30px_rgba(0,242,255,0.3)]"
             >
               <FaCrown className="text-lg" />

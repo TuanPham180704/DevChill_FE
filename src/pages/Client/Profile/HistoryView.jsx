@@ -1,8 +1,14 @@
-import { FiClock, FiPlay, FiTrash2, FiMoreVertical, FiFilm } from "react-icons/fi";
+import {
+  FiClock,
+  FiPlay,
+  FiTrash2,
+  FiMoreVertical,
+  FiFilm,
+} from "react-icons/fi";
 import { Link } from "react-router-dom";
-import Sidebar from "../../../components/SideBar";
+import Sidebar from "../../../components/Client/SideBar";
 
-const mockHistory = []; 
+const mockHistory = [];
 
 export default function HistoryView() {
   return (
@@ -11,52 +17,76 @@ export default function HistoryView() {
       <main className="flex-1 bg-[#111827] px-16 py-12 overflow-y-auto max-h-screen hidden-scrollbar">
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-white text-3xl font-bold mb-1">Lịch sử xem phim</h1>
-            <p className="text-dc-text-muted text-sm">Quản lý các bộ phim bạn đã hoặc đang xem</p>
+            <h1 className="text-white text-3xl font-bold mb-1">
+              Lịch sử xem phim
+            </h1>
+            <p className="text-dc-text-muted text-sm">
+              Quản lý các bộ phim bạn đã hoặc đang xem
+            </p>
           </div>
           {mockHistory.length > 0 && (
             <button className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[rgba(244,63,94,0.3)] text-dc-error hover:bg-[rgba(244,63,94,0.1)] hover:border-dc-error transition-all text-sm font-medium group">
-              <FiTrash2 className="group-hover:scale-110 transition-transform" /> Xóa tất cả
+              <FiTrash2 className="group-hover:scale-110 transition-transform" />{" "}
+              Xóa tất cả
             </button>
           )}
         </div>
         <div className="flex flex-col gap-4">
           {mockHistory.length > 0 ? (
             mockHistory.map((item) => (
-              <div key={item.id} className="group flex gap-6 p-4 rounded-2xl bg-[rgba(15,23,42,0.4)] border border-[rgba(100,116,139,0.15)] hover:bg-dc-input-bg hover:border-[rgba(0,242,255,0.3)] hover:shadow-[0_4px_30px_rgba(0,242,255,0.06)] transition-all duration-300">
+              <div
+                key={item.id}
+                className="group flex gap-6 p-4 rounded-2xl bg-[rgba(15,23,42,0.4)] border border-[rgba(100,116,139,0.15)] hover:bg-dc-input-bg hover:border-[rgba(0,242,255,0.3)] hover:shadow-[0_4px_30px_rgba(0,242,255,0.06)] transition-all duration-300"
+              >
                 <div className="relative w-48 h-28 rounded-xl overflow-hidden shrink-0 cursor-pointer bg-[#0A0E17]">
-                  <img src={item.posterUrl} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90 group-hover:opacity-100" />
+                  <img
+                    src={item.posterUrl}
+                    alt={item.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90 group-hover:opacity-100"
+                  />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300 backdrop-blur-[2px]">
                     <div className="w-12 h-12 rounded-full bg-[#00F2FF]/20 flex items-center justify-center border border-[#00F2FF]/50 shadow-[0_0_20px_rgba(0,242,255,0.5)] transform scale-90 group-hover:scale-100 transition-transform duration-300">
                       <FiPlay className="text-[#00F2FF] text-xl ml-1" />
                     </div>
                   </div>
                   <div className="absolute bottom-0 left-0 w-full h-1.5 bg-black/60 backdrop-blur-sm">
-                    <div className="h-full bg-linear-to-r from-[#00F2FF] to-dc-teal shadow-[0_0_10px_rgba(0,242,255,0.8)] relative" style={{ width: `${item.progress}%` }}>
+                    <div
+                      className="h-full bg-linear-to-r from-[#00F2FF] to-dc-teal shadow-[0_0_10px_rgba(0,242,255,0.8)] relative"
+                      style={{ width: `${item.progress}%` }}
+                    >
                       <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-white rounded-full shadow-[0_0_5px_rgba(255,255,255,0.8)]"></div>
                     </div>
                   </div>
                 </div>
                 <div className="flex-1 flex flex-col justify-center py-2">
                   <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-white font-bold text-xl cursor-pointer hover:text-[#00F2FF] transition-colors">{item.title}</h3>
+                    <h3 className="text-white font-bold text-xl cursor-pointer hover:text-[#00F2FF] transition-colors">
+                      {item.title}
+                    </h3>
                     <button className="text-[#64748b] hover:text-white p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[#1e293b]">
                       <FiMoreVertical />
                     </button>
                   </div>
                   <div className="flex items-center gap-4 mt-1">
                     <div className="flex items-center gap-1.5 text-sm font-medium text-dc-text-muted">
-                      <FiClock className="text-[#00F2FF]/70" /> 
-                      <span className="text-white">{item.watchedTime}</span> / {item.totalTime}
+                      <FiClock className="text-[#00F2FF]/70" />
+                      <span className="text-white">
+                        {item.watchedTime}
+                      </span> / {item.totalTime}
                     </div>
                     <div className="w-1 h-1 rounded-full bg-[#334155]"></div>
-                    <span className={`text-sm font-medium ${item.progress === 100 ? "text-dc-success" : "text-[#00F2FF]"}`}>
-                      {item.progress === 100 ? "Đã xem xong" : `Hoàn thành ${item.progress}%`}
+                    <span
+                      className={`text-sm font-medium ${item.progress === 100 ? "text-dc-success" : "text-[#00F2FF]"}`}
+                    >
+                      {item.progress === 100
+                        ? "Đã xem xong"
+                        : `Hoàn thành ${item.progress}%`}
                     </span>
-                  </div>               
-                  <p className="text-xs text-[#64748b] font-medium mt-auto uppercase tracking-wider">{item.lastWatched}</p>
+                  </div>
+                  <p className="text-xs text-[#64748b] font-medium mt-auto uppercase tracking-wider">
+                    {item.lastWatched}
+                  </p>
                 </div>
-
               </div>
             ))
           ) : (
@@ -65,12 +95,15 @@ export default function HistoryView() {
                 <div className="absolute inset-0 bg-[#00F2FF]/5 blur-xl"></div>
                 <FiFilm className="text-4xl text-[#334155]" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">Chưa có lịch sử xem</h3>
+              <h3 className="text-xl font-bold text-white mb-2">
+                Chưa có lịch sử xem
+              </h3>
               <p className="text-dc-text-muted max-w-sm mb-8 leading-relaxed">
-                Bạn chưa xem bộ phim nào gần đây. Hãy khám phá hàng ngàn bộ phim hấp dẫn trên DevChill ngay!
+                Bạn chưa xem bộ phim nào gần đây. Hãy khám phá hàng ngàn bộ phim
+                hấp dẫn trên DevChill ngay!
               </p>
-              <Link 
-                to="/" 
+              <Link
+                to="/"
                 className="btn-cinematic px-8 py-3.5 rounded-xl text-base flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(0,242,255,0.15)] hover:shadow-[0_0_30px_rgba(0,242,255,0.3)]"
               >
                 <FiPlay className="text-lg" />
@@ -79,7 +112,6 @@ export default function HistoryView() {
             </div>
           )}
         </div>
-
       </main>
       <style>{`
         .hidden-scrollbar::-webkit-scrollbar {

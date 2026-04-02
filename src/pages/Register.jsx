@@ -22,6 +22,7 @@ import { toast } from "react-toastify";
 export default function Register() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setConfirmShowPassword] = useState(false);
   const {
     register: formRegister,
     handleSubmit,
@@ -148,7 +149,7 @@ export default function Register() {
                 <div className="relative">
                   <FiLock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-dc-text-muted" />
                   <input
-                    type={showPassword ? "text" : "password"}
+                    type={showConfirmPassword ? "text" : "password"}
                     placeholder="confirm-password"
                     {...formRegister("confirmPassword")}
                     className={`w-full pl-10 pr-12 py-3 bg-dc-input-bg border rounded-xl text-dc-text
@@ -156,10 +157,10 @@ export default function Register() {
                   />
                   <button
                     type="button"
-                    onClick={() => setShowPassword(!showPassword)}
+                    onClick={() => setConfirmShowPassword(!showConfirmPassword)}
                     className="absolute right-3.5 top-1/2 -translate-y-1/2 text-dc-text-muted"
                   >
-                    {showPassword ? <FiEyeOff /> : <FiEye />}
+                    {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
                   </button>
                 </div>
                 {errors.confirmPassword && (
