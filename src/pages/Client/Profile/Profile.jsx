@@ -85,8 +85,6 @@ export default function Profile() {
       toast.error(err?.response?.data?.message || "Cập nhật thất bại!");
     }
   };
-
-  // ✅ FIX: clean function - không toast, không catch
   const handleChangePassword = async (data) => {
     return await changePassword(data);
   };
@@ -212,8 +210,6 @@ export default function Profile() {
               </span>
             </p>
           </div>
-
-          {/* Avatar */}
           <div className="flex flex-col items-center gap-4 shrink-0">
             <input
               type="file"

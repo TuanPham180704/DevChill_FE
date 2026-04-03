@@ -15,7 +15,7 @@ import PremiumHistory from "../pages/Client/Profile/PremiumHistory";
 import Support from "../pages/Client/Profile/Support";
 import CustomerList from "../pages/Admin/CustomerList";
 import AdminLayout from "../layouts/AdminLayout";
-
+import ProtectedRoute from "../routes/ProtectedRoute";
 export default function AppRouter() {
   return (
     <>
@@ -25,17 +25,24 @@ export default function AppRouter() {
             <Route index element={<Home />} />
           </Route>
           <Route path="/login" element={<Login />} />
-          <Route path="/profile" element={<Profile />} />
           <Route path="/register" element={<Register />} />
           <Route path="/verify-otp" element={<VerifyOtp />} />
-          <Route path="/history" element={<HistoryView />} />
-          <Route path="/my-premium" element={<PremiumHistory />} />
-          <Route path="/support" element={<Support />} />
+          <Route element={<ProtectedRoute roles={["user"]} />}>
+            <Route element={<AppLayout />}>
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/my-premium" element={<PremiumHistory />} />
+              <Route path="/history" element={<HistoryView />} />
+              <Route path="/support" element={<Support />} />
+            </Route>
+          </Route>
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
-          <Route element={<AdminLayout />}>
-            <Route path="/admin/customers" element={<CustomerList />} />
+          <Route element={<ProtectedRoute roles={["admin"]} />}>
+            <Route element={<AdminLayout />}>
+              <Route path="/admin/customers" element={<CustomerList />} />
+            </Route>
           </Route>
+
           <Route element={<NotFound />} path="*" />
         </Routes>
       </BrowserRouter>

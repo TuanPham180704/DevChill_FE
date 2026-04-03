@@ -1,17 +1,36 @@
-import { FaChartBar, FaUsers, FaFilm, FaFileContract, FaBoxOpen, FaHeadset, FaSignOutAlt } from 'react-icons/fa';
-import { Link, useLocation } from 'react-router-dom';
+import {
+  FaChartBar,
+  FaUsers,
+  FaFilm,
+  FaFileContract,
+  FaBoxOpen,
+  FaHeadset,
+  FaSignOutAlt,
+} from "react-icons/fa";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { logout } from "../../utils/auth";
 
 export default function Sidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
 
   const menuItems = [
-    { name: 'Tổng quan', icon: <FaChartBar />, path: '/admin' },
-    { name: 'Quản lý khách hàng', icon: <FaUsers />, path: '/admin/customers' },
-    { name: 'Quản lý phim', icon: <FaFilm />, path: '/admin/movies' },
-    { name: 'Quản lý hợp đồng', icon: <FaFileContract />, path: '/admin/contracts' },
-    { name: 'Quản lý gói', icon: <FaBoxOpen />, path: '/admin/packages' },
-    { name: 'Quản lý hỗ trợ', icon: <FaHeadset />, path: '/admin/support' },
+    { name: "Tổng quan", icon: <FaChartBar />, path: "/admin" },
+    { name: "Quản lý khách hàng", icon: <FaUsers />, path: "/admin/customers" },
+    { name: "Quản lý phim", icon: <FaFilm />, path: "/admin/movies" },
+    {
+      name: "Quản lý hợp đồng",
+      icon: <FaFileContract />,
+      path: "/admin/contracts",
+    },
+    { name: "Quản lý gói", icon: <FaBoxOpen />, path: "/admin/packages" },
+    { name: "Quản lý hỗ trợ", icon: <FaHeadset />, path: "/admin/support" },
   ];
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   return (
     <aside className="w-64 h-screen bg-[#060a14]/80 backdrop-blur-xl border-r border-white/5 flex flex-col justify-between fixed left-0 top-0 text-white z-50">
@@ -21,18 +40,21 @@ export default function Sidebar() {
             DEV<span className="font-light text-white">CHILL</span>
           </h2>
         </div>
-        
+
         <nav className="p-4 space-y-2 mt-4">
           {menuItems.map((item) => {
-            const isActive = location.pathname === item.path || (item.path !== '/admin' && location.pathname.startsWith(item.path));
+            const isActive =
+              location.pathname === item.path ||
+              (item.path !== "/admin" &&
+                location.pathname.startsWith(item.path));
             return (
               <Link
                 key={item.name}
                 to={item.path}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 font-medium ${
-                  isActive 
-                    ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.15)]' 
-                    : 'text-gray-400 hover:text-white hover:bg-white/5 border border-transparent'
+                  isActive
+                    ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.15)]"
+                    : "text-gray-400 hover:text-white hover:bg-white/5 border border-transparent"
                 }`}
               >
                 <span className="text-xl">{item.icon}</span>
@@ -50,12 +72,15 @@ export default function Sidebar() {
               A
             </div>
             <div>
-              <p className="text-sm font-semibold text-white leading-none">Admin</p>
+              <p className="text-sm font-semibold text-white leading-none">
+                Admin
+              </p>
               <p className="text-xs text-gray-400 mt-1">Quản lý hệ thống</p>
             </div>
           </div>
-          <button 
-            className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors cursor-pointer" 
+          <button
+            onClick={handleLogout}
+            className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors cursor-pointer"
             title="Đăng xuất"
           >
             <FaSignOutAlt size={18} />

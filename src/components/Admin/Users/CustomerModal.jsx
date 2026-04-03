@@ -1,18 +1,8 @@
-import { useState, useEffect } from 'react';
-import { FaTimes, FaUser, FaEdit } from 'react-icons/fa';
+import { useState, useEffect } from "react";
+import { FaTimes, FaUser, FaEdit } from "react-icons/fa";
 
 export default function CustomerModal({ isOpen, onClose, user, onSave }) {
-  const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    password: '',
-    birth_date: '',
-    gender: 'unknown',
-    role: 'user',
-    avatar_url: '',
-    is_premium: false,
-    is_active: true
-  });
+  const [formData, setFormData] = useState({});
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
@@ -20,219 +10,220 @@ export default function CustomerModal({ isOpen, onClose, user, onSave }) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({
         ...user,
-        birth_date: user.birth_date ? new Date(user.birth_date).toISOString().split('T')[0] : ''
+        password: "",
+        premium_plan: user.premium_plan || 1,
       });
-      setIsEditing(false);
-    } else {
-      setFormData({
-        username: '',
-        email: '',
-        password: '',
-        birth_date: '',
-        gender: 'unknown',
-        role: 'user',
-        avatar_url: '',
-        is_premium: false,
-        is_active: true
-      });
-      setIsEditing(false);
     }
+    setIsEditing(false);
   }, [user, isOpen]);
 
   if (!isOpen) return null;
 
   const handleSave = () => {
-    if (onSave) {
-      onSave({
-          ...formData,
-          created_at: formData.created_at || new Date().toISOString()
-      });
-    }
+    const data = { ...formData };
+    if (!data.password) delete data.password;
+    onSave && onSave(data);
+  };
+
+  const formatDate = (d) => {
+    if (!d) return "Không có";
+    const date = new Date(d);
+    if (isNaN(date)) return "Không hợp lệ";
+    return date.toLocaleString("vi-VN");
   };
 
   return (
-    <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
-      <div 
-        className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity" 
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Overlay */}
+      <div
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
         onClick={onClose}
-      ></div>
-      
-      <div className="relative bg-white w-full max-w-3xl rounded-2xl shadow-xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-        
-        {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-          <h3 className="text-lg font-bold text-gray-800">
-            THÔNG TIN CHI TIẾT NGƯỜI DÙNG
-          </h3>
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={() => setIsEditing(!isEditing)} 
-              title={isEditing ? "Hủy chỉnh sửa" : "Chỉnh sửa thông tin"}
-              className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all ${
-                isEditing 
-                ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/30' 
-                : 'hover:bg-gray-200 text-gray-500 hover:text-indigo-600'
-              }`}
+      />
+
+      {/* Modal */}
+      <div className="relative w-full max-w-5xl bg-white rounded-2xl shadow-xl overflow-hidden">
+        {/* HEADER */}
+        <div className="flex justify-between items-center px-6 py-4 bg-indigo-600 text-white">
+          <h3 className="text-lg font-semibold">Quản lý người dùng</h3>
+
+          <div className="flex gap-2">
+            <button
+              onClick={() => setIsEditing(!isEditing)}
+              className="p-2 rounded-lg hover:bg-white/20"
             >
-              <FaEdit size={16} />
+              <FaEdit />
             </button>
-            <button 
-              onClick={onClose} 
-              className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-200 text-gray-500 transition-colors"
+
+            <button
+              onClick={onClose}
+              className="p-2 rounded-lg hover:bg-white/20"
             >
-              <FaTimes size={16} />
+              <FaTimes />
             </button>
           </div>
         </div>
 
-        {/* Body */}
-        <div className="p-6 overflow-y-auto max-h-[80vh]">
-          <div className="flex flex-col md:flex-row gap-8 mb-6">
-            {/* Avatar Section */}
-            <div className="flex flex-col items-center gap-3">
-               <div className="w-24 h-24 rounded-full cursor-pointer bg-gray-100 border-2 border-gray-200 flex items-center justify-center text-gray-400 relative overflow-hidden">
-                  {formData.avatar_url ? (
-                      <img src={formData.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
-                  ) : (
-                      <div className="w-full h-full bg-indigo-500 flex items-center justify-center text-white font-bold text-2xl">
-                          {formData.username
-                            ? formData.username.split(" ").map(w => w[0]).join("").substring(0, 2).toUpperCase()
-                            : <FaUser size={32} />
-                          }
-                      </div>
-                  )}
-               </div>
-            </div>
-            
-            {/* Main Info */}
-            <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div className="space-y-1.5">
-                    <label className="text-sm font-semibold text-gray-700">Tên người dùng <span className="text-red-500">*</span></label>
-                    <input 
-                        type="text" 
-                        value={formData.username} 
-                        disabled
-                        className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-500 text-sm cursor-not-allowed focus:outline-none transition-all placeholder-gray-400 opacity-70" 
-                        placeholder="VD: Nguyễn Văn A"
-                    />
-                </div>
-
-                <div className="space-y-1.5">
-                    <label className="text-sm font-semibold text-gray-700">Email <span className="text-red-500">*</span></label>
-                    <input 
-                        type="email" 
-                        value={formData.email} 
-                        disabled={!isEditing}
-                        onChange={e => setFormData({...formData, email: e.target.value})}
-                        className={`w-full px-4 py-2 border rounded-lg text-sm transition-all placeholder-gray-400 outline-none ${
-                            isEditing 
-                            ? 'bg-white border-indigo-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-gray-800' 
-                            : 'bg-gray-50 border-gray-200 text-gray-500 cursor-not-allowed'
-                        }`} 
-                        placeholder="VD: email@example.com"
-                    />
-                </div>
-
-                <div className="space-y-1.5">
-                    <label className="text-sm font-semibold text-gray-700">Mật khẩu <span className="text-red-500">*</span></label>
-                    <input 
-                        type="password" 
-                        value={formData.password} 
-                        disabled={!isEditing}
-                        onChange={e => setFormData({...formData, password: e.target.value})}
-                        className={`w-full px-4 py-2 border rounded-lg text-sm transition-all placeholder-gray-400 outline-none ${
-                            isEditing 
-                            ? 'bg-white border-indigo-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-gray-800' 
-                            : 'bg-gray-50 border-gray-200 text-gray-500 cursor-not-allowed'
-                        }`} 
-                        placeholder="Nhập để đổi mật khẩu mới"
-                    />
-                </div>
-
-                <div className="space-y-1.5">
-                    <label className="text-sm font-semibold text-gray-700">Ngày sinh</label>
-                    <input 
-                        type="date" 
-                        value={formData.birth_date} 
-                        disabled
-                        className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-500 text-sm cursor-not-allowed focus:outline-none transition-all opacity-70" 
-                    />
-                </div>
-
-                <div className="space-y-1.5">
-                    <label className="text-sm font-semibold text-gray-700">Giới tính</label>
-                    <select 
-                        value={formData.gender} 
-                        disabled
-                        className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-500 text-sm cursor-not-allowed focus:outline-none transition-all font-medium opacity-70"
-                    >
-                        <option value="male">Nam</option>
-                        <option value="female">Nữ</option>
-                        <option value="other">Khác</option>
-                        <option value="unknown">Không rõ</option>
-                    </select>
-                </div>
-
-                <div className="space-y-1.5">
-                    <label className="text-sm font-semibold text-gray-700">Vai trò (Role)</label>
-                    <select 
-                        value={formData.role} 
-                        disabled={!isEditing}
-                        onChange={e => setFormData({...formData, role: e.target.value})}
-                        className={`w-full px-4 py-2 border rounded-lg text-sm transition-all font-medium outline-none appearance-none ${
-                            isEditing 
-                            ? 'bg-white border-indigo-200 focus:border-indigo-500 text-gray-800 cursor-pointer' 
-                            : 'bg-gray-50 border-gray-200 text-gray-500 cursor-not-allowed'
-                        }`}
-                    >
-                        <option value="user">Khách hàng (User)</option>
-                        <option value="admin">Quản trị viên (Admin)</option>
-                    </select>
-                </div>
-            </div>
-          </div>
-
-          <hr className="border-gray-100 my-6" />
-
-          <div className="w-full">
-              <div className={`flex items-center justify-between p-4 rounded-lg border transition-all ${isEditing ? 'bg-amber-50 border-amber-200' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
-                 <div>
-                    <h4 className={`text-sm font-bold ${isEditing ? 'text-amber-900' : 'text-gray-500'}`}>Gói Premium</h4>
-                    <p className={`text-xs mt-0.5 ${isEditing ? 'text-amber-700/70' : 'text-gray-400'}`}>Kích hoạt đặc quyền hội viên</p>
-                 </div>
-                 <label className={`relative inline-flex items-center ${isEditing ? 'cursor-pointer' : 'cursor-not-allowed'}`}>
-                    <input 
-                        type="checkbox" 
-                        className="sr-only peer" 
-                        checked={formData.is_premium} 
-                        disabled={!isEditing}
-                        onChange={e => setFormData({...formData, is_premium: e.target.checked})} 
-                    />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
-                 </label>
+        {/* BODY */}
+        <div className="grid grid-cols-3 gap-6 p-6">
+          {/* LEFT */}
+          <div className="flex flex-col items-center justify-between h-full text-center">
+            <div className="space-y-4 flex flex-col items-center">
+              <div className="w-24 h-24 rounded-full overflow-hidden border">
+                {formData.avatar_url ? (
+                  <img
+                    src={formData.avatar_url}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-indigo-500 flex items-center justify-center text-white text-xl font-bold">
+                    {formData.username?.slice(0, 2).toUpperCase() || <FaUser />}
+                  </div>
+                )}
               </div>
+
+              <div>
+                <p className="font-semibold">{formData.username}</p>
+                <p className="text-xs text-gray-400">ID: {formData.id}</p>
+              </div>
+            </div>
+
+            <div className="w-full text-xs text-gray-500 bg-gray-50 rounded-lg p-3 space-y-1">
+              <p>
+                <span className="font-medium">Tạo:</span>{" "}
+                {formatDate(formData.created_at)}
+              </p>
+              <p>
+                <span className="font-medium">Cập nhật:</span>{" "}
+                {formatDate(formData.updated_at)}
+              </p>
+            </div>
           </div>
 
+          {/* MIDDLE */}
+          <div className="grid grid-rows-3 gap-4 h-full">
+            <div className="flex flex-col justify-center">
+              <label className="text-sm text-gray-600">Email</label>
+              <input
+                value={formData.email || ""}
+                disabled={!isEditing}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
+                className={`w-full mt-1 px-3 py-2 rounded-lg border ${
+                  isEditing ? "border-indigo-400" : "bg-gray-100"
+                }`}
+              />
+            </div>
+
+            <div className="flex flex-col justify-center">
+              <label className="text-sm text-gray-600">Password</label>
+              <input
+                type="password"
+                value={formData.password || ""}
+                disabled={!isEditing}
+                onChange={(e) =>
+                  setFormData({ ...formData, password: e.target.value })
+                }
+                placeholder="Để trống nếu không đổi"
+                className={`w-full mt-1 px-3 py-2 rounded-lg border ${
+                  isEditing ? "border-indigo-400" : "bg-gray-100"
+                }`}
+              />
+            </div>
+
+            <div className="flex flex-col justify-center">
+              <label className="text-sm text-gray-600">Role</label>
+              <select
+                value={formData.role}
+                disabled={!isEditing}
+                onChange={(e) =>
+                  setFormData({ ...formData, role: e.target.value })
+                }
+                className="w-full mt-1 px-3 py-2 rounded-lg border"
+              >
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+          </div>
+
+          {/* RIGHT */}
+          <div className="grid grid-rows-3 gap-4 h-full">
+            {/* ACTIVE */}
+            <div className="p-3 rounded-lg border flex justify-between items-center">
+              <span className="text-sm text-gray-600">Trạng thái</span>
+              <span
+                className={`text-sm font-medium ${
+                  formData.is_active ? "text-green-600" : "text-gray-400"
+                }`}
+              >
+                {formData.is_active ? "Hoạt động" : "Chưa kích hoạt"}
+              </span>
+            </div>
+
+            {/* PREMIUM */}
+            <div className="p-3 rounded-lg border flex flex-col justify-center">
+              <p className="text-sm text-gray-600 mb-1">Premium</p>
+              <select
+                disabled={!isEditing}
+                value={formData.premium_plan || 1}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    is_premium: true,
+                    premium_plan: Number(e.target.value),
+                  })
+                }
+                className="w-full px-3 py-2 rounded-lg border"
+              >
+                <option value={1}>1 tháng</option>
+                <option value={2}>2 tháng</option>
+                <option value={3}>3 tháng</option>
+              </select>
+            </div>
+
+            {/* LOCK */}
+            <div className="p-3 rounded-lg border flex flex-col justify-center">
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-600">Khóa</span>
+                <span
+                  className={`text-sm font-medium ${
+                    formData.is_locked ? "text-red-500" : "text-green-500"
+                  }`}
+                >
+                  {formData.is_locked ? "Đã khóa" : "Bình thường"}
+                </span>
+              </div>
+
+              {formData.is_locked && (
+                <div className="text-xs text-red-400 mt-1">
+                  <p>{formData.block_reason}</p>
+                  <p>{formatDate(formData.lock_until)}</p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
-        {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3 rounded-b-2xl">
-          <button 
+        {/* FOOTER */}
+        <div className="flex justify-end gap-2 px-6 py-3 border-t">
+          <button
             onClick={onClose}
-            className="px-5 py-2.5 rounded-lg text-gray-600 font-medium hover:bg-gray-200 transition-colors text-sm"
+            className="px-4 py-2 rounded-lg hover:bg-gray-100"
           >
-            Hủy bỏ
+            Hủy
           </button>
-          <button 
+
+          <button
             onClick={handleSave}
             disabled={!isEditing}
-            className={`px-6 py-2.5 rounded-lg font-medium transition-all text-sm ${
-                isEditing 
-                ? 'bg-indigo-500 text-white hover:bg-indigo-600 shadow-sm shadow-indigo-500/30' 
-                : 'bg-gray-100 text-gray-400 cursor-not-allowed shadow-none'
+            className={`px-5 py-2 rounded-lg ${
+              isEditing
+                ? "bg-indigo-600 text-white"
+                : "bg-gray-200 text-gray-400"
             }`}
           >
-            Lưu thay đổi
+            Lưu
           </button>
         </div>
       </div>

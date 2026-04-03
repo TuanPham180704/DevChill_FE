@@ -24,7 +24,6 @@
   --color-dc-success: #10b981;
 }
 
-/* Glassmorphism card */
 .glass-card {
   background: var(--color-dc-card);
   backdrop-filter: blur(24px) saturate(1.4);
@@ -46,7 +45,11 @@
 
 /* Cinematic gradient button */
 .btn-cinematic {
-  background: linear-gradient(135deg, var(--color-dc-cyan), var(--color-dc-teal));
+  background: linear-gradient(
+    135deg,
+    var(--color-dc-cyan),
+    var(--color-dc-teal)
+  );
   color: #0a0e17;
   font-weight: 700;
   letter-spacing: 0.03em;
@@ -103,7 +106,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Floating label animation */
@@ -123,17 +128,36 @@
 }
 
 /* Stagger delays for sequential animations */
-.delay-1 { animation-delay: 0.1s; }
-.delay-2 { animation-delay: 0.2s; }
-.delay-3 { animation-delay: 0.3s; }
-.delay-4 { animation-delay: 0.4s; }
-.delay-5 { animation-delay: 0.5s; }
-.delay-6 { animation-delay: 0.6s; }
+.delay-1 {
+  animation-delay: 0.1s;
+}
+.delay-2 {
+  animation-delay: 0.2s;
+}
+.delay-3 {
+  animation-delay: 0.3s;
+}
+.delay-4 {
+  animation-delay: 0.4s;
+}
+.delay-5 {
+  animation-delay: 0.5s;
+}
+.delay-6 {
+  animation-delay: 0.6s;
+}
 
 /* Subtle pulse glow on logo / branding */
 @keyframes pulse-glow {
-  0%, 100% { text-shadow: 0 0 10px rgba(0, 229, 255, 0.4); }
-  50% { text-shadow: 0 0 25px rgba(0, 229, 255, 0.7), 0 0 50px rgba(0, 229, 255, 0.3); }
+  0%,
+  100% {
+    text-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
+  }
+  50% {
+    text-shadow:
+      0 0 25px rgba(0, 229, 255, 0.7),
+      0 0 50px rgba(0, 229, 255, 0.3);
+  }
 }
 
 .text-glow {
@@ -195,4 +219,16 @@
 
 .page-enter {
   animation: page-enter 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.input {
+  @apply w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400;
+}
+
+.input-disabled {
+  @apply w-full border rounded-lg px-3 py-2 bg-gray-100 text-gray-500;
+}
+
+.label {
+  @apply text-sm font-semibold mb-1 block;
 }
