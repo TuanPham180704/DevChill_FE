@@ -30,7 +30,7 @@ The system is built with **React (Vite)** for the frontend and **Node.js + Expre
 
 ## 🚀 Tech Stack
 
-### 🎨 Frontend
+### 🎨🎨 Frontend
 
 - React (Vite) — Fast and modern UI development
 - Tailwind CSS — Clean & responsive design
@@ -39,7 +39,7 @@ The system is built with **React (Vite)** for the frontend and **Node.js + Expre
 - Framer Motion — Smooth animations
 - React Icons — UI icon library
 - React Toastify — Notifications
-- React QR Code — QR display for tickets
+- React QR Code — QR display for tickets 
 
 ---
 
