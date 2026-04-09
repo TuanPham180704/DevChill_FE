@@ -23,6 +23,7 @@ import ForgotTest from "../pages/Client/ForgotTest";
 import VerifyOtpTest from "../pages/Client/VerifyOtpTest";
 import ResetTest from "../pages/Client/ResetTest";
 import CustomerListTest from "../pages/Admin/CustomerListTest";
+import ContractsTest from "../pages/Admin/ContractsTest";
 
 export default function AppRouter() {
   return (
@@ -40,9 +41,9 @@ export default function AppRouter() {
           <Route path="/verifyotptest" element={<VerifyOtpTest />} />
           <Route path="/resettest" element={<ResetTest />} />
           <Route element={<AdminLayoutTest />}>
-            <Route path="/admin/dashboardtest" element={<div className="text-gray-500 font-medium">Dashboard Test Page</div>} />
+            <Route path="/admin" element={<div className="text-gray-500 font-medium">Dashboard Test Page</div>} />
             <Route path="/admin/customerstest" element={<CustomerListTest />} />
-            <Route path="/admin/contractstest" element={<div className="text-gray-500 font-medium">Contracts Test Page</div>} />
+            <Route path="/admin/contractstest" element={<ContractsTest />} />
             <Route path="/admin/moviestest" element={<div className="text-gray-500 font-medium">Movies Test Page</div>} />
             <Route path="/admin/packagestest" element={<div className="text-gray-500 font-medium">Packages Test Page</div>} />
             <Route path="/admin/premieretest" element={<div className="text-gray-500 font-medium">Premiere Test Page</div>} />

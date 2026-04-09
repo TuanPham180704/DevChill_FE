@@ -75,11 +75,11 @@ export function CustomerDetailModal({ isOpen, onClose, user, isEditing, setIsEdi
                  <div className="space-y-1.5">
                    <div className="flex justify-between items-center">
                      <span className="text-[11px] font-bold text-gray-400">Tham gia</span>
-                     <span className="text-[11px] font-black text-indigo-600">15/01/2024</span>
+                     <span className="text-[11px] font-black text-indigo-600">{user?.join_date ? new Date(user.join_date).toLocaleDateString('vi-VN') : '---'}</span>
                    </div>
                    <div className="flex justify-between items-center">
                      <span className="text-[11px] font-bold text-gray-400">Cuối</span>
-                     <span className="text-[11px] font-black text-indigo-600">06/04/2025</span>
+                     <span className="text-[11px] font-black text-indigo-600">{user?.last_login ? new Date(user.last_login).toLocaleDateString('vi-VN') : '---'}</span>
                    </div>
                  </div>
               </div>
@@ -90,8 +90,10 @@ export function CustomerDetailModal({ isOpen, onClose, user, isEditing, setIsEdi
                    <Briefcase size={10} />
                  </div>
                  <div className="flex justify-between items-center">
-                   <span className="text-[11px] font-bold text-gray-400 italic">Premium Basic</span>
-                   <span className="px-1.5 py-0.5 rounded-md bg-amber-500 text-white text-[7px] font-black uppercase">Active</span>
+                   <span className="text-[11px] font-bold text-gray-400 italic">{user?.service_name || 'Free Plan'}</span>
+                   <span className={`px-1.5 py-0.5 rounded-md text-white text-[7px] font-black uppercase ${user?.status === 'active' ? 'bg-emerald-500' : 'bg-gray-400'}`}>
+                     {user?.status || 'Inactive'}
+                   </span>
                  </div>
               </div>
             </div>
@@ -123,11 +125,11 @@ export function CustomerDetailModal({ isOpen, onClose, user, isEditing, setIsEdi
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                          <label className={labelCls}>Ngày sinh</label>
-                         <div className="px-4 py-2 rounded-xl bg-gray-50 border border-gray-100 text-gray-600 font-bold text-xs">01/01/2000</div>
+                         <div className="px-4 py-2 rounded-xl bg-gray-50 border border-gray-100 text-gray-600 font-bold text-xs">{user?.dob ? new Date(user.dob).toLocaleDateString('vi-VN') : '---'}</div>
                       </div>
                       <div>
                          <label className={labelCls}>Giới tính</label>
-                         <div className="px-4 py-2 rounded-xl bg-gray-50 border border-gray-100 text-gray-600 font-bold text-xs">Nam</div>
+                         <div className="px-4 py-2 rounded-xl bg-gray-50 border border-gray-100 text-gray-600 font-bold text-xs">{user?.gender || '---'}</div>
                       </div>
                     </div>
                   </div>
@@ -205,7 +207,7 @@ export function CustomerDetailModal({ isOpen, onClose, user, isEditing, setIsEdi
                          <label className="block text-[9px] font-black text-rose-300 uppercase mb-1.5 ml-1">Mở khóa</label>
                          <div className="flex items-center gap-2 p-3.5 rounded-2xl bg-white border border-rose-100 shadow-sm text-rose-600">
                            <Clock size={14} />
-                           <span className="text-sm font-black">{user?.lockUntil || "20/04/2026"}</span>
+                           <span className="text-sm font-black">{user?.lockUntil ? new Date(user.lockUntil).toLocaleDateString('vi-VN') : '---'}</span>
                          </div>
                       </div>
                     </div>

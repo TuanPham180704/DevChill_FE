@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Shield, Eye, RefreshCw, Download, Search, LockOpen, ChevronDown, History, Lock } from 'lucide-react';
 import { 
   CustomerDetailModal, 
@@ -6,33 +6,65 @@ import {
   UnlockModal, 
   LockModal 
 } from '../../components/Admin/Users/CustomerModalTest';
+import Pagination from '../../components/Admin/Pagination';
 
 /* ─── Page component ────────────────────────────────────────────────── */
 export default function CustomerListTest() {
+  const [users, setUsers] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [serviceFilter, setServiceFilter] = useState('Tất cả dịch vụ');
+  const [lockFilter, setLockFilter] = useState('Tất cả khóa');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
   const [showModal, setShowModal] = useState(false);
   const [showLockModal, setShowLockModal] = useState(false);
   const [showUnlockModal, setShowUnlockModal] = useState(false);
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [selectedUser, setSelectedUser] = useState({
-    id: '#2491024',
-    name: 'Nguyễn Văn An',
-    email: 'an.nguyen@email.com',
-    role: 'User',
-    service: 'Premium',
-    isLocked: true,
-    lockReason: 'Vi phạm điều khoản cộng đồng: Đăng tải nội dung không phù hợp nhiều lần.',
-    lockUntil: '20/04/2026'
-  });
+  const [selectedUser, setSelectedUser] = useState(null);
+
+  // Filtering logic
+  const filteredUsers = useMemo(() => {
+    return users.filter(user => {
+      const matchSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          user.email.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchService = serviceFilter === 'Tất cả dịch vụ' || user.service === serviceFilter;
+      const matchLock = lockFilter === 'Tất cả khóa' || 
+                        (lockFilter === 'Bị khóa' ? user.isLocked : !user.isLocked);
+      return matchSearch && matchService && matchLock;
+    });
+  }, [users, searchTerm, serviceFilter, lockFilter]);
+
+  // Pagination slicing
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+  const currentUsers = filteredUsers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  // Stats calculation
+  const stats = {
+    total: users.length,
+    premium: users.filter(u => u.service === 'Premium').length,
+    restricted: users.filter(u => u.status === 'restricted').length,
+    locked: users.filter(u => u.isLocked).length
+  };
+
   const thCls = 'px-4 py-3 text-left text-xs font-semibold text-gray-500 whitespace-nowrap';
   const selCls = 'px-3 py-2 rounded-xl text-sm outline-none text-gray-600 border bg-gray-50 appearance-none cursor-pointer';
-  const inputCls = 'w-full px-4 py-2.5 rounded-xl text-sm outline-none border transition-all';
-  const getInpStyle = (editable) => ({
-    background: editable ? '#FFFFFF' : '#F8FAFC',
-    borderColor: editable ? '#6366F1' : '#F1F5F9',
-    color: editable ? '#1E293B' : '#64748B'
-  });
-  const labelCls = 'block text-xs font-bold text-gray-500 mb-1.5 ml-1';
+
+  const handleOpenDetail = (user) => {
+    setSelectedUser(user);
+    setShowModal(true);
+  };
+
+  const handleOpenLock = (user) => {
+    setSelectedUser(user);
+    setShowLockModal(true);
+  };
+
+  const handleOpenUnlock = (user) => {
+    setSelectedUser(user);
+    setShowUnlockModal(true);
+  };
 
   return (
     <div className="h-full flex flex-col overflow-hidden" style={{ background: '#F8FAFC' }}>
@@ -45,7 +77,7 @@ export default function CustomerListTest() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-black text-gray-800 tracking-tight">Quản lý Người dùng</h1>
-          <p className="text-sm text-gray-400 mt-1">0 người dùng · 0 đang hoạt động</p>
+          <p className="text-sm text-gray-400 mt-1">{stats.total} người dùng · {stats.total - stats.locked} đang hoạt động</p>
         </div>
         <button className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border transition-all hover:bg-gray-50"
           style={{ background: '#fff', color: '#64748B', borderColor: '#000000' }}>
@@ -56,19 +88,19 @@ export default function CustomerListTest() {
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div className="bg-white rounded-2xl p-4 border" style={{ borderColor: '#E2E8F0' }}>
-          <p className="text-2xl font-black text-blue-500">0</p>
+          <p className="text-2xl font-black text-blue-500">{stats.total}</p>
           <p className="text-xs text-gray-500 mt-1">Tổng users</p>
         </div>
         <div className="bg-white rounded-2xl p-4 border" style={{ borderColor: '#E2E8F0' }}>
-          <p className="text-2xl font-black text-amber-500">0</p>
+          <p className="text-2xl font-black text-amber-500">{stats.premium}</p>
           <p className="text-xs text-gray-500 mt-1">Premium</p>
         </div>
         <div className="bg-white rounded-2xl p-4 border" style={{ borderColor: '#E2E8F0' }}>
-          <p className="text-2xl font-black text-red-500">0</p>
-          <p className="text-xs text-gray-500 mt-1">Chưa kích hoạt</p>
+          <p className="text-2xl font-black text-red-500">{stats.restricted}</p>
+          <p className="text-xs text-gray-500 mt-1">Hạn chế</p>
         </div>
         <div className="bg-white rounded-2xl p-4 border" style={{ borderColor: '#E2E8F0' }}>
-          <p className="text-2xl font-black text-purple-500">0</p>
+          <p className="text-2xl font-black text-purple-500">{stats.locked}</p>
           <p className="text-xs text-gray-500 mt-1">Bị khóa</p>
         </div>
       </div>
@@ -77,24 +109,36 @@ export default function CustomerListTest() {
       <div className="flex items-center justify-between gap-3 mb-4">
         {/* Left: Filters */}
         <div className="flex items-center gap-3">
-          <div className="relative w-96">
+          <div className="relative w-72">
             <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
-            <input placeholder="Tìm tên, email..." className="w-full pl-9 pr-4 py-2 rounded-xl text-sm outline-none text-gray-700 border" style={{ background: '#ffffff', borderColor: '#000000' }} />
+            <input 
+              value={searchTerm}
+              onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+              placeholder="Tìm tên, email..." 
+              className="w-full pl-9 pr-4 py-2 rounded-xl text-sm outline-none text-gray-700 border" 
+              style={{ background: '#ffffff', borderColor: '#E2E8F0' }} 
+            />
           </div>
           <div className="relative">
-            <select className={selCls} style={{ borderColor: '#000000', borderWidth: '1px', borderStyle: 'solid' }}>
+            <select 
+              value={serviceFilter}
+              onChange={(e) => { setServiceFilter(e.target.value); setCurrentPage(1); }}
+              className={selCls} 
+              style={{ borderColor: '#E2E8F0' }}
+            >
               <option>Tất cả dịch vụ</option>
+              <option>Free</option>
+              <option>Premium</option>
             </select>
             <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
           </div>
           <div className="relative">
-            <select className={selCls} style={{ borderColor: '#000000', borderWidth: '1px', borderStyle: 'solid' }}>
-              <option>Tất cả trạng thái</option>
-            </select>
-            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-          </div>
-          <div className="relative">
-            <select className={selCls} style={{ borderColor: '#000000', borderWidth: '1px', borderStyle: 'solid' }}>
+            <select 
+              value={lockFilter}
+              onChange={(e) => { setLockFilter(e.target.value); setCurrentPage(1); }}
+              className={selCls} 
+              style={{ borderColor: '#E2E8F0' }}
+            >
               <option>Tất cả khóa</option>
               <option>Bình thường</option>
               <option>Bị khóa</option>
@@ -105,8 +149,9 @@ export default function CustomerListTest() {
 
         {/* Right: Actions */}
         <div className="flex items-center gap-2">
-          <button className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border transition-all hover:bg-gray-50"
-            style={{ background: '#fff', color: '#64748B', borderColor: '#000000' }}>
+          <button onClick={() => { setSearchTerm(''); setServiceFilter('Tất cả dịch vụ'); setLockFilter('Tất cả khóa'); setCurrentPage(1); }}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border transition-all hover:bg-gray-50"
+            style={{ background: '#fff', color: '#64748B', borderColor: '#E2E8F0' }}>
             <RefreshCw size={14} /> Làm mới
           </button>
           <button className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border transition-all hover:opacity-80"
@@ -136,108 +181,120 @@ export default function CustomerListTest() {
               </tr>
             </thead>
             <tbody className="divide-y" style={{ borderColor: '#F1F5F9' }}>
-              <tr className="hover:bg-gray-50/50 transition-colors">
-                <td className="px-4 py-3 text-center"><input type="checkbox" className="rounded border-gray-300" /></td>
-                <td className="px-4 py-3 text-sm text-gray-500 font-medium">#1</td>
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-xs shadow-sm">NA</div>
-                    <span className="text-sm font-semibold text-gray-700">Nguyễn Văn A</span>
-                  </div>
-                </td>
-                <td className="px-4 py-3 text-sm text-gray-500">nguyenvana@gmail.com</td>
-                <td className="px-4 py-3 text-sm text-gray-600">User</td>
-                <td className="px-4 py-3">
-                  <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase bg-amber-50 text-amber-600 border border-amber-100 italic tracking-wider">Premium</span>
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-1.5 text-green-600">
-                    <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                    <span className="text-xs font-bold">Đã kích hoạt</span>
-                  </div>
-                </td>
-                <td className="px-4 py-3">
-                  <span className="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-blue-50 text-blue-500 border border-blue-100">Bình thường</span>
-                </td>
-                <td className="px-4 py-3">
-                   <div className="flex items-center gap-1">
-                      <button onClick={() => setShowModal(true)} className="p-1.5 rounded-lg text-gray-400 hover:text-blue-500 hover:bg-blue-50 transition-all" title="Xem chi tiết"><Eye size={16} /></button>
-                      <button onClick={() => setShowLockModal(true)} className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all" title="Khóa tài khoản"><LockOpen size={16} /></button>
-                   </div>
-                </td>
-              </tr>
-              <tr className="hover:bg-gray-50/50 transition-colors border-t border-gray-50">
-                <td className="px-4 py-3 text-center"><input type="checkbox" className="rounded border-gray-300" /></td>
-                <td className="px-4 py-3 text-sm text-gray-500 font-medium">#2</td>
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-rose-500 flex items-center justify-center text-white font-bold text-xs shadow-sm">TH</div>
-                    <span className="text-sm font-semibold text-gray-700">Trần Thị H</span>
-                  </div>
-                </td>
-                <td className="px-4 py-3 text-sm text-gray-500">tranthih@gmail.com</td>
-                <td className="px-4 py-3 text-sm text-gray-600">User</td>
-                <td className="px-4 py-3">
-                  <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase bg-gray-50 text-gray-400 border border-gray-100 italic tracking-wider">Free</span>
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-1.5 text-rose-600">
-                    <div className="w-1.5 h-1.5 rounded-full bg-rose-500" />
-                    <span className="text-xs font-bold">Bị hạn chế</span>
-                  </div>
-                </td>
-                <td className="px-4 py-3">
-                  <span className="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-rose-50 text-rose-500 border border-rose-100">Đã khóa</span>
-                </td>
-                <td className="px-4 py-3">
-                   <div className="flex items-center gap-1">
-                      <button onClick={() => setShowModal(true)} className="p-1.5 rounded-lg text-gray-400 hover:text-blue-500 hover:bg-blue-50 transition-all" title="Xem chi tiết"><Eye size={16} /></button>
-                      <button onClick={() => setShowUnlockModal(true)} className="p-1.5 rounded-lg text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 transition-all" title="Mở khóa tài khoản"><Lock size={16} /></button>
-                   </div>
-                </td>
-              </tr>
+              {currentUsers.map(user => (
+                <tr key={user.id} className="hover:bg-gray-50/50 transition-colors">
+                  <td className="px-4 py-3 text-center"><input type="checkbox" className="rounded border-gray-300" /></td>
+                  <td className="px-4 py-3 text-sm text-gray-500 font-medium">#{user.id}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-sm bg-gradient-to-br ${user.role === 'Admin' ? 'from-purple-500 to-indigo-600' : 'from-blue-400 to-blue-600'}`}>
+                        {user.name.split(' ').map(n => n[0]).join('')}
+                      </div>
+                      <span className="text-sm font-semibold text-gray-700">{user.name}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-500">{user.email}</td>
+                  <td className="px-4 py-3 text-sm text-gray-600">{user.role}</td>
+                  <td className="px-4 py-3">
+                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase italic tracking-wider border ${
+                      user.service === 'Premium' 
+                      ? 'bg-amber-50 text-amber-600 border-amber-100' 
+                      : 'bg-gray-50 text-gray-400 border-gray-100'
+                    }`}>
+                      {user.service}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className={`flex items-center gap-1.5 ${
+                      user.status === 'active' ? 'text-green-600' : 
+                      user.status === 'restricted' ? 'text-rose-600' : 'text-gray-400'
+                    }`}>
+                      <div className={`w-1.5 h-1.5 rounded-full ${
+                         user.status === 'active' ? 'bg-green-500' : 
+                         user.status === 'restricted' ? 'bg-rose-500' : 'bg-gray-300'
+                      }`} />
+                      <span className="text-xs font-bold">
+                        {user.status === 'active' ? 'Đã kích hoạt' : 
+                         user.status === 'restricted' ? 'Bị hạn chế' : 'Chưa kích hoạt'}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold border ${
+                      user.isLocked 
+                      ? 'bg-rose-50 text-rose-500 border-rose-100' 
+                      : 'bg-blue-50 text-blue-500 border-blue-100'
+                    }`}>
+                      {user.isLocked ? 'Đã khóa' : 'Bình thường'}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-1">
+                      <button onClick={() => handleOpenDetail(user)} className="p-1.5 rounded-lg text-gray-400 hover:text-blue-500 hover:bg-blue-50 transition-all" title="Xem chi tiết"><Eye size={16} /></button>
+                      {user.isLocked ? (
+                        <button onClick={() => handleOpenUnlock(user)} className="p-1.5 rounded-lg text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 transition-all" title="Mở khóa tài khoản"><Lock size={16} /></button>
+                      ) : (
+                        <button onClick={() => handleOpenLock(user)} className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all" title="Khóa tài khoản"><LockOpen size={16} /></button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {filteredUsers.length === 0 && (
+                <tr>
+                  <td colSpan={9} className="px-4 py-10 text-center text-sm text-gray-400 italic">
+                    Không tìm thấy người dùng nào phù hợp
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
 
-        {/* Modals */}
-        <CustomerDetailModal 
-          isOpen={showModal} 
-          onClose={() => { setShowModal(false); setIsEditing(false); }}
-          user={selectedUser}
-          isEditing={isEditing}
-          setIsEditing={setIsEditing}
-          onShowRoleModal={() => setShowRoleModal(true)}
-        />
-
-        <RoleChangeModal 
-          isOpen={showRoleModal}
-          onClose={() => setShowRoleModal(false)}
-        />
-
-        <UnlockModal 
-          isOpen={showUnlockModal}
-          onClose={() => setShowUnlockModal(false)}
-        />
-
-        <LockModal 
-          isOpen={showLockModal}
-          onClose={() => setShowLockModal(false)}
-        />
-
         {/* Footer */}
-        <div className="px-6 py-4 border-t flex items-center justify-between" style={{ borderColor: '#E2E8F0' }}>
-          <div className="flex items-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-            <p className="text-sm font-medium text-gray-600">Hiển thị <span className="text-blue-600">0</span> / 0 người dùng</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <button disabled className="px-3 py-1.5 rounded-lg text-xs font-bold bg-gray-50 text-gray-400 border border-gray-100 cursor-not-allowed">Trước</button>
-            <button className="w-8 h-8 rounded-lg text-xs font-black bg-blue-500 text-white shadow-lg shadow-blue-500/20">1</button>
-            <button disabled className="px-3 py-1.5 rounded-lg text-xs font-bold bg-gray-50 text-gray-400 border border-gray-100 cursor-not-allowed">Sau</button>
-          </div>
+        <div className="px-6 py-4 border-t" style={{ borderColor: '#E2E8F0' }}>
+          <Pagination 
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+            totalItems={filteredUsers.length}
+            itemsPerPage={itemsPerPage}
+            itemName="người dùng"
+          />
         </div>
       </div>
+
+      {/* Modals */}
+      {selectedUser && (
+        <>
+          <CustomerDetailModal 
+            isOpen={showModal} 
+            onClose={() => { setShowModal(false); setIsEditing(false); }}
+            user={selectedUser}
+            isEditing={isEditing}
+            setIsEditing={setIsEditing}
+            onShowRoleModal={() => setShowRoleModal(true)}
+          />
+
+          <RoleChangeModal 
+            isOpen={showRoleModal}
+            onClose={() => setShowRoleModal(false)}
+            user={selectedUser}
+          />
+
+          <UnlockModal 
+            isOpen={showUnlockModal}
+            onClose={() => setShowUnlockModal(false)}
+            user={selectedUser}
+          />
+
+          <LockModal 
+            isOpen={showLockModal}
+            onClose={() => setShowLockModal(false)}
+            user={selectedUser}
+          />
+        </>
+      )}
     </div>
   );
 }

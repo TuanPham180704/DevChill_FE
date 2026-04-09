@@ -13,7 +13,7 @@ export default function SideBarTest() {
   const location = useLocation();
 
   const menuItems = [
-    { name: "Tổng quan", icon: <FaChartBar />, path: "/admin/dashboardtest" },
+    { name: "Tổng quan", icon: <FaChartBar />, path: "/admin" },
     { name: "Quản lý khách hàng", icon: <FaUsers />, path: "/admin/customerstest" },
     { name: "Quản lý phim", icon: <FaFilm />, path: "/admin/moviestest" },
     { name: "Quản lý hợp đồng", icon: <FaFileContract />, path: "/admin/contractstest" },
