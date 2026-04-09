@@ -14,17 +14,52 @@ export default function ChangePassword({ isOpen, onClose, onSubmit }) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({});
 
   if (!isOpen) return null;
+  const validateForm = (updatedField = {}) => {
+    const formData = {
+      oldPassword,
+      newPassword,
+      confirmPassword,
+      ...updatedField,
+    };
+
+    const result = changePasswordSchema.safeParse(formData);
+    if (!result.success) {
+      const fieldErrors = {};
+      result.error.issues.forEach((issue) => {
+        const field = issue.path[0];
+        if (touched[field] || formData[field].trim() !== "") {
+          fieldErrors[field] = issue.message;
+        }
+      });
+      setErrors(fieldErrors);
+    } else {
+      setErrors({});
+    }
+  };
+
+  const handleChange = (field, value, setValue) => {
+    setValue(value);
+    validateForm({ [field]: value });
+  };
+
+  const handleBlur = (field) => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+    validateForm();
+  };
 
   const handleSubmit = async () => {
-    setErrors({});
+    setTouched({ oldPassword: true, newPassword: true, confirmPassword: true });
+    validateForm();
 
     const result = changePasswordSchema.safeParse({
       oldPassword,
       newPassword,
       confirmPassword,
     });
+
     if (!result.success) {
       const fieldErrors = Object.fromEntries(
         result.error.issues.map((err) => [err.path[0], err.message]),
@@ -32,12 +67,14 @@ export default function ChangePassword({ isOpen, onClose, onSubmit }) {
       setErrors(fieldErrors);
       return;
     }
+
     try {
       setLoading(true);
       const res = await onSubmit(result.data);
       setOldPassword("");
       setNewPassword("");
       setConfirmPassword("");
+      setTouched({});
       toast.success(res?.message || "Đổi mật khẩu thành công!");
       onClose();
     } catch (err) {
@@ -47,20 +84,23 @@ export default function ChangePassword({ isOpen, onClose, onSubmit }) {
       setLoading(false);
     }
   };
+
   const renderPasswordInput = (
     value,
-    setValue,
+    fieldName,
     placeholder,
     showPassword,
     setShowPassword,
-    fieldName,
+    setValue,
   ) => (
-    <div className="relative w-full">
+    <div className="relative w-full min-h-14">
+      {" "}
       <input
         type={showPassword ? "text" : "password"}
         placeholder={placeholder}
         value={value}
-        onChange={(e) => setValue(e.target.value)}
+        onChange={(e) => handleChange(fieldName, e.target.value, setValue)}
+        onBlur={() => handleBlur(fieldName)}
         className={`w-full px-5 py-3.5 rounded-xl bg-[rgba(15,23,42,0.6)] border ${
           errors[fieldName] ? "border-red-500" : "border-dc-input-border"
         } text-white text-sm outline-none placeholder-[#64748b] focus:border-[#00F2FF] focus:shadow-[0_0_0_3px_rgba(0,242,255,0.15)] transition-all pr-12`}
@@ -72,11 +112,14 @@ export default function ChangePassword({ isOpen, onClose, onSubmit }) {
       >
         {showPassword ? <FiEyeOff /> : <FiEye />}
       </button>
-      {errors[fieldName] && (
-        <p className="text-red-500 text-xs mt-1">{errors[fieldName]}</p>
-      )}
+      <div className="min-h-4">
+        {errors[fieldName] && (
+          <p className="text-red-500 text-xs mt-1">{errors[fieldName]}</p>
+        )}
+      </div>
     </div>
   );
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm transition-opacity"
@@ -102,27 +145,27 @@ export default function ChangePassword({ isOpen, onClose, onSubmit }) {
         <div className="px-8 py-6 space-y-5">
           {renderPasswordInput(
             oldPassword,
-            setOldPassword,
+            "oldPassword",
             "Mật khẩu cũ",
             showOldPassword,
             setShowOldPassword,
-            "oldPassword",
+            setOldPassword,
           )}
           {renderPasswordInput(
             newPassword,
-            setNewPassword,
+            "newPassword",
             "Mật khẩu mới",
             showNewPassword,
             setShowNewPassword,
-            "newPassword",
+            setNewPassword,
           )}
           {renderPasswordInput(
             confirmPassword,
-            setConfirmPassword,
+            "confirmPassword",
             "Xác nhận mật khẩu mới",
             showConfirmPassword,
             setShowConfirmPassword,
-            "confirmPassword",
+            setConfirmPassword,
           )}
         </div>
 

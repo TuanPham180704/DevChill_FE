@@ -38,16 +38,58 @@ export default function AppRouter() {
           <Route path="/verify-otp" element={<VerifyOtp />} />
           <Route path="/movies" element={<MovieList />} />
           <Route path="/movies/:id" element={<MovieDetail />} />
-          <Route path="/movie-view/:id" element={<MovieView />} />
+          <Route path="/movies-view/:id" element={<MovieView />} />
           <Route element={<AdminLayoutTest />}>
-            <Route path="/admin" element={<div className="text-gray-500 font-medium">Dashboard Test Page</div>} />
+            <Route
+              path="/admin"
+              element={
+                <div className="text-gray-500 font-medium">
+                  Dashboard Test Page
+                </div>
+              }
+            />
             <Route path="/admin/customerstest" element={<CustomerListTest />} />
             <Route path="/admin/contractstest" element={<ContractsTest />} />
-            <Route path="/admin/moviestest" element={<div className="text-gray-500 font-medium">Movies Test Page</div>} />
-            <Route path="/admin/packagestest" element={<div className="text-gray-500 font-medium">Packages Test Page</div>} />
-            <Route path="/admin/premieretest" element={<div className="text-gray-500 font-medium">Premiere Test Page</div>} />
-            <Route path="/admin/supporttest" element={<div className="text-gray-500 font-medium">Support Test Page</div>} />
-            <Route path="/admin/reportstest" element={<div className="text-gray-500 font-medium">Reports Test Page</div>} />
+            <Route
+              path="/admin/moviestest"
+              element={
+                <div className="text-gray-500 font-medium">
+                  Movies Test Page
+                </div>
+              }
+            />
+            <Route
+              path="/admin/packagestest"
+              element={
+                <div className="text-gray-500 font-medium">
+                  Packages Test Page
+                </div>
+              }
+            />
+            <Route
+              path="/admin/premieretest"
+              element={
+                <div className="text-gray-500 font-medium">
+                  Premiere Test Page
+                </div>
+              }
+            />
+            <Route
+              path="/admin/supporttest"
+              element={
+                <div className="text-gray-500 font-medium">
+                  Support Test Page
+                </div>
+              }
+            />
+            <Route
+              path="/admin/reportstest"
+              element={
+                <div className="text-gray-500 font-medium">
+                  Reports Test Page
+                </div>
+              }
+            />
           </Route>
 
           <Route element={<ProtectedRoute roles={["user"]} />}>

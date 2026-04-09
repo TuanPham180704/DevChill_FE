@@ -8,7 +8,9 @@ import {
   changePassword,
 } from "../../../api/userApi";
 import { removeToken } from "../../../utils/auth";
-
+import ReactDatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { FiCalendar } from "react-icons/fi";
 export default function Profile() {
   const [user, setUser] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
@@ -20,8 +22,6 @@ export default function Profile() {
   });
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const fileInputRef = useRef(null);
-
-  // Load thông tin người dùng
   useEffect(() => {
     const fetchProfile = async () => {
       try {
