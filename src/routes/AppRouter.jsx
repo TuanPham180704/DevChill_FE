@@ -6,22 +6,20 @@ import Home from "../pages/Home";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import NotFound from "../pages/NotFound";
-import VerifyOtp from "../pages/VerifyOtp";
+import VerifyOtp from "../components/VerifyOtp";
 import ForgotPassword from "../components/Forgotpassword";
 import ResetPassword from "../components/Resetpassword";
 import Profile from "../pages/Client/Profile/Profile";
 import HistoryView from "../pages/Client/Profile/HistoryView";
 import PremiumHistory from "../pages/Client/Profile/PremiumHistory";
+import MovieList from "@/pages/MovieList";
+import MovieDetail from "@/pages/MovieDetail";
+import MovieView from "@/pages/MovieView";
 import Support from "../pages/Client/Profile/Support";
 import CustomerList from "../pages/Admin/CustomerList";
 import AdminLayout from "../layouts/AdminLayout";
 import AdminLayoutTest from "../layouts/AdminLayoutTest";
 import ProtectedRoute from "../routes/ProtectedRoute";
-import LoginTest from "../pages/Client/LoginTest";
-import RegisterTest from "../pages/Client/RegisterTest";
-import ForgotTest from "../pages/Client/ForgotTest";
-import VerifyOtpTest from "../pages/Client/VerifyOtpTest";
-import ResetTest from "../pages/Client/ResetTest";
 import CustomerListTest from "../pages/Admin/CustomerListTest";
 import ContractsTest from "../pages/Admin/ContractsTest";
 
@@ -34,12 +32,13 @@ export default function AppRouter() {
             <Route index element={<Home />} />
           </Route>
           <Route path="/login" element={<Login />} />
-          <Route path="/logintest" element={<LoginTest />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/registertest" element={<RegisterTest />} />
-          <Route path="/forgottest" element={<ForgotTest />} />
-          <Route path="/verifyotptest" element={<VerifyOtpTest />} />
-          <Route path="/resettest" element={<ResetTest />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/verify-otp" element={<VerifyOtp />} />
+          <Route path="/movies" element={<MovieList />} />
+          <Route path="/movies/:id" element={<MovieDetail />} />
+          <Route path="/movie-view/:id" element={<MovieView />} />
           <Route element={<AdminLayoutTest />}>
             <Route path="/admin" element={<div className="text-gray-500 font-medium">Dashboard Test Page</div>} />
             <Route path="/admin/customerstest" element={<CustomerListTest />} />
@@ -51,7 +50,6 @@ export default function AppRouter() {
             <Route path="/admin/reportstest" element={<div className="text-gray-500 font-medium">Reports Test Page</div>} />
           </Route>
 
-          <Route path="/verify-otp" element={<VerifyOtp />} />
           <Route element={<ProtectedRoute roles={["user"]} />}>
             <Route element={<AppLayout />}>
               <Route path="/profile" element={<Profile />} />
@@ -60,8 +58,7 @@ export default function AppRouter() {
               <Route path="/support" element={<Support />} />
             </Route>
           </Route>
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
+
           <Route element={<ProtectedRoute roles={["admin"]} />}>
             <Route element={<AdminLayout />}>
               <Route path="/admin/customers" element={<CustomerList />} />

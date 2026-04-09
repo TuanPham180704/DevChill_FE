@@ -14,6 +14,7 @@ export default function MovieList() {
     window.scrollTo(0, 0);
     // Lọc data theo category
     if (category) {
+       // eslint-disable-next-line react-hooks/immutability
        const keyTitle = getTitle();
        setMovies(allMovies.filter(m => m.category === keyTitle || m.category?.toLowerCase().includes(keyTitle.toLowerCase())));
     } else {
@@ -34,7 +35,7 @@ export default function MovieList() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans pb-24 selection:bg-blue-200 selection:text-blue-900">
-      <div className="pt-24 sm:pt-32 px-4 sm:px-8 lg:px-16 max-w-[1600px] mx-auto">
+      <div className="pt-24 sm:pt-32 px-4 sm:px-8 lg:px-16 max-w-400 mx-auto">
          
          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-10">
             <div>
@@ -74,14 +75,14 @@ export default function MovieList() {
                   className="flex flex-col gap-4 group cursor-pointer animate-fade-in-up"
                   style={{ animationDelay: `${(index % 6) * 50}ms` }}
                 >
-                  <div className="relative aspect-[2/3] rounded-3xl overflow-hidden bg-white shadow-sm hover:shadow-2xl hover:shadow-blue-900/15 transition-all duration-500 transform group-hover:-translate-y-2 ring-1 ring-black/5 group-hover:ring-blue-500/30">
+                  <div className="relative aspect-2/3 rounded-3xl overflow-hidden bg-white shadow-sm hover:shadow-2xl hover:shadow-blue-900/15 transition-all duration-500 transform group-hover:-translate-y-2 ring-1 ring-black/5 group-hover:ring-blue-500/30">
                     <img
                       src={movie.image}
                       alt={movie.title}
                       className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out"
                       loading="lazy"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute inset-0 bg-linear-to-t from-slate-900/60 via-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                        <div className="w-14 h-14 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center transform scale-50 group-hover:scale-100 transition-transform duration-500 delay-75 shadow-lg">

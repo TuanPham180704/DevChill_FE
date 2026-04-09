@@ -1,15 +1,6 @@
-import { Link, useNavigate } from "react-router-dom";
-import {
-  FiMail,
-  FiLock,
-  FiUser,
-  FiEye,
-  FiEyeOff,
-  FiFilm,
-  FiHome,
-} from "react-icons/fi";
-import devchilllogo from "../assets/devchill-logo.png";
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Eye, EyeOff, Film, Mail, Lock, User } from "lucide-react";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,12 +10,29 @@ import { useMutation } from "@tanstack/react-query";
 import { registerApi } from "../api/authApi";
 import { toast } from "react-toastify";
 
+const inputBase =
+  "w-full px-4 py-3 rounded-lg text-base outline-none transition-all duration-200 text-white placeholder-slate-400 font-medium";
+
+const inputStyle = {
+  background: "rgba(255,255,255,0.08)",
+  border: "1px solid rgba(0,212,255,0.25)",
+};
+
+const gradBtn =
+  "w-full py-3 rounded-lg font-bold text-base transition-all flex items-center justify-center gap-2 text-black hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70";
+
+const gradStyle = {
+  background: "linear-gradient(135deg,#00D4FF 0%,#7C3AED 100%)",
+  boxShadow: "0 0 25px rgba(0,212,255,0.35)",
+};
+
 export default function Register() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setConfirmShowPassword] = useState(false);
+
   const {
-    register: formRegister,
+    register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm({
@@ -37,6 +45,7 @@ export default function Register() {
       verify: false,
     },
   });
+
   const mutation = useMutation({
     mutationFn: registerApi,
     onSuccess(data, variables) {
@@ -51,184 +60,254 @@ export default function Register() {
       );
     },
   });
-  const onSubmit = (formData) => {
-    mutation.mutate(formData);
+
+  const onSubmit = (data) => {
+    if (mutation.isPending) return;
+    mutation.mutate(data);
   };
 
+  const isLoading = mutation.isPending || isSubmitting;
+
   return (
-    <div className="min-h-screen flex bg-dc-darker page-enter relative">
-      <Link to="/" className="fixed top-8 left-8 z-50 flex items-center gap-2">
-        <FiHome className="text-xl" />
-      </Link>
-      <div className="flex-1 flex items-center justify-center px-6 py-12 bg-dc-dark relative overflow-hidden">
-        <div className="w-full max-w-md">
-          <div className="glass-card rounded-2xl p-8 animate-float-in delay-1">
-            <h1 className="text-2xl font-bold text-white mb-2">
-              Tạo tài khoản
-            </h1>
-            <p className="text-dc-text-muted text-sm mb-6">
-              Đăng ký để trải nghiệm kho phim khổng lồ
+    <div className="min-h-screen flex bg-[#0D0D0D]">
+      {/* LEFT */}
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(0,212,255,0.06) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.06) 1px,transparent 1px)",
+            backgroundSize: "60px 60px",
+          }}
+        />
+        <div className="absolute inset-0 bg-linear-to-br from-[#020617] via-[#050816] to-[#0a0519]" />
+        <div className="absolute -top-32 -left-32 w-96 h-96 bg-cyan-500/20 blur-3xl rounded-full" />
+        <div className="absolute bottom-0 right-10 w-80 h-80 bg-purple-500/20 blur-3xl rounded-full" />
+
+        <div className="relative z-10 flex flex-col justify-center h-full px-16">
+          <Link to="/" className="flex items-center gap-3 mb-12">
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-linear-to-br from-cyan-400 to-purple-600 shadow-[0_0_25px_rgba(0,212,255,0.5)]">
+              <Film size={24} className="text-white" />
+            </div>
+            <span className="text-3xl font-black bg-linear-to-br from-cyan-400 to-purple-600 bg-clip-text text-transparent">
+              DevChill
+            </span>
+          </Link>
+
+          <h1 className="text-4xl font-black text-white leading-snug mb-4">
+            Tham gia ngay
+            <br />
+            <span className="bg-linear-to-r from-cyan-400 to-purple-600 bg-clip-text text-transparent">
+              cộng đồng DevChill
+            </span>
+          </h1>
+
+          <p className="text-base text-slate-400 mb-10 max-w-lg">
+            Tạo tài khoản để trải nghiệm AI gợi ý phim và kho nội dung cực chất.
+          </p>
+
+          <div className="grid grid-cols-3 gap-4 max-w-lg">
+            {[
+              { val: "10K+", label: "Phim" },
+              { val: "88K+", label: "Người dùng" },
+              { val: "92%", label: "AI chính xác" },
+            ].map((s) => (
+              <div
+                key={s.label}
+                className="p-4 rounded-xl text-center backdrop-blur-md"
+                style={{
+                  background: "rgba(255,255,255,0.06)",
+                  border: "1px solid rgba(0,212,255,0.2)",
+                }}
+              >
+                <p className="text-2xl font-black text-cyan-400">{s.val}</p>
+                <p className="text-xs text-slate-400 mt-1">{s.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* RIGHT */}
+      <div className="flex-1 lg:w-1/2 flex items-center justify-center px-8 relative">
+        <div className="absolute inset-0 bg-linear-to-br from-[#020617] via-[#050816] to-[#0a0519]" />
+        <div className="absolute top-16 right-16 w-64 h-64 bg-purple-500/10 blur-3xl rounded-full" />
+        <div className="absolute bottom-16 left-8 w-64 h-64 bg-cyan-500/10 blur-3xl rounded-full" />
+
+        <div className="relative z-10 w-full max-w-md">
+          <div
+            className="rounded-2xl p-8 backdrop-blur-xl"
+            style={{
+              background: "rgba(255,255,255,0.06)",
+              border: "1px solid rgba(0,212,255,0.2)",
+              boxShadow: "0 0 25px rgba(0,212,255,0.08)",
+            }}
+          >
+            <h2 className="text-3xl font-black text-white mb-1">Đăng ký</h2>
+            <p className="text-xl text-slate-300 mb-8">
+              Tạo tài khoản DevChill
             </p>
 
-            <form
-              className="space-y-4"
-              onSubmit={handleSubmit(onSubmit)}
-              noValidate
-            >
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+              {/* USERNAME */}
               <div>
-                <label className="block text-sm font-medium text-dc-text mb-1.5">
-                  Username
+                <label className="text-sm text-white mb-1 block font-semibold">
+                  USERNAME
                 </label>
-                <div className="relative">
-                  <FiUser className="absolute left-3.5 top-1/2 -translate-y-1/2 text-dc-text-muted" />
+                <div className="relative group">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-cyan-400" />
                   <input
-                    type="text"
-                    placeholder="username"
-                    {...formRegister("username")}
-                    className={`w-full pl-10 pr-4 py-3 bg-dc-input-bg border rounded-xl text-dc-text
-                      ${errors.username ? "border-red-500" : "border-dc-input-border"}`}
+                    {...register("username")}
+                    disabled={isLoading}
+                    className={`${inputBase} pl-10 ${
+                      errors.username ? "border border-red-500" : ""
+                    }`}
+                    style={inputStyle}
+                    placeholder="yourname"
                   />
                 </div>
                 {errors.username && (
-                  <span className="text-red-400 text-sm">
+                  <p className="text-red-400 text-xs mt-1">
                     {errors.username.message}
-                  </span>
+                  </p>
                 )}
               </div>
+
+              {/* EMAIL */}
               <div>
-                <label className="block text-sm font-medium text-dc-text mb-1.5">
-                  Email
+                <label className="text-sm text-white mb-1 block font-semibold">
+                  EMAIL
                 </label>
-                <div className="relative">
-                  <FiMail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-dc-text-muted" />
+                <div className="relative group">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-cyan-400" />
                   <input
                     type="email"
-                    placeholder="you@example.com"
-                    {...formRegister("email")}
-                    className={`w-full pl-10 pr-4 py-3 bg-dc-input-bg border rounded-xl text-dc-text
-                      ${errors.email ? "border-red-500" : "border-dc-input-border"}`}
+                    {...register("email")}
+                    disabled={isLoading}
+                    className={`${inputBase} pl-10 ${
+                      errors.email ? "border border-red-500" : ""
+                    }`}
+                    style={inputStyle}
+                    placeholder="name@email.com"
                   />
                 </div>
                 {errors.email && (
-                  <span className="text-red-400 text-sm">
+                  <p className="text-red-400 text-xs mt-1">
                     {errors.email.message}
-                  </span>
+                  </p>
                 )}
               </div>
+
+              {/* PASSWORD */}
               <div>
-                <label className="block text-sm font-medium text-dc-text mb-1.5">
-                  Mật khẩu
+                <label className="text-sm text-white mb-1 block font-semibold">
+                  MẬT KHẨU
                 </label>
-                <div className="relative">
-                  <FiLock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-dc-text-muted" />
+                <div className="relative group">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-cyan-400" />
                   <input
                     type={showPassword ? "text" : "password"}
-                    placeholder="password"
-                    {...formRegister("password")}
-                    className={`w-full pl-10 pr-12 py-3 bg-dc-input-bg border rounded-xl text-dc-text
-                      ${errors.password ? "border-red-500" : "border-dc-input-border"}`}
+                    {...register("password")}
+                    disabled={isLoading}
+                    className={`${inputBase} pl-10 pr-10 ${
+                      errors.password ? "border border-red-500" : ""
+                    }`}
+                    style={inputStyle}
+                    placeholder="••••••••"
                   />
                   <button
                     type="button"
+                    disabled={isLoading}
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-dc-text-muted"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-cyan-400"
                   >
-                    {showPassword ? <FiEyeOff /> : <FiEye />}
+                    {showPassword ? <EyeOff /> : <Eye />}
                   </button>
                 </div>
                 {errors.password && (
-                  <span className="text-red-400 text-sm">
+                  <p className="text-red-400 text-xs mt-1">
                     {errors.password.message}
-                  </span>
+                  </p>
                 )}
               </div>
+
+              {/* CONFIRM PASSWORD */}
               <div>
-                <label className="block text-sm font-medium text-dc-text mb-1.5">
-                  Xác nhận mật khẩu
+                <label className="text-sm text-white mb-1 block font-semibold">
+                  XÁC NHẬN MẬT KHẨU
                 </label>
-                <div className="relative">
-                  <FiLock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-dc-text-muted" />
+                <div className="relative group">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-cyan-400" />
                   <input
                     type={showConfirmPassword ? "text" : "password"}
-                    placeholder="confirm-password"
-                    {...formRegister("confirmPassword")}
-                    className={`w-full pl-10 pr-12 py-3 bg-dc-input-bg border rounded-xl text-dc-text
-                      ${errors.confirmPassword ? "border-red-500" : "border-dc-input-border"}`}
+                    {...register("confirmPassword")}
+                    disabled={isLoading}
+                    className={`${inputBase} pl-10 pr-10 ${
+                      errors.confirmPassword ? "border border-red-500" : ""
+                    }`}
+                    style={inputStyle}
+                    placeholder="••••••••"
                   />
                   <button
                     type="button"
+                    disabled={isLoading}
                     onClick={() => setConfirmShowPassword(!showConfirmPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-dc-text-muted"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-cyan-400"
                   >
-                    {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
+                    {showConfirmPassword ? <EyeOff /> : <Eye />}
                   </button>
                 </div>
                 {errors.confirmPassword && (
-                  <span className="text-red-400 text-sm">
+                  <p className="text-red-400 text-xs mt-1">
                     {errors.confirmPassword.message}
-                  </span>
+                  </p>
                 )}
               </div>
+
+              {/* VERIFY */}
               <div className="flex items-center gap-2">
                 <input
                   type="checkbox"
-                  {...formRegister("verify")}
-                  className="w-4 h-4 accent-cyan-500"
+                  {...register("verify")}
+                  disabled={isLoading}
+                  className="w-4 h-4 accent-cyan-400"
                 />
-                <label className="text-sm text-dc-text">
-                  Tôi không phải robot
+                <label className="text-sm text-slate-300">
+                  Tôi đồng ý với điều khoản
                 </label>
               </div>
               {errors.verify && (
-                <span className="text-red-400 text-sm">
-                  {errors.verify.message}
-                </span>
+                <p className="text-red-400 text-xs">{errors.verify.message}</p>
               )}
+
+              {/* BUTTON */}
               <button
                 type="submit"
-                disabled={mutation.isLoading || isSubmitting}
-                className="btn-cinematic w-full py-3.5 rounded-xl text-base flex items-center justify-center gap-2"
+                disabled={isLoading}
+                className={gradBtn}
+                style={gradStyle}
               >
-                {mutation.isLoading || isSubmitting
-                  ? "Đang đăng ký..."
-                  : "Đăng ký"}
+                {isLoading ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                    Đang gửi email...
+                  </>
+                ) : (
+                  "Đăng ký"
+                )}
               </button>
             </form>
 
-            <p className="text-center text-dc-text-muted text-sm mt-6">
+            <p className="text-center mt-6 text-sm text-slate-300">
               Đã có tài khoản?{" "}
               <Link
                 to="/login"
-                className="text-dc-cyan font-medium hover:underline"
+                className="text-cyan-400 font-semibold hover:underline"
               >
                 Đăng nhập
               </Link>
             </p>
           </div>
-        </div>
-      </div>
-      <div className="hidden lg:flex w-[40%] relative cinematic-overlay overflow-hidden items-end">
-        <img
-          src={devchilllogo}
-          alt="DevChill Cinema"
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        <div className="relative z-10 p-10 pb-16">
-          <div className="flex items-center gap-3 mb-4">
-            <FiFilm className="text-dc-cyan text-xl" />
-            <span className="text-2xl font-bold text-white tracking-wide">
-              Dev<span className="text-dc-cyan text-glow">Chill</span>
-            </span>
-          </div>
-          <h2 className="text-3xl font-bold text-white leading-tight">
-            Tham gia cộng đồng
-            <br />
-            <span className="text-dc-cyan">yêu phim</span> lớn nhất
-          </h2>
-          <p className="mt-3 text-dc-text-muted text-sm max-w-xs">
-            Tạo tài khoản miễn phí để xem phim không giới hạn và nhận gợi ý cá
-            nhân hóa.
-          </p>
         </div>
       </div>
     </div>

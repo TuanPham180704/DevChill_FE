@@ -16,6 +16,7 @@ export default function MovieView() {
     window.scrollTo(0, 0);
     // Tìm phim đúng chuẩn ID (phát phim trên id)
     const foundMovie = allMovies.find(m => m.id.toString() === id?.toString());
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMovie(foundMovie || allMovies[0]);
   }, [id]);
 
@@ -80,12 +81,12 @@ export default function MovieView() {
          </div>
       </header>
 
-      <main className="relative z-10 pt-24 sm:pt-28 lg:pt-32 max-w-[1600px] mx-auto px-0 sm:px-4 lg:px-8">
+      <main className="relative z-10 pt-24 sm:pt-28 lg:pt-32 max-w-400 mx-auto px-0 sm:px-4 lg:px-8">
          
          {/* Video Player Section */}
          <div className="w-full relative animate-fade-in-up">
             {/* Ambient Border Glow */}
-            <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-none sm:rounded-[32px] blur-md opacity-10 hidden sm:block"></div>
+            <div className="absolute -inset-1 bg-linear-to-r from-blue-600 to-indigo-600 rounded-none sm:rounded-[32px] blur-md opacity-10 hidden sm:block"></div>
             
             <div className="relative w-full aspect-video bg-black sm:rounded-3xl overflow-hidden shadow-xl shadow-blue-900/10 border-y sm:border-2 border-slate-800 z-10 group">
                <video
@@ -174,7 +175,7 @@ export default function MovieView() {
                   
                   {/* Nhập bình luận */}
                   <div className="flex gap-4 mb-10">
-                     <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center font-bold text-white shrink-0 shadow-md">
+                     <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-linear-to-tr from-blue-600 to-indigo-600 flex items-center justify-center font-bold text-white shrink-0 shadow-md">
                         US
                      </div>
                      <div className="flex-1 relative">
@@ -235,7 +236,7 @@ export default function MovieView() {
             </div>
 
             {/* Right Column: Related Suggestions */}
-            <div className="w-full xl:w-[380px] shrink-0">
+            <div className="w-full xl:w-95 shrink-0">
                <div className="bg-white border border-slate-200 rounded-3xl p-6 h-full shadow-sm sticky top-28">
                   <h3 className="font-extrabold text-xl text-slate-900 mb-6 uppercase tracking-wider relative pt-2">
                      <span className="absolute top-0 left-0 w-8 h-1.5 bg-indigo-500 rounded-full"></span>
