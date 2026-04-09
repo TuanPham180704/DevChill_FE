@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Play, Filter, LayoutGrid } from 'lucide-react';
+import { Play, Filter, LayoutGrid, Star } from 'lucide-react';
 import { allMovies } from '../data/mockMovies';
 
 export default function MovieList() {
@@ -33,29 +33,29 @@ export default function MovieList() {
   const displayTitle = category ? `Phim ${getTitle()}` : 'Tất Cả Phim';
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] text-gray-900 font-sans pb-24">
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans pb-24 selection:bg-blue-200 selection:text-blue-900">
       <div className="pt-24 sm:pt-32 px-4 sm:px-8 lg:px-16 max-w-[1600px] mx-auto">
          
          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-10">
             <div>
-               <p className="inline-block px-3 py-1 bg-blue-100 text-blue-700 font-black text-[10px] uppercase tracking-widest rounded-full mb-3 shadow-sm animate-fade-in-up">
+               <p className="inline-block px-3 py-1.5 bg-blue-100 text-blue-700 font-extrabold text-[10px] uppercase tracking-widest rounded-full mb-3 shadow-sm animate-fade-in-up border border-blue-200">
                  Thư viện phim
                </p>
-               <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 tracking-tight drop-shadow-sm animate-fade-in-up" style={{animationDelay: '100ms'}}>
+               <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight drop-shadow-sm animate-fade-in-up" style={{animationDelay: '100ms'}}>
                  {displayTitle}
                </h1>
             </div>
             
             <div className="flex items-center gap-3 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
-               <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-50 hover:shadow-md transition-all active:scale-95 shadow-sm">
-                  <Filter className="w-4 h-4" /> Bọ lọc
+               <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 hover:bg-slate-50 hover:text-blue-600 transition-all active:scale-95 shadow-sm">
+                  <Filter className="w-4 h-4" /> Bộ lọc
                </button>
-               <select className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-700 outline-none hover:shadow-md transition-all shadow-sm appearance-none cursor-pointer pr-8 w-40 active:scale-95">
+               <select className="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 hover:bg-slate-50 transition-all shadow-sm appearance-none cursor-pointer pr-8 w-40 active:scale-95">
                   <option>Mới nhất</option>
                   <option>Phổ biến nhất</option>
                   <option>Đánh giá cao</option>
                </select>
-               <div className="hidden sm:flex items-center justify-center p-2 rounded-xl bg-gray-200 text-gray-700 cursor-pointer hover:bg-gray-300 transition-colors">
+               <div className="hidden sm:flex items-center justify-center p-2.5 rounded-xl bg-white border border-slate-200 shadow-sm text-slate-500 cursor-pointer hover:text-blue-600 transition-colors">
                   <LayoutGrid className="w-5 h-5"/>
                </div>
             </div>
@@ -67,52 +67,55 @@ export default function MovieList() {
               {movies.map((movie, index) => (
                 <div 
                   key={movie.id} 
-                  onClick={() => navigate(`/movies/${movie.id}`)}
-                  className="flex flex-col gap-3 group cursor-pointer animate-fade-in-up"
+                  onClick={() => {
+                     navigate(`/movies/${movie.id}`);
+                     window.scrollTo(0, 0);
+                  }}
+                  className="flex flex-col gap-4 group cursor-pointer animate-fade-in-up"
                   style={{ animationDelay: `${(index % 6) * 50}ms` }}
                 >
-                  <div className="relative aspect-[2/3] rounded-2xl overflow-hidden bg-gray-200 shadow-sm hover:shadow-2xl hover:shadow-blue-900/20 transition-all duration-300 transform group-hover:-translate-y-2 ring-1 ring-black/5 group-hover:ring-blue-500/40">
+                  <div className="relative aspect-[2/3] rounded-3xl overflow-hidden bg-white shadow-sm hover:shadow-2xl hover:shadow-blue-900/15 transition-all duration-500 transform group-hover:-translate-y-2 ring-1 ring-black/5 group-hover:ring-blue-500/30">
                     <img
                       src={movie.image}
                       alt={movie.title}
                       className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out"
                       loading="lazy"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                       <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center transform scale-50 group-hover:scale-100 transition-transform duration-500 delay-75 shadow-lg">
-                          <Play className="w-6 h-6 text-white fill-white ml-1" />
+                       <div className="w-14 h-14 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center transform scale-50 group-hover:scale-100 transition-transform duration-500 delay-75 shadow-lg">
+                          <Play className="w-6 h-6 text-blue-600 fill-blue-600 ml-1" />
                        </div>
                     </div>
                     
                     {/* Badge */}
                     <div className="absolute top-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform -translate-y-2 group-hover:translate-y-0">
-                       <span className="bg-blue-600/90 backdrop-blur-sm text-white px-2 py-1 rounded text-[10px] font-black shadow-sm tracking-wider">
-                          HD
+                       <span className="bg-amber-500/90 backdrop-blur-sm text-white px-2.5 py-1 rounded-lg text-[11px] font-extrabold shadow-sm flex items-center gap-1 border border-white/20">
+                          <Star className="w-3 h-3 fill-current"/> {movie.rating || '4.8'}
                        </span>
                     </div>
                   </div>
                   
-                  <div className="px-1 text-center sm:text-left">
-                    <h4 className="font-extrabold text-sm sm:text-base text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1">{movie.title}</h4>
-                    <div className="flex items-center justify-center sm:justify-start gap-2 mt-1">
-                       <p className="text-[11px] sm:text-xs text-gray-500 font-bold">{movie.year}</p>
-                       <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-                       <p className="text-[11px] sm:text-xs text-gray-500 font-bold">{movie.duration}</p>
+                  <div className="px-1 text-center sm:text-left transition-transform duration-300 group-hover:translate-x-1">
+                    <h4 className="font-extrabold text-sm sm:text-base text-slate-800 group-hover:text-blue-600 transition-colors line-clamp-1">{movie.title.split(' (')[0]}</h4>
+                    <div className="flex items-center justify-center sm:justify-start gap-1.5 mt-1 text-slate-500 font-bold text-[11px] sm:text-xs">
+                       <span>{movie.year}</span>
+                       <span className="w-1.5 h-1.5 bg-slate-300 rounded-full"></span>
+                       <span>{movie.duration}</span>
                     </div>
                   </div>
                 </div>
               ))}
            </div>
          ) : (
-           <div className="py-20 text-center text-gray-500 font-semibold">Chưa có phim nào trong thể loại này.</div>
+           <div className="py-20 text-center text-slate-500 font-semibold text-lg bg-white border border-slate-200 rounded-3xl shadow-sm">Chưa có phim nào trong thể loại này.</div>
          )}
          
          {/* Load More Button */}
          {movies.length > 0 && (
            <div className="flex justify-center mt-16 sm:mt-20">
-              <button className="px-8 py-3.5 bg-white border-2 border-gray-200 text-gray-800 rounded-xl font-black tracking-wider uppercase text-sm hover:bg-gray-50 hover:border-blue-300 hover:text-blue-600 transition-all duration-300 shadow-sm active:scale-95 group">
+              <button className="px-8 py-3.5 bg-white border-2 border-slate-200 text-slate-700 rounded-2xl font-extrabold tracking-wider uppercase text-sm hover:bg-blue-50 hover:border-blue-400 hover:text-blue-600 hover:shadow-[0_0_15px_rgba(59,130,246,0.15)] transition-all duration-300 shadow-sm active:scale-95 group">
                  Tải Thêm Phim
               </button>
            </div>
