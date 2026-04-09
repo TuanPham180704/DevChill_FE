@@ -15,6 +15,7 @@ import PremiumHistory from "../pages/Client/Profile/PremiumHistory";
 import Support from "../pages/Client/Profile/Support";
 import CustomerList from "../pages/Admin/CustomerList";
 import AdminLayout from "../layouts/AdminLayout";
+import AdminLayoutTest from "../layouts/AdminLayoutTest";
 import ProtectedRoute from "../routes/ProtectedRoute";
 import LoginTest from "../pages/Client/LoginTest";
 import RegisterTest from "../pages/Client/RegisterTest";
@@ -38,8 +39,15 @@ export default function AppRouter() {
           <Route path="/forgottest" element={<ForgotTest />} />
           <Route path="/verifyotptest" element={<VerifyOtpTest />} />
           <Route path="/resettest" element={<ResetTest />} />
-          <Route element={<AdminLayout />}>
+          <Route element={<AdminLayoutTest />}>
+            <Route path="/admin/dashboardtest" element={<div className="text-gray-500 font-medium">Dashboard Test Page</div>} />
             <Route path="/admin/customerstest" element={<CustomerListTest />} />
+            <Route path="/admin/contractstest" element={<div className="text-gray-500 font-medium">Contracts Test Page</div>} />
+            <Route path="/admin/moviestest" element={<div className="text-gray-500 font-medium">Movies Test Page</div>} />
+            <Route path="/admin/packagestest" element={<div className="text-gray-500 font-medium">Packages Test Page</div>} />
+            <Route path="/admin/premieretest" element={<div className="text-gray-500 font-medium">Premiere Test Page</div>} />
+            <Route path="/admin/supporttest" element={<div className="text-gray-500 font-medium">Support Test Page</div>} />
+            <Route path="/admin/reportstest" element={<div className="text-gray-500 font-medium">Reports Test Page</div>} />
           </Route>
 
           <Route path="/verify-otp" element={<VerifyOtp />} />
