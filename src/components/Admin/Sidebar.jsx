@@ -14,7 +14,7 @@ import { toast } from "react-toastify";
 import { logout } from "../../utils/auth";
 import avatarImg from "../../assets/devchill-logo.png";
 
-export default function AdminSidebar() {
+export default function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const [user, setUser] = useState(null);

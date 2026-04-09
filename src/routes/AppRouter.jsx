@@ -17,9 +17,10 @@ import MovieDetail from "@/pages/MovieDetail";
 import MovieView from "@/pages/MovieView";
 import Support from "../pages/Client/Profile/Support";
 import CustomerList from "../pages/Admin/CustomerList";
+import ContractList from "../pages/Admin/ContractList";
 import AdminLayout from "../layouts/AdminLayout";
 import ProtectedRoute from "../routes/ProtectedRoute";
-
+import DashBoard from "../pages/Admin/DashBoard";
 
 export default function AppRouter() {
   return (
@@ -49,7 +50,9 @@ export default function AppRouter() {
 
           <Route element={<ProtectedRoute roles={["admin"]} />}>
             <Route element={<AdminLayout />}>
+              <Route path="/admin" element={<DashBoard />} />
               <Route path="/admin/customers" element={<CustomerList />} />
+              <Route path="/admin/contracts" element={<ContractList />} />
             </Route>
           </Route>
 

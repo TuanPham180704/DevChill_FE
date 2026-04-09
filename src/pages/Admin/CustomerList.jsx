@@ -8,7 +8,6 @@ import {
   FaHistory,
 } from "react-icons/fa";
 import ExportCSV from "../../components/common/ExportCSV";
-import Sidebar from "../../components/Admin/Sidebar";
 import Pagination from "../../components/Admin/Pagination";
 import CustomerModal from "../../components/Admin/Users/CustomerModal";
 import LockModal from "../../components/Admin/Users/LockModal";
@@ -146,7 +145,7 @@ export default function CustomerList() {
   }));
   return (
     <div className="flex min-h-screen bg-[#F4F6FA]">
-      <Sidebar />
+
       <div className="flex-1 ml-64 flex flex-col">
         <div className="p-8 space-y-6 flex-1">
           <div className="flex flex-col gap-1">
