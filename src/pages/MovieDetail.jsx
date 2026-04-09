@@ -115,7 +115,6 @@ export default function MovieDetail() {
             {movie.desc}
           </p>
 
-          {/* Actions */}
           <div className="flex flex-col sm:flex-row items-center gap-4 pt-4 animate-float-in delay-4">
             <button
               onClick={() => navigate(`/movies-view/${movie.id}`)}
