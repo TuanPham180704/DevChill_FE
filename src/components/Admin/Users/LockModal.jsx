@@ -1,7 +1,13 @@
 import { useState, useEffect } from "react";
 import { FaLock, FaUnlock } from "react-icons/fa";
 
-export default function LockModal({ isOpen, onClose, user, onConfirm }) {
+export default function LockModal({
+  isOpen,
+  onClose,
+  user,
+  onConfirm,
+  loading,
+}) {
   const [reason, setReason] = useState("");
   const [lockUntil, setLockUntil] = useState("");
   const [isPermanent, setIsPermanent] = useState(false);
@@ -108,15 +114,24 @@ export default function LockModal({ isOpen, onClose, user, onConfirm }) {
                   lock_until: isPermanent ? null : lockUntil,
                 });
               }
-              onClose();
             }}
+            disabled={loading}
             className={`flex-1 py-2 rounded-lg text-white shadow transition ${
               isLocked
                 ? "bg-green-500 hover:bg-green-600"
                 : "bg-red-500 hover:bg-red-600"
             }`}
           >
-            {isLocked ? "Mở khóa" : "Khóa"}
+            {loading ? (
+              <div className="flex items-center justify-center gap-2">
+                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span>Đang xử lý...</span>
+              </div>
+            ) : isLocked ? (
+              "Mở khóa"
+            ) : (
+              "Khóa"
+            )}
           </button>
         </div>
       </div>

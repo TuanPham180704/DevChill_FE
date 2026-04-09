@@ -7,39 +7,31 @@ import {
   FaUnlock,
   FaHistory,
 } from "react-icons/fa";
-
+import ExportCSV from "../../components/common/ExportCSV";
 import Sidebar from "../../components/Admin/Sidebar";
 import Pagination from "../../components/Admin/Pagination";
 import CustomerModal from "../../components/Admin/Users/CustomerModal";
 import LockModal from "../../components/Admin/Users/LockModal";
 import AuditLogModal from "../../components/Admin/Users/AuditLogModal";
-
 import {
   getUsers,
   updateUser,
   lockUser,
   unlockUser,
 } from "../../api/adUserApi";
-
 import { toast } from "react-toastify";
-
 export default function CustomerList() {
   const [users, setUsers] = useState([]);
   const [auditLogs] = useState([]);
-
+  const [loadingLock, setLoadingLock] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-
   const [selectedUser, setSelectedUser] = useState(null);
-
   const [isCustomerModalOpen, setCustomerModalOpen] = useState(false);
   const [isLockModalOpen, setLockModalOpen] = useState(false);
   const [isAuditLogOpen, setIsAuditLogOpen] = useState(false);
-
   const [loading, setLoading] = useState(false);
-
-  // ================== FETCH ==================
   const fetchUsers = async () => {
     try {
       setLoading(true);
@@ -65,8 +57,6 @@ export default function CustomerList() {
   useEffect(() => {
     fetchUsers();
   }, []);
-
-  // ================== FILTER ==================
   const filteredUsers = useMemo(() => {
     const keyword = searchTerm.toLowerCase();
 
@@ -100,8 +90,6 @@ export default function CustomerList() {
     const start = (currentPage - 1) * itemsPerPage;
     return filteredUsers.slice(start, start + itemsPerPage);
   }, [filteredUsers, currentPage]);
-
-  // ================== UPDATE ==================
   const handleSaveCustomer = async (data) => {
     try {
       await updateUser(selectedUser.id, {
@@ -119,10 +107,9 @@ export default function CustomerList() {
       toast.error(err?.response?.data?.message || "Cập nhật thất bại");
     }
   };
-
-  // ================== LOCK ==================
   const handleLockConfirm = async (userId, data) => {
     try {
+      setLoadingLock(true);
       if (!data) {
         await unlockUser(userId);
         toast.success("Đã mở khóa");
@@ -130,16 +117,15 @@ export default function CustomerList() {
         await lockUser(userId, data);
         toast.success("Đã khóa tài khoản");
       }
-
       await fetchUsers();
       setLockModalOpen(false);
       setSelectedUser(null);
     } catch (err) {
       toast.error(err?.response?.data?.message || "Thao tác thất bại");
+    } finally {
+      setLoadingLock(false);
     }
   };
-
-  // ================== UI ==================
   const badge = (style) =>
     `px-3 py-1 text-xs font-semibold rounded-full ${style}`;
 
@@ -149,7 +135,15 @@ export default function CustomerList() {
     if (gender === "other") return "Khác";
     return "Không rõ";
   };
-
+  const csvData = filteredUsers.map((u) => ({
+    ID: u.id,
+    Tên: u.username,
+    Email: u.email,
+    Giới_tính: getGenderText(u.gender),
+    Gói: u.is_premium ? "Premium" : "Free",
+    Trạng_thái: u.is_active ? "Active" : "Inactive",
+    Khóa: u.is_locked ? "Locked" : "Normal",
+  }));
   return (
     <div className="flex min-h-screen bg-[#F4F6FA]">
       <Sidebar />
@@ -164,7 +158,32 @@ export default function CustomerList() {
               dàng ✨
             </p>
           </div>
-
+          <div className="grid grid-cols-4 gap-4 mb-4">
+            <div className="bg-white p-4 rounded-xl shadow text-center">
+              <div className="text-2xl font-bold text-blue-600">
+                {users.length}
+              </div>
+              <div className="text-gray-500 text-sm">Tổng users</div>
+            </div>
+            <div className="bg-white p-4 rounded-xl shadow text-center">
+              <div className="text-2xl font-bold text-yellow-600">
+                {users.filter((u) => u.is_premium).length}
+              </div>
+              <div className="text-gray-500 text-sm">Premium</div>
+            </div>
+            <div className="bg-white p-4 rounded-xl shadow text-center">
+              <div className="text-2xl font-bold text-red-600">
+                {users.filter((u) => !u.is_active).length}
+              </div>
+              <div className="text-gray-500 text-sm">Chưa kích hoạt</div>
+            </div>
+            <div className="bg-white p-4 rounded-xl shadow text-center">
+              <div className="text-2xl font-bold text-purple-600">
+                {users.filter((u) => u.is_locked).length}
+              </div>
+              <div className="text-gray-500 text-sm">Bị khóa</div>
+            </div>
+          </div>
           <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-4 rounded-xl shadow-sm">
             <div className="flex items-center gap-3 flex-wrap">
               <div className="relative w-72">
@@ -190,6 +209,20 @@ export default function CustomerList() {
             </div>
 
             <div className="flex items-center gap-2">
+              <ExportCSV
+                data={csvData}
+                fields={[
+                  "ID",
+                  "Tên",
+                  "Email",
+                  "Giới_tính",
+                  "Gói",
+                  "Trạng_thái",
+                  "Khóa",
+                ]}
+                fileName="DanhSachKhachHang"
+              />
+
               <button
                 onClick={() => setIsAuditLogOpen(true)}
                 className="flex items-center gap-2 px-4 py-2 text-sm bg-gray-100 rounded-lg hover:bg-gray-200"
@@ -207,7 +240,6 @@ export default function CustomerList() {
               </button>
             </div>
           </div>
-
           <div className="bg-white rounded-2xl shadow overflow-hidden">
             <table className="w-full text-sm">
               <thead className="bg-gray-100 text-gray-500 uppercase text-xs">
@@ -216,7 +248,7 @@ export default function CustomerList() {
                   <th className="p-4 text-left">Tên</th>
                   <th className="p-4 text-left">Email</th>
                   <th className="p-4">Giới tính</th>
-                  <th className="p-4">Gói</th> {/* NEW */}
+                  <th className="p-4">Gói</th>
                   <th className="p-4">Trạng thái</th>
                   <th className="p-4">Khóa</th>
                   <th className="p-4 text-center">Hành động</th>
@@ -246,8 +278,6 @@ export default function CustomerList() {
                       <td className="p-4 text-center">
                         {getGenderText(user.gender)}
                       </td>
-
-                      {/* PREMIUM */}
                       <td className="p-4 text-center">
                         <span
                           className={badge(
@@ -259,7 +289,6 @@ export default function CustomerList() {
                           {user.is_premium ? "Premium" : "Free"}
                         </span>
                       </td>
-
                       <td className="p-4 text-center">
                         <span
                           className={badge(
@@ -271,7 +300,6 @@ export default function CustomerList() {
                           {user.is_active ? "Active" : "Inactive"}
                         </span>
                       </td>
-
                       <td className="p-4 text-center">
                         <span
                           className={badge(
@@ -283,7 +311,6 @@ export default function CustomerList() {
                           {user.is_locked ? "Locked" : "Normal"}
                         </span>
                       </td>
-
                       <td className="p-4">
                         <div className="flex justify-center gap-2">
                           <button
@@ -318,7 +345,6 @@ export default function CustomerList() {
             </table>
           </div>
         </div>
-
         <div className="sticky bottom-0 bg-white border-t py-3 flex justify-center shadow-inner">
           <Pagination
             currentPage={currentPage}
@@ -348,6 +374,7 @@ export default function CustomerList() {
         }}
         user={selectedUser}
         onConfirm={handleLockConfirm}
+        loading={loadingLock}
       />
 
       <AuditLogModal
