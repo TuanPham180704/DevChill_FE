@@ -8,11 +8,43 @@ import {
   FaSignOutAlt,
 } from "react-icons/fa";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { getProfile } from "../../api/userApi";
+import { toast } from "react-toastify";
 import { logout } from "../../utils/auth";
+import avatarImg from "../../assets/devchill-logo.png";
 
-export default function Sidebar() {
+export default function AdminSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("Bạn chưa đăng nhập!");
+        setLoading(false);
+        return;
+      }
+      try {
+        const data = await getProfile(token);
+        setUser(data);
+      } catch (err) {
+        console.error(err);
+        toast.error("Không thể tải thông tin admin!");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUser();
+  }, []);
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   const menuItems = [
     { name: "Tổng quan", icon: <FaChartBar />, path: "/admin" },
@@ -27,65 +59,72 @@ export default function Sidebar() {
     { name: "Quản lý hỗ trợ", icon: <FaHeadset />, path: "/admin/support" },
   ];
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
+  const avatarSrc = user?.avatar_url || avatarImg;
 
   return (
-    <aside className="w-64 h-screen bg-[#060a14]/80 backdrop-blur-xl border-r border-white/5 flex flex-col justify-between fixed left-0 top-0 text-white z-50">
+    <aside className="w-64 h-screen bg-white border-r border-gray-200 flex flex-col justify-between fixed left-0 top-0 text-gray-700 shadow-lg z-50">
       <div>
-        <div className="p-6 border-b border-white/5">
-          <h2 className="text-2xl font-black tracking-tighter bg-clip-text text-transparent bg-linear-to-r from-cyan-400 to-dc-success">
-            DEV<span className="font-light text-white">CHILL</span>
+        <div className="p-6 border-b border-gray-200">
+          <h2 className="text-2xl font-black tracking-tighter text-gray-800">
+            DEV<span className="font-light text-cyan-500">CHILL</span>
           </h2>
         </div>
-
         <nav className="p-4 space-y-2 mt-4">
           {menuItems.map((item) => {
             const isActive =
               location.pathname === item.path ||
               (item.path !== "/admin" &&
                 location.pathname.startsWith(item.path));
+
             return (
               <Link
                 key={item.name}
                 to={item.path}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 font-medium ${
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 font-medium ${
                   isActive
-                    ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.15)]"
-                    : "text-gray-400 hover:text-white hover:bg-white/5 border border-transparent"
+                    ? "bg-cyan-50 text-cyan-600 shadow-sm border-l-4 border-cyan-500"
+                    : "text-gray-600 hover:text-cyan-600 hover:bg-gray-100"
                 }`}
               >
-                <span className="text-xl">{item.icon}</span>
-                {item.name}
+                <span className="text-lg">{item.icon}</span>
+                <span className="truncate">{item.name}</span>
               </Link>
             );
           })}
         </nav>
       </div>
-
-      <div className="p-4 border-t border-white/5 bg-[#060a14]/50 backdrop-blur-md">
-        <div className="flex items-center justify-between">
+      <div className="p-4 border-t border-gray-200 flex flex-col gap-4">
+        {loading ? (
+          <p className="flex items-center gap-2 text-gray-400 text-sm">
+            <span className="w-4 h-4 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></span>
+            Đang tải thông tin...
+          </p>
+        ) : (
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-linear-to-tr from-cyan-500 to-blue-600 flex items-center justify-center font-bold text-white shadow-[0_0_10px_rgba(6,182,212,0.3)]">
-              A
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-white leading-none">
-                Admin
+            <img
+              src={avatarSrc}
+              alt="admin avatar"
+              className="w-12 h-12 rounded-full object-cover shadow-md"
+            />
+            <div className="flex flex-col truncate">
+              <p className="text-sm font-semibold text-gray-800 truncate">
+                {user?.username || "Admin"}
               </p>
-              <p className="text-xs text-gray-400 mt-1">Quản lý hệ thống</p>
+              <p className="text-xs text-gray-500 truncate">
+                {user?.email || "Quản lý hệ thống"}
+              </p>
             </div>
           </div>
+        )}
+        {!loading && (
           <button
             onClick={handleLogout}
-            className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors cursor-pointer"
-            title="Đăng xuất"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-all font-medium"
           >
-            <FaSignOutAlt size={18} />
+            <FaSignOutAlt size={16} />
+            Đăng xuất
           </button>
-        </div>
+        )}
       </div>
     </aside>
   );
