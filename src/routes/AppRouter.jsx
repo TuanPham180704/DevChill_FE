@@ -21,6 +21,9 @@ import ContractList from "../pages/Admin/ContractList";
 import AdminLayout from "../layouts/AdminLayout";
 import ProtectedRoute from "../routes/ProtectedRoute";
 import DashBoard from "../pages/Admin/DashBoard";
+import UpgradePage from "../pages/Client/Premium/UpgradePage";
+import PaymentPage from "../pages/Client/Premium/PaymentPage";
+import SuccessPage from "../pages/Client/Premium/SuccessPage";
 
 export default function AppRouter() {
   return (
@@ -46,6 +49,10 @@ export default function AppRouter() {
               <Route path="/history" element={<HistoryView />} />
               <Route path="/support" element={<Support />} />
             </Route>
+            {/* Premium flow — standalone pages (no AppLayout header/footer) */}
+            <Route path="/upgrade" element={<UpgradePage />} />
+            <Route path="/payment/:packageId" element={<PaymentPage />} />
+            <Route path="/payment/success" element={<SuccessPage />} />
           </Route>
 
           <Route element={<ProtectedRoute roles={["admin"]} />}>
