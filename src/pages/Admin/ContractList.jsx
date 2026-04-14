@@ -47,8 +47,10 @@ export default function ContractList() {
       const matchSearch =
         c.name?.toLowerCase().includes(keyword) ||
         c.status?.toLowerCase().includes(keyword);
+
       let matchStatus = true;
       if (statusFilter !== "all") matchStatus = c.status === statusFilter;
+
       return matchSearch && matchStatus;
     });
   }, [contracts, searchTerm, statusFilter]);
@@ -115,65 +117,66 @@ export default function ContractList() {
   return (
     <div className="flex min-h-screen bg-[#F4F6FA]">
       <div className="flex-1 ml-64 flex flex-col">
-        <div className="p-8 flex-1 flex flex-col gap-6">
-          <div className="flex flex-col gap-1">
-            <h1 className="text-2xl font-bold text-gray-800">
+        <div className="p-6 flex-1 flex flex-col gap-5">
+          <div>
+            <h1 className="text-xl font-bold text-gray-800">
               Quản lý hợp đồng
             </h1>
             <p className="text-sm text-gray-500">
               Theo dõi, chỉnh sửa và quản lý hợp đồng dễ dàng ✨
             </p>
           </div>
-
-          {/* Thống kê nhanh */}
-          <div className="grid grid-cols-4 gap-4 mb-4">
-            <div className="bg-white p-4 rounded-xl shadow text-center">
-              <div className="text-2xl font-bold text-blue-600">
+          <div className="grid grid-cols-4 gap-3">
+            <div className="bg-white p-3 rounded-lg shadow text-center">
+              <div className="text-xl font-bold text-blue-600">
                 {contracts.length}
               </div>
-              <div className="text-gray-500 text-sm">Tổng hợp đồng</div>
+              <div className="text-xs text-gray-500">Tổng hợp đồng</div>
             </div>
-            <div className="bg-white p-4 rounded-xl shadow text-center">
-              <div className="text-2xl font-bold text-green-600">
+
+            <div className="bg-white p-3 rounded-lg shadow text-center">
+              <div className="text-xl font-bold text-green-600">
                 {contracts.filter((c) => c.status === "draft").length}
               </div>
-              <div className="text-gray-500 text-sm">Draft</div>
+              <div className="text-xs text-gray-500">Draft</div>
             </div>
-            <div className="bg-white p-4 rounded-xl shadow text-center">
-              <div className="text-2xl font-bold text-blue-600">
+
+            <div className="bg-white p-3 rounded-lg shadow text-center">
+              <div className="text-xl font-bold text-blue-600">
                 {contracts.filter((c) => c.status === "active").length}
               </div>
-              <div className="text-gray-500 text-sm">Active</div>
+              <div className="text-xs text-gray-500">Active</div>
             </div>
-            <div className="bg-white p-4 rounded-xl shadow text-center">
-              <div className="text-2xl font-bold text-red-600">
+
+            <div className="bg-white p-3 rounded-lg shadow text-center">
+              <div className="text-xl font-bold text-red-600">
                 {
                   contracts.filter(
                     (c) => c.status === "expired" || c.status === "cancelled",
                   ).length
                 }
               </div>
-              <div className="text-gray-500 text-sm">Expired/Cancelled</div>
+              <div className="text-xs text-gray-500">Expired</div>
             </div>
           </div>
 
-          {/* Search & Actions */}
-          <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-4 rounded-xl shadow-sm">
-            <div className="flex items-center gap-3 flex-wrap">
-              <div className="relative w-72">
+          {/* FILTER */}
+          <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3 rounded-lg shadow-sm">
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="relative w-64">
                 <FaSearch className="absolute left-3 top-3 text-gray-400 text-sm" />
                 <input
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="Tìm kiếm..."
-                  className="w-full pl-9 pr-3 py-2.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+                  className="w-full pl-9 pr-3 py-2 text-sm border rounded-lg"
                 />
               </div>
 
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-3 py-2 text-sm border rounded-lg bg-white focus:ring-2 focus:ring-blue-400"
+                className="px-3 py-2 text-sm border rounded-lg"
               >
                 <option value="all">Tất cả</option>
                 <option value="draft">Draft</option>
@@ -199,7 +202,7 @@ export default function ContractList() {
 
               <button
                 onClick={fetchContracts}
-                className="flex items-center gap-2 px-4 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                className="flex items-center gap-2 px-4 py-2 text-sm bg-blue-500 text-white rounded-lg"
               >
                 <FaRedo />
                 Refresh
@@ -210,43 +213,41 @@ export default function ContractList() {
                   setSelectedContract(null);
                   setContractModalOpen(true);
                 }}
-                className="flex items-center gap-2 px-4 py-2 text-sm bg-green-500 text-white rounded-lg hover:bg-green-600"
+                className="flex items-center gap-2 px-3 py-2 text-sm bg-green-500 text-white rounded-lg"
               >
                 <FaPlus />
-                Thêm hợp đồng
+                Thêm
               </button>
             </div>
           </div>
 
-          {/* Table */}
-          <div className="bg-white rounded-2xl shadow overflow-hidden flex-1 flex flex-col">
-            <div className="overflow-x-auto flex-1">
-              <table className="w-full text-sm">
-                <thead className="bg-gray-100 text-gray-500 uppercase text-xs">
+          {/* TABLE */}
+          <div className="bg-white rounded-xl shadow flex-1 overflow-hidden">
+            <div className="overflow-auto">
+              <table className="w-full text-xs">
+                <thead className="bg-gray-100 text-gray-500 uppercase">
                   <tr>
-                    <th className="p-4 text-left">ID</th>
-                    <th className="p-4 text-left">Tên</th>
-                    <th className="p-4 text-center">Ngày bắt đầu</th>
-                    <th className="p-4 text-center">Ngày kết thúc</th>
-                    <th className="p-4 text-center">Trạng thái</th>
-                    <th className="p-4 text-center">File</th>
-                    <th className="p-4 text-center">Hành động</th>
+                    <th className="p-3 text-left">ID</th>
+                    <th className="p-3 text-left">Tên</th>
+                    <th className="p-3 text-center">Start</th>
+                    <th className="p-3 text-center">End</th>
+                    <th className="p-3 text-center">Status</th>
+                    <th className="p-3 text-center">File</th>
+                    <th className="p-3 text-center">Action</th>
                   </tr>
                 </thead>
+
                 <tbody>
                   {loading ? (
                     <tr>
-                      <td colSpan="7" className="text-center py-6">
-                        Đang tải...
+                      <td colSpan="7" className="text-center py-4">
+                        Loading...
                       </td>
                     </tr>
                   ) : currentContracts.length === 0 ? (
                     <tr>
-                      <td
-                        colSpan="7"
-                        className="text-center py-6 text-gray-400"
-                      >
-                        Không có dữ liệu
+                      <td colSpan="7" className="text-center py-4">
+                        No data
                       </td>
                     </tr>
                   ) : (
@@ -254,31 +255,31 @@ export default function ContractList() {
                       <tr key={c.id} className="border-t hover:bg-gray-50">
                         <td className="p-4">{c.id}</td>
                         <td className="p-4 font-medium">{c.name}</td>
-                        <td className="p-4 text-center">
-                          {c.start_date || "-"}
-                        </td>
-                        <td className="p-4 text-center">{c.end_date || "-"}</td>
+                        <td className="p-4 text-center">{c.start_date}</td>
+                        <td className="p-4 text-center">{c.end_date}</td>
                         <td className="p-4 text-center">{c.status}</td>
+
                         <td className="p-4 text-center">
                           {c.file_url ? (
                             <button
                               onClick={() => handleDownload(c)}
-                              className="text-blue-600 hover:underline flex items-center gap-1 justify-center mx-auto"
+                              className="text-blue-600 flex items-center gap-1 justify-center mx-auto"
                             >
                               <FaDownload />
                               File
                             </button>
                           ) : (
-                            "Không"
+                            "No"
                           )}
                         </td>
+
                         <td className="p-4 text-center">
                           <button
                             onClick={() => {
                               setSelectedContract(c);
                               setContractModalOpen(true);
                             }}
-                            className="p-2 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200"
+                            className="p-1 bg-blue-100 rounded text-blue-600"
                           >
                             <FaEye />
                           </button>
@@ -290,8 +291,7 @@ export default function ContractList() {
               </table>
             </div>
           </div>
-
-          <div className="bg-white border-t py-3 flex justify-center shadow-inner mt-auto">
+          <div className="bg-white py-2 flex justify-center rounded-lg">
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
@@ -302,7 +302,6 @@ export default function ContractList() {
           </div>
         </div>
       </div>
-
       <ContractModal
         isOpen={isContractModalOpen}
         onClose={() => {
@@ -311,6 +310,7 @@ export default function ContractList() {
         }}
         contract={selectedContract}
         onSave={handleSaveContract}
+        isEditMode={!selectedContract}
       />
     </div>
   );

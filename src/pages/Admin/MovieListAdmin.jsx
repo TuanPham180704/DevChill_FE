@@ -1,8 +1,9 @@
 /* eslint-disable no-unused-vars */
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { FaSearch, FaRedo, FaEye, FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
 
+import ExportCSV from "../../components/common/ExportCSV";
 import Pagination from "../../components/Admin/Pagination";
 import MoviesModal from "../../components/Admin/Movies/MoviesModal";
 
@@ -11,20 +12,24 @@ import { getAllMovies } from "../../api/moviesApi";
 export default function MoviesListAdmin() {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(false);
-
   const [page, setPage] = useState(1);
-  const limit = 10;
-
+  const limit = 5;
   const [keyword, setKeyword] = useState("");
+  const [debouncedKeyword, setDebouncedKeyword] = useState("");
   const [status, setStatus] = useState("");
   const [type, setType] = useState("");
-
   const [total, setTotal] = useState(0);
-
   const [selectedMovieId, setSelectedMovieId] = useState(null);
   const [isModalOpen, setModalOpen] = useState(false);
+  const [mode, setMode] = useState("edit");
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedKeyword(keyword);
+      setPage(1);
+    }, 400);
 
-  /* ================= FETCH ================= */
+    return () => clearTimeout(handler);
+  }, [keyword]);
   const fetchMovies = useCallback(async () => {
     try {
       setLoading(true);
@@ -32,7 +37,7 @@ export default function MoviesListAdmin() {
       const res = await getAllMovies({
         page,
         limit,
-        keyword,
+        keyword: debouncedKeyword,
         status,
         type,
       });
@@ -44,20 +49,37 @@ export default function MoviesListAdmin() {
     } finally {
       setLoading(false);
     }
-  }, [page, keyword, status, type]);
+  }, [page, debouncedKeyword, status, type]);
 
   useEffect(() => {
     fetchMovies();
   }, [fetchMovies]);
-
-  /* ================= HANDLER ================= */
+  const stats = useMemo(() => {
+    return {
+      totalMovies: movies.length,
+      completed: movies.filter((m) => m.status === "completed").length,
+      draft: movies.filter((m) => m.status === "draft").length,
+      active: movies.filter((m) => m.status === "active").length,
+      expired: movies.filter((m) => m.status === "expired").length,
+    };
+  }, [movies]);
+  const csvData = movies.map((m) => ({
+    ID: m.id,
+    Ten: m.name,
+    Nam: m.year,
+    Loai: m.type,
+    Tap: m.episode_total,
+    Trang_thai: m.status,
+  }));
   const handleOpenCreate = () => {
     setSelectedMovieId(null);
+    setMode("create");
     setModalOpen(true);
   };
 
   const handleOpenDetail = (movie) => {
     setSelectedMovieId(movie.id);
+    setMode("edit");
     setModalOpen(true);
   };
 
@@ -65,38 +87,45 @@ export default function MoviesListAdmin() {
     setModalOpen(false);
     setSelectedMovieId(null);
   };
-
-  /* ================= UI ================= */
   return (
     <div className="flex min-h-screen bg-[#F4F6FA]">
       <div className="flex-1 ml-64 flex flex-col">
-        <div className="p-8 flex-1 flex flex-col gap-6">
-          {/* HEADER */}
+        <div className="p-6 flex-1 flex flex-col gap-5">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Quản lý phim</h1>
-            <p className="text-sm text-gray-500">
-              Quản lý nội dung phim, tập và metadata 🎬
-            </p>
+            <h1 className="text-xl font-bold text-gray-800">Quản lý phim</h1>
+            <p className="text-sm text-gray-500">Quản lý nội dung phim 🎬</p>
           </div>
-
-          {/* FILTER */}
-          <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-4 rounded-xl shadow-sm">
-            <div className="flex items-center gap-3 flex-wrap">
-              {/* SEARCH */}
-              <div className="relative w-72">
+          <div className="grid grid-cols-5 gap-3">
+            {[
+              ["Tổng", stats.totalMovies, "blue"],
+              ["Completed", stats.completed, "green"],
+              ["Draft", stats.draft, "yellow"],
+              ["Active", stats.active, "blue"],
+              ["Expired", stats.expired, "red"],
+            ].map(([label, value, color]) => (
+              <div
+                key={label}
+                className="bg-white p-3 rounded-lg shadow text-center"
+              >
+                <div className={`text-xl font-bold text-${color}-600`}>
+                  {value}
+                </div>
+                <div className="text-xs text-gray-500">{label}</div>
+              </div>
+            ))}
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3 rounded-lg shadow-sm">
+            <div className="flex gap-2 flex-wrap">
+              <div className="relative w-64">
                 <FaSearch className="absolute left-3 top-3 text-gray-400 text-sm" />
                 <input
                   value={keyword}
-                  onChange={(e) => {
-                    setKeyword(e.target.value);
-                    setPage(1);
-                  }}
+                  onChange={(e) => setKeyword(e.target.value)}
                   placeholder="Tìm phim..."
-                  className="w-full pl-9 pr-3 py-2.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+                  className="w-full pl-9 pr-3 py-2 text-sm border rounded-lg"
                 />
               </div>
 
-              {/* STATUS */}
               <select
                 value={status}
                 onChange={(e) => {
@@ -112,7 +141,6 @@ export default function MoviesListAdmin() {
                 <option value="expired">Expired</option>
               </select>
 
-              {/* TYPE */}
               <select
                 value={type}
                 onChange={(e) => {
@@ -127,107 +155,108 @@ export default function MoviesListAdmin() {
               </select>
             </div>
 
-            {/* ACTION */}
-            <div className="flex items-center gap-2">
+            <div className="flex gap-2">
+              <ExportCSV
+                data={csvData}
+                fields={["ID", "Ten", "Nam", "Loai", "Tap", "Trang_thai"]}
+                fileName="DanhSachPhim"
+              />
               <button
                 onClick={fetchMovies}
-                className="flex items-center gap-2 px-4 py-2 text-sm bg-blue-500 text-white rounded-lg"
+                className="flex items-center gap-2 px-4 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600"
               >
-                <FaRedo /> Refresh
+                <FaRedo />
+                Refresh
               </button>
 
               <button
                 onClick={handleOpenCreate}
-                className="flex items-center gap-2 px-4 py-2 text-sm bg-green-500 text-white rounded-lg"
+                className="px-3 py-2 text-sm bg-green-500 text-white rounded-lg flex items-center gap-2"
               >
-                <FaPlus /> Thêm phim
+                <FaPlus />
+                Thêm
               </button>
             </div>
           </div>
-
-          {/* TABLE */}
-          <div className="bg-white rounded-2xl shadow flex-1 flex flex-col overflow-hidden">
-            <div className="overflow-auto flex-1">
-              <table className="w-full text-sm">
-                <thead className="bg-gray-100 text-gray-500 uppercase text-xs">
+          <div className="bg-white rounded-xl shadow flex-1 overflow-hidden">
+            <div className="overflow-auto">
+              <table className="w-full text-xs">
+                <thead className="bg-gray-100 text-gray-500 uppercase">
                   <tr>
-                    <th className="p-4 text-left">ID</th>
-                    <th className="p-4 text-center">Poster</th>
-                    <th className="p-4 text-left">Tên</th>
-                    <th className="p-4 text-center">Năm</th>
-                    <th className="p-4 text-center">Loại</th>
-                    <th className="p-4 text-center">Tập</th>
-                    <th className="p-4 text-center">Trạng thái</th>
-                    <th className="p-4 text-center">Hành động</th>
+                    <th className="p-2">ID</th>
+                    <th className="p-2">Poster</th>
+                    <th className="p-2">Tên</th>
+                    <th className="p-2">Năm</th>
+                    <th className="p-2">Loại</th>
+                    <th className="p-2">Tập</th>
+                    <th className="p-2">Status</th>
+                    <th className="p-2">Action</th>
                   </tr>
                 </thead>
 
                 <tbody>
                   {loading ? (
                     <tr>
-                      <td colSpan="8" className="text-center py-6">
-                        Đang tải...
+                      <td colSpan="8" className="text-center py-4">
+                        Loading...
                       </td>
                     </tr>
                   ) : movies.length === 0 ? (
                     <tr>
-                      <td
-                        colSpan="8"
-                        className="text-center py-6 text-gray-400"
-                      >
-                        Không có dữ liệu
+                      <td colSpan="8" className="text-center py-4">
+                        No data
                       </td>
                     </tr>
                   ) : (
                     movies.map((m) => (
                       <tr key={m.id} className="border-t hover:bg-gray-50">
-                        <td className="p-4">{m.id}</td>
+                        <td className="p-2">{m.id}</td>
 
-                        {/* POSTER */}
-                        <td className="p-4 text-center">
-                          <div className="w-14 h-20 mx-auto rounded overflow-hidden bg-gray-100 flex items-center justify-center">
-                            {m.poster_url ? (
-                              <img
-                                src={m.poster_url}
-                                alt={m.name}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <span className="text-xs text-gray-400">
-                                No Image
-                              </span>
-                            )}
-                          </div>
+                        <td className="p-2">
+                          <img
+                            src={m.poster_url}
+                            className="w-10 h-14 object-cover rounded mx-auto"
+                          />
                         </td>
 
-                        <td className="p-4 font-medium">{m.name}</td>
+                        <td className="p-2 font-medium">{m.name}</td>
+                        <td className="p-2 text-center">{m.year || "-"}</td>
+                        <td className="p-2 text-center">{m.type}</td>
+                        <td className="p-2 text-center">{m.episode_total}</td>
 
-                        <td className="p-4 text-center">{m.year || "-"}</td>
-
-                        <td className="p-4 text-center">{m.type || "-"}</td>
-
-                        <td className="p-4 text-center">
-                          {m.episode_total || 0}
-                        </td>
-
-                        <td className="p-4 text-center">
+                        <td className="p-2 text-center">
                           <span
-                            className={`px-2 py-1 rounded text-xs font-medium ${
-                              m.status === "completed"
-                                ? "bg-green-100 text-green-600"
-                                : m.status === "draft"
-                                  ? "bg-gray-100 text-gray-600"
-                                  : "bg-red-100 text-red-600"
-                            }`}
+                            className={`px-2 py-1 rounded text-xs
+                              ${
+                                m.status === "active"
+                                  ? "bg-green-100 text-green-700"
+                                  : ""
+                              }
+                              ${
+                                m.status === "draft"
+                                  ? "bg-gray-100 text-gray-700"
+                                  : ""
+                              }
+                              ${
+                                m.status === "completed"
+                                  ? "bg-blue-100 text-blue-700"
+                                  : ""
+                              }
+                              ${
+                                m.status === "expired"
+                                  ? "bg-red-100 text-red-700"
+                                  : ""
+                              }
+                            `}
                           >
                             {m.status}
                           </span>
                         </td>
 
-                        <td className="p-4 text-center">
+                        <td className="p-2 text-center">
                           <button
                             onClick={() => handleOpenDetail(m)}
-                            className="p-2 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200"
+                            className="p-1 bg-blue-100 rounded text-blue-600"
                           >
                             <FaEye />
                           </button>
@@ -239,9 +268,7 @@ export default function MoviesListAdmin() {
               </table>
             </div>
           </div>
-
-          {/* PAGINATION */}
-          <div className="bg-white border-t py-3 flex justify-center shadow-inner mt-auto">
+          <div className="bg-white py-2 flex justify-center rounded-lg">
             <Pagination
               currentPage={page}
               totalPages={Math.ceil(total / limit)}
@@ -253,10 +280,10 @@ export default function MoviesListAdmin() {
         </div>
       </div>
 
-      {/* MODAL */}
       {isModalOpen && (
         <MoviesModal
           movieId={selectedMovieId}
+          mode={mode}
           onClose={handleCloseModal}
           onReload={fetchMovies}
         />

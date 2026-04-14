@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { FaTimes, FaSave, FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
@@ -9,7 +8,10 @@ import {
   updateMovieMeta,
   updateMovieMedia,
   updateMovieSetting,
+  createMovie, // ✅ thêm cho CREATE
 } from "../../../api/moviesApi";
+
+import { getContracts } from "../../../api/contractApi";
 
 const TAB = {
   INFO: "info",
@@ -18,23 +20,81 @@ const TAB = {
   SETTING: "setting",
 };
 
-export default function MoviesModal({ movieId, onClose, onReload }) {
+export default function MoviesModal({
+  movieId,
+  mode = "edit",
+  onClose,
+  onReload,
+}) {
   const [activeTab, setActiveTab] = useState(TAB.INFO);
+  // eslint-disable-next-line no-unused-vars
   const [movie, setMovie] = useState(null);
-
   const [edit, setEdit] = useState({});
+  const [contracts, setContracts] = useState([]);
+
+  /* ================= LOAD ================= */
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/immutability
+    fetchContracts();
+  }, []);
 
   useEffect(() => {
-    if (movieId) fetchMovie();
-  }, [movieId]);
+    if (mode === "edit" && movieId) {
+      // eslint-disable-next-line react-hooks/immutability
+      fetchMovie();
+    }
+
+    if (mode === "create") {
+      setMovie({});
+      setEdit({
+        // ================= INFO FIELD =================
+        name: "",
+        origin_name: "", 
+        year: "",
+        type: "",
+        duration: "", 
+        episode_total: "",
+        content: "",
+
+        contract_id: "",
+        status: "draft",
+        source: "",
+        tmdb_id: "",
+
+        is_available: false,
+        is_premium: false,
+
+        categories: [],
+        countries: [],
+        people: [],
+        episodes: [],
+
+        poster_mode: "url",
+        thumb_mode: "url",
+      });
+    }
+  }, [movieId, mode]);
+
+  const fetchContracts = async () => {
+    try {
+      const res = await getContracts();
+      setContracts(res.data || []);
+    } catch {
+      toast.error("Load contract failed");
+    }
+  };
 
   const fetchMovie = async () => {
     try {
       const res = await getMovieById(movieId);
       setMovie(res.data);
-      setEdit(res.data);
-      // eslint-disable-next-line no-unused-vars
-    } catch (err) {
+
+      setEdit({
+        ...res.data,
+        poster_mode: "url",
+        thumb_mode: "url",
+      });
+    } catch {
       toast.error("Load movie failed");
     }
   };
@@ -43,20 +103,19 @@ export default function MoviesModal({ movieId, onClose, onReload }) {
     setEdit((prev) => ({ ...prev, [field]: value }));
   };
 
+  /* ================= SAVE ================= */
   const handleSave = async () => {
     try {
+      if (mode === "create") {
+        await createMovie(edit);
+        toast.success("Created successfully");
+        onReload();
+        onClose();
+        return;
+      }
+
       if (activeTab === TAB.INFO) {
-        await updateMovieInfo(movieId, {
-          name: edit.name,
-          origin_name: edit.origin_name,
-          content: edit.content,
-          type: edit.type,
-          contract_id: edit.contract_id,
-          year: edit.year,
-          duration: edit.duration,
-          episode_total: edit.episode_total,
-          created_by: edit.created_by,
-        });
+        await updateMovieInfo(movieId, edit);
       }
 
       if (activeTab === TAB.META) {
@@ -89,21 +148,79 @@ export default function MoviesModal({ movieId, onClose, onReload }) {
       toast.success("Updated successfully");
       fetchMovie();
       onReload();
-      // eslint-disable-next-line no-unused-vars
-    } catch (err) {
-      toast.error("Update failed");
+    } catch {
+      toast.error(mode === "create" ? "Create failed" : "Update failed");
     }
   };
 
-  if (!movie) return null;
+  /* ================= EPISODES ================= */
+  function addEpisode() {
+    setEdit((prev) => ({
+      ...prev,
+      episodes: [
+        ...(prev.episodes || []),
+        { season: 1, episode_number: 1, name: "", streams: [] },
+      ],
+    }));
+  }
 
+  function updateEpisode(i, field, value) {
+    setEdit((prev) => {
+      const eps = [...(prev.episodes || [])];
+      eps[i] = { ...eps[i], [field]: value };
+      return { ...prev, episodes: eps };
+    });
+  }
+
+  function addStream(i) {
+    setEdit((prev) => {
+      const eps = [...(prev.episodes || [])];
+
+      eps[i].streams = [
+        ...(eps[i].streams || []),
+        {
+          server_name: "",
+          quality: "",
+          lang: "",
+          link_embed: "",
+          link_m3u8: "",
+        },
+      ];
+
+      return { ...prev, episodes: eps };
+    });
+  }
+
+  function updateStream(i, j, field, value) {
+    setEdit((prev) => {
+      const eps = [...(prev.episodes || [])];
+      const streams = [...(eps[i].streams || [])];
+
+      streams[j] = { ...streams[j], [field]: value };
+
+      eps[i] = { ...eps[i], streams };
+
+      return { ...prev, episodes: eps };
+    });
+  }
+
+  /* ================= FILE ================= */
+  function handleFileChange(field, file) {
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    handleChange(field, url);
+  }
+
+  /* ================= UI ================= */
   return (
     <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
-      <div className="bg-white w-[1100px] h-[650px] rounded-xl flex flex-col">
+      <div className="bg-white w-275 h-175 rounded-xl flex flex-col">
         {/* HEADER */}
         <div className="flex justify-between items-center p-4 border-b">
-          <h2 className="text-xl font-bold">Movie Detail</h2>
-          <FaTimes className="cursor-pointer" onClick={onClose} />
+          <h2 className="text-xl font-bold">
+            {mode === "create" ? "Create Movie" : "Movie Detail"}
+          </h2>
+          <FaTimes onClick={onClose} className="cursor-pointer" />
         </div>
 
         {/* TAB */}
@@ -119,8 +236,9 @@ export default function MoviesModal({ movieId, onClose, onReload }) {
           ))}
         </div>
 
-        {/* CONTENT FIX HEIGHT */}
+        {/* CONTENT */}
         <div className="flex-1 overflow-auto p-4">
+          {/* ================= INFO ================= */}
           {activeTab === TAB.INFO && (
             <div className="grid grid-cols-2 gap-4">
               <Input
@@ -128,41 +246,53 @@ export default function MoviesModal({ movieId, onClose, onReload }) {
                 value={edit.name}
                 onChange={(v) => handleChange("name", v)}
               />
+
               <Input
-                label="Origin"
+                label="Origin Name"
                 value={edit.origin_name}
                 onChange={(v) => handleChange("origin_name", v)}
               />
-              <Input
-                label="Type"
-                value={edit.type}
-                onChange={(v) => handleChange("type", v)}
-              />
+
               <Input
                 label="Year"
                 value={edit.year}
                 onChange={(v) => handleChange("year", v)}
               />
+
+              <Input
+                label="Type"
+                value={edit.type}
+                onChange={(v) => handleChange("type", v)}
+              />
+
               <Input
                 label="Duration"
                 value={edit.duration}
                 onChange={(v) => handleChange("duration", v)}
               />
+
               <Input
                 label="Episode Total"
                 value={edit.episode_total}
                 onChange={(v) => handleChange("episode_total", v)}
               />
-              <Input
-                label="Contract"
-                value={edit.contract_id}
-                onChange={(v) => handleChange("contract_id", v)}
-              />
-              <Input
-                label="Created By"
-                value={edit.created_by}
-                onChange={(v) => handleChange("created_by", v)}
-              />
+
+              <div>
+                <label className="text-sm font-semibold">Contract</label>
+                <select
+                  className="w-full border p-2 mt-1 rounded"
+                  value={edit.contract_id || ""}
+                  onChange={(e) => handleChange("contract_id", e.target.value)}
+                >
+                  <option value="">Select contract</option>
+                  {contracts.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <Textarea
                 label="Content"
                 value={edit.content}
@@ -170,7 +300,6 @@ export default function MoviesModal({ movieId, onClose, onReload }) {
               />
             </div>
           )}
-
           {activeTab === TAB.META && (
             <div className="space-y-4">
               <MetaInput
@@ -191,28 +320,35 @@ export default function MoviesModal({ movieId, onClose, onReload }) {
               />
             </div>
           )}
-
           {activeTab === TAB.MEDIA && (
             <div className="space-y-4">
-              <Input
+              <MediaInput
                 label="Poster"
                 value={edit.poster_url}
+                mode={edit.poster_mode}
                 onChange={(v) => handleChange("poster_url", v)}
+                onFile={(f) => handleFileChange("poster_url", f)}
+                onMode={(v) => handleChange("poster_mode", v)}
               />
-              <Input
+
+              <MediaInput
                 label="Thumb"
                 value={edit.thumb_url}
+                mode={edit.thumb_mode}
                 onChange={(v) => handleChange("thumb_url", v)}
+                onFile={(f) => handleFileChange("thumb_url", f)}
+                onMode={(v) => handleChange("thumb_mode", v)}
               />
+
               <Input
                 label="Trailer"
                 value={edit.trailer_url}
                 onChange={(v) => handleChange("trailer_url", v)}
               />
 
-              {/* EPISODES */}
               <div>
                 <h3 className="font-bold mb-2">Episodes</h3>
+
                 {edit.episodes?.map((ep, i) => (
                   <div key={i} className="border p-3 mb-3 rounded">
                     <div className="grid grid-cols-3 gap-2">
@@ -233,56 +369,54 @@ export default function MoviesModal({ movieId, onClose, onReload }) {
                       />
                     </div>
 
-                    <div className="mt-2">
-                      {ep.streams?.map((s, j) => (
-                        <div key={j} className="grid grid-cols-3 gap-2 mb-2">
-                          <Input
-                            label="Server"
-                            value={s.server_id}
-                            onChange={(v) => updateStream(i, j, "server_id", v)}
-                          />
-                          <Input
-                            label="Quality"
-                            value={s.quality}
-                            onChange={(v) => updateStream(i, j, "quality", v)}
-                          />
-                          <Input
-                            label="Lang"
-                            value={s.lang}
-                            onChange={(v) => updateStream(i, j, "lang", v)}
-                          />
-                          <Input
-                            label="Embed"
-                            value={s.link_embed}
-                            onChange={(v) =>
-                              updateStream(i, j, "link_embed", v)
-                            }
-                          />
-                          <Input
-                            label="M3U8"
-                            value={s.link_m3u8}
-                            onChange={(v) => updateStream(i, j, "link_m3u8", v)}
-                          />
-                        </div>
-                      ))}
+                    {ep.streams?.map((s, j) => (
+                      <div key={j} className="grid grid-cols-3 gap-2 mt-2">
+                        <Input
+                          label="Server Name"
+                          value={s.server_name}
+                          onChange={(v) => updateStream(i, j, "server_name", v)}
+                        />
+                        <Input
+                          label="Quality"
+                          value={s.quality}
+                          onChange={(v) => updateStream(i, j, "quality", v)}
+                        />
+                        <Input
+                          label="Lang"
+                          value={s.lang}
+                          onChange={(v) => updateStream(i, j, "lang", v)}
+                        />
+                        <Input
+                          label="Embed"
+                          value={s.link_embed}
+                          onChange={(v) => updateStream(i, j, "link_embed", v)}
+                        />
+                        <Input
+                          label="M3U8"
+                          value={s.link_m3u8}
+                          onChange={(v) => updateStream(i, j, "link_m3u8", v)}
+                        />
+                      </div>
+                    ))}
 
-                      <button
-                        onClick={() => addStream(i)}
-                        className="text-blue-500"
-                      >
-                        <FaPlus /> Add Stream
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => addStream(i)}
+                      className="text-blue-500 flex items-center gap-1 mt-2"
+                    >
+                      <FaPlus /> Add Stream
+                    </button>
                   </div>
                 ))}
 
-                <button onClick={addEpisode} className="text-green-500">
+                <button
+                  onClick={addEpisode}
+                  className="text-green-500 flex items-center gap-1"
+                >
                   <FaPlus /> Add Episode
                 </button>
               </div>
             </div>
           )}
-
           {activeTab === TAB.SETTING && (
             <div className="grid grid-cols-2 gap-4">
               <Input
@@ -314,8 +448,6 @@ export default function MoviesModal({ movieId, onClose, onReload }) {
             </div>
           )}
         </div>
-
-        {/* FOOTER */}
         <div className="p-4 border-t flex justify-end gap-2">
           <button onClick={onClose} className="px-4 py-2 bg-gray-300 rounded">
             Hủy
@@ -324,44 +456,15 @@ export default function MoviesModal({ movieId, onClose, onReload }) {
             onClick={handleSave}
             className="px-4 py-2 bg-blue-500 text-white rounded flex items-center gap-2"
           >
-            <FaSave /> Lưu
+            <FaSave /> {mode === "create" ? "Create" : "Lưu"}
           </button>
         </div>
       </div>
     </div>
   );
-
-  function addEpisode() {
-    handleChange("episodes", [
-      ...(edit.episodes || []),
-      { season: 1, episode_number: 1, name: "", streams: [] },
-    ]);
-  }
-
-  function updateEpisode(i, field, value) {
-    const eps = [...edit.episodes];
-    eps[i][field] = value;
-    handleChange("episodes", eps);
-  }
-
-  function addStream(i) {
-    const eps = [...edit.episodes];
-    eps[i].streams.push({
-      server_id: "",
-      quality: "",
-      lang: "",
-      link_embed: "",
-      link_m3u8: "",
-    });
-    handleChange("episodes", eps);
-  }
-
-  function updateStream(i, j, field, value) {
-    const eps = [...edit.episodes];
-    eps[i].streams[j][field] = value;
-    handleChange("episodes", eps);
-  }
 }
+
+/* ================= COMPONENTS ================= */
 
 function Input({ label, value, onChange }) {
   return (
@@ -378,7 +481,7 @@ function Input({ label, value, onChange }) {
 
 function Textarea({ label, value, onChange }) {
   return (
-    <div className="col-span-2">
+    <div>
       <label className="text-sm font-semibold">{label}</label>
       <textarea
         className="w-full border p-2 rounded mt-1"
@@ -416,6 +519,7 @@ function MetaInput({ label, data, onChange, hasRole }) {
   return (
     <div>
       <h4 className="font-bold">{label}</h4>
+
       {data.map((item, i) => (
         <div key={i} className="flex gap-2 mb-2">
           <input
@@ -432,9 +536,43 @@ function MetaInput({ label, data, onChange, hasRole }) {
           )}
         </div>
       ))}
-      <button onClick={add} className="text-blue-500">
+
+      <button className="text-blue-500 flex items-center gap-1" onClick={add}>
         <FaPlus /> Add
       </button>
+    </div>
+  );
+}
+
+function MediaInput({ label, value, mode, onChange, onFile, onMode }) {
+  return (
+    <div>
+      <label className="font-semibold">{label}</label>
+
+      <div className="flex gap-2 mt-1">
+        <select
+          className="border p-2"
+          value={mode || "url"}
+          onChange={(e) => onMode(e.target.value)}
+        >
+          <option value="url">URL</option>
+          <option value="folder">Folder</option>
+        </select>
+
+        {mode === "folder" ? (
+          <input
+            type="file"
+            className="border p-2 flex-1"
+            onChange={(e) => onFile(e.target.files?.[0])}
+          />
+        ) : (
+          <input
+            className="border p-2 flex-1"
+            value={value || ""}
+            onChange={(e) => onChange(e.target.value)}
+          />
+        )}
+      </div>
     </div>
   );
 }

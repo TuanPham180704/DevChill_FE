@@ -145,7 +145,6 @@ export default function CustomerList() {
   }));
   return (
     <div className="flex min-h-screen bg-[#F4F6FA]">
-
       <div className="flex-1 ml-64 flex flex-col">
         <div className="p-8 space-y-6 flex-1">
           <div className="flex flex-col gap-1">
