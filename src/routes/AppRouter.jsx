@@ -24,6 +24,7 @@ import DashBoard from "../pages/Admin/DashBoard";
 import UpgradePage from "../pages/Client/Premium/UpgradePage";
 import PaymentPage from "../pages/Client/Premium/PaymentPage";
 import SuccessPage from "../pages/Client/Premium/SuccessPage";
+import MoviesListAdmin from "../pages/Admin/MovieListAdmin";
 
 export default function AppRouter() {
   return (
@@ -60,6 +61,7 @@ export default function AppRouter() {
               <Route path="/admin" element={<DashBoard />} />
               <Route path="/admin/customers" element={<CustomerList />} />
               <Route path="/admin/contracts" element={<ContractList />} />
+              <Route path="/admin/movies" element={<MoviesListAdmin />} />
             </Route>
           </Route>
 

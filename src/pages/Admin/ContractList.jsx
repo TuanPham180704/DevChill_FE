@@ -25,7 +25,7 @@ export default function ContractList() {
   const fetchContracts = async () => {
     try {
       setLoading(true);
-      const res = await getContracts({ page: 1, limit: 100, search: "" });
+      const res = await getContracts({ page: 1, limit: 5, search: "" });
       const contractList =
         res?.data?.data || res?.data || (Array.isArray(res) ? res : []);
       setContracts(contractList);
@@ -115,7 +115,7 @@ export default function ContractList() {
   return (
     <div className="flex min-h-screen bg-[#F4F6FA]">
       <div className="flex-1 ml-64 flex flex-col">
-        <div className="p-8 space-y-6 flex-1">
+        <div className="p-8 flex-1 flex flex-col gap-6">
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl font-bold text-gray-800">
               Quản lý hợp đồng
@@ -219,72 +219,79 @@ export default function ContractList() {
           </div>
 
           {/* Table */}
-          <div className="bg-white rounded-2xl shadow overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-100 text-gray-500 uppercase text-xs">
-                <tr>
-                  <th className="p-4 text-left">ID</th>
-                  <th className="p-4 text-left">Tên</th>
-                  <th className="p-4 text-center">Ngày bắt đầu</th>
-                  <th className="p-4 text-center">Ngày kết thúc</th>
-                  <th className="p-4 text-center">Trạng thái</th>
-                  <th className="p-4 text-center">File</th>
-                  <th className="p-4 text-center">Hành động</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
+          <div className="bg-white rounded-2xl shadow overflow-hidden flex-1 flex flex-col">
+            <div className="overflow-x-auto flex-1">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-100 text-gray-500 uppercase text-xs">
                   <tr>
-                    <td colSpan="7" className="text-center py-6">
-                      Đang tải...
-                    </td>
+                    <th className="p-4 text-left">ID</th>
+                    <th className="p-4 text-left">Tên</th>
+                    <th className="p-4 text-center">Ngày bắt đầu</th>
+                    <th className="p-4 text-center">Ngày kết thúc</th>
+                    <th className="p-4 text-center">Trạng thái</th>
+                    <th className="p-4 text-center">File</th>
+                    <th className="p-4 text-center">Hành động</th>
                   </tr>
-                ) : currentContracts.length === 0 ? (
-                  <tr>
-                    <td colSpan="7" className="text-center py-6 text-gray-400">
-                      Không có dữ liệu
-                    </td>
-                  </tr>
-                ) : (
-                  currentContracts.map((c) => (
-                    <tr key={c.id} className="border-t hover:bg-gray-50">
-                      <td className="p-4">{c.id}</td>
-                      <td className="p-4 font-medium">{c.name}</td>
-                      <td className="p-4 text-center">{c.start_date || "-"}</td>
-                      <td className="p-4 text-center">{c.end_date || "-"}</td>
-                      <td className="p-4 text-center">{c.status}</td>
-                      <td className="p-4 text-center">
-                        {c.file_url ? (
-                          <button
-                            onClick={() => handleDownload(c)}
-                            className="text-blue-600 hover:underline flex items-center gap-1 justify-center mx-auto"
-                          >
-                            <FaDownload />
-                            File
-                          </button>
-                        ) : (
-                          "Không"
-                        )}
-                      </td>
-                      <td className="p-4 text-center">
-                        <button
-                          onClick={() => {
-                            setSelectedContract(c);
-                            setContractModalOpen(true);
-                          }}
-                          className="p-2 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200"
-                        >
-                          <FaEye />
-                        </button>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    <tr>
+                      <td colSpan="7" className="text-center py-6">
+                        Đang tải...
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : currentContracts.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan="7"
+                        className="text-center py-6 text-gray-400"
+                      >
+                        Không có dữ liệu
+                      </td>
+                    </tr>
+                  ) : (
+                    currentContracts.map((c) => (
+                      <tr key={c.id} className="border-t hover:bg-gray-50">
+                        <td className="p-4">{c.id}</td>
+                        <td className="p-4 font-medium">{c.name}</td>
+                        <td className="p-4 text-center">
+                          {c.start_date || "-"}
+                        </td>
+                        <td className="p-4 text-center">{c.end_date || "-"}</td>
+                        <td className="p-4 text-center">{c.status}</td>
+                        <td className="p-4 text-center">
+                          {c.file_url ? (
+                            <button
+                              onClick={() => handleDownload(c)}
+                              className="text-blue-600 hover:underline flex items-center gap-1 justify-center mx-auto"
+                            >
+                              <FaDownload />
+                              File
+                            </button>
+                          ) : (
+                            "Không"
+                          )}
+                        </td>
+                        <td className="p-4 text-center">
+                          <button
+                            onClick={() => {
+                              setSelectedContract(c);
+                              setContractModalOpen(true);
+                            }}
+                            className="p-2 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200"
+                          >
+                            <FaEye />
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
 
-          <div className="sticky bottom-0 bg-white border-t py-3 flex justify-center shadow-inner">
+          <div className="bg-white border-t py-3 flex justify-center shadow-inner mt-auto">
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}

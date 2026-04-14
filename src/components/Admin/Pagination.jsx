@@ -1,4 +1,3 @@
-import React from 'react';
 
 export default function Pagination({ currentPage, totalPages, onPageChange, totalItems, itemsPerPage, itemName = "mục" }) {
   const currentTotal = Math.min(currentPage * itemsPerPage, totalItems);
