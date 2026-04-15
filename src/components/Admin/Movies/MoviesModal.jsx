@@ -20,6 +20,12 @@ const TAB = {
   SETTING: "setting",
 };
 
+const STATUS_OPTIONS = [
+  { label: "Draft", value: "draft" },
+  { label: "Published", value: "published" },
+  { label: "Completed", value: "completed" },
+  { label: "Hidden", value: "hidden" },
+];
 export default function MoviesModal({
   movieId,
   mode = "edit",
@@ -214,8 +220,6 @@ export default function MoviesModal({
           </h2>
           <FaTimes onClick={onClose} className="cursor-pointer" />
         </div>
-
-        {/* TAB */}
         <div className="flex border-b">
           {Object.values(TAB).map((t) => (
             <button
@@ -408,9 +412,10 @@ export default function MoviesModal({
           )}
           {activeTab === TAB.SETTING && (
             <div className="grid grid-cols-2 gap-4">
-              <Input
+              <Select
                 label="Status"
                 value={edit.status}
+                options={STATUS_OPTIONS}
                 onChange={(v) => handleChange("status", v)}
               />
               <Input
@@ -556,6 +561,25 @@ function MediaInput({ label, value, mode, onChange, onFile, onMode }) {
           />
         )}
       </div>
+    </div>
+  );
+}
+function Select({ label, value, options = [], onChange, className = "" }) {
+  return (
+    <div className={`flex flex-col gap-1 ${className}`}>
+      {label && <label className="text-sm text-gray-500">{label}</label>}
+
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="border border-gray-300 rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+      >
+        {options.map((opt) => (
+          <option key={opt.value} value={opt.value}>
+            {opt.label}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }

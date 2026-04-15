@@ -17,7 +17,6 @@ import {
 
 const Home = () => {
   const navigate = useNavigate();
-  // Lấy phim nổi bật từ data (phim đầu tiên trong suggestions)
   const [featuredMovie] = useState(suggestions[0]);
 
   return (
