@@ -23,8 +23,17 @@ const TAB = {
 const STATUS_OPTIONS = [
   { label: "Draft", value: "draft" },
   { label: "Published", value: "published" },
-  { label: "Completed", value: "completed" },
   { label: "Hidden", value: "hidden" },
+];
+const LIFECYCLE_OPTIONS = [
+  { label: "Upcoming", value: "upcoming" },
+  { label: "Ongoing", value: "ongoing" },
+  { label: "Completed", value: "completed" },
+];
+const PRODUCTION_OPTIONS = [
+  { label: "Planning", value: "planning" },
+  { label: "Filming", value: "filming" },
+  { label: "Post Production", value: "post-production" },
 ];
 export default function MoviesModal({
   movieId,
@@ -63,6 +72,8 @@ export default function MoviesModal({
 
         contract_id: "",
         status: "draft",
+        lifecycle_status: "ongoing",
+        production_status: null,
         source: "",
         tmdb_id: "",
 
@@ -142,6 +153,8 @@ export default function MoviesModal({
       if (activeTab === TAB.SETTING) {
         await updateMovieSetting(movieId, {
           status: edit.status,
+          lifecycle_status: edit.lifecycle_status,
+          production_status: edit.production_status,
           is_available: edit.is_available,
           is_premium: edit.is_premium,
           source: edit.source,
@@ -418,11 +431,27 @@ export default function MoviesModal({
                 options={STATUS_OPTIONS}
                 onChange={(v) => handleChange("status", v)}
               />
+
+              <Select
+                label="Lifecycle"
+                value={edit.lifecycle_status}
+                options={LIFECYCLE_OPTIONS}
+                onChange={(v) => handleChange("lifecycle_status", v)}
+              />
+
+              <Select
+                label="Production"
+                value={edit.production_status}
+                options={PRODUCTION_OPTIONS}
+                onChange={(v) => handleChange("production_status", v)}
+              />
+
               <Input
                 label="Source"
                 value={edit.source}
                 onChange={(v) => handleChange("source", v)}
               />
+
               <Input
                 label="TMDB"
                 value={edit.tmdb_id}
@@ -434,6 +463,7 @@ export default function MoviesModal({
                 checked={edit.is_available}
                 onChange={(v) => handleChange("is_available", v)}
               />
+
               <Checkbox
                 label="Premium"
                 checked={edit.is_premium}

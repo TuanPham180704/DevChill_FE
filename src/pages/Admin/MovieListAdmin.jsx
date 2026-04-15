@@ -22,6 +22,7 @@ export default function MoviesListAdmin() {
   const [selectedMovieId, setSelectedMovieId] = useState(null);
   const [isModalOpen, setModalOpen] = useState(false);
   const [mode, setMode] = useState("edit");
+
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedKeyword(keyword);
@@ -30,6 +31,7 @@ export default function MoviesListAdmin() {
 
     return () => clearTimeout(handler);
   }, [keyword]);
+
   const fetchMovies = useCallback(async () => {
     try {
       setLoading(true);
@@ -54,15 +56,16 @@ export default function MoviesListAdmin() {
   useEffect(() => {
     fetchMovies();
   }, [fetchMovies]);
+
   const stats = useMemo(() => {
     return {
       totalMovies: movies.length,
-      completed: movies.filter((m) => m.status === "completed").length,
       draft: movies.filter((m) => m.status === "draft").length,
-      active: movies.filter((m) => m.status === "active").length,
-      expired: movies.filter((m) => m.status === "expired").length,
+      published: movies.filter((m) => m.status === "published").length,
+      hidden: movies.filter((m) => m.status === "hidden").length,
     };
   }, [movies]);
+
   const csvData = movies.map((m) => ({
     ID: m.id,
     Ten: m.name,
@@ -71,6 +74,7 @@ export default function MoviesListAdmin() {
     Tap: m.episode_total,
     Trang_thai: m.status,
   }));
+
   const handleOpenCreate = () => {
     setSelectedMovieId(null);
     setMode("create");
@@ -87,6 +91,7 @@ export default function MoviesListAdmin() {
     setModalOpen(false);
     setSelectedMovieId(null);
   };
+
   return (
     <div className="flex min-h-screen bg-[#F4F6FA]">
       <div className="flex-1 ml-64 flex flex-col">
@@ -95,13 +100,13 @@ export default function MoviesListAdmin() {
             <h1 className="text-xl font-bold text-gray-800">Quản lý phim</h1>
             <p className="text-sm text-gray-500">Quản lý nội dung phim 🎬</p>
           </div>
-          <div className="grid grid-cols-5 gap-3">
+
+          <div className="grid grid-cols-4 gap-3">
             {[
               ["Tổng", stats.totalMovies, "blue"],
-              ["Completed", stats.completed, "green"],
               ["Draft", stats.draft, "yellow"],
-              ["Active", stats.active, "blue"],
-              ["Expired", stats.expired, "red"],
+              ["Published", stats.published, "green"],
+              ["Hidden", stats.hidden, "red"],
             ].map(([label, value, color]) => (
               <div
                 key={label}
@@ -114,6 +119,7 @@ export default function MoviesListAdmin() {
               </div>
             ))}
           </div>
+
           <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3 rounded-lg shadow-sm">
             <div className="flex gap-2 flex-wrap">
               <div className="relative w-64">
@@ -135,10 +141,9 @@ export default function MoviesListAdmin() {
                 className="px-3 py-2 text-sm border rounded-lg"
               >
                 <option value="">Tất cả trạng thái</option>
-                <option value="completed">Completed</option>
                 <option value="draft">Draft</option>
-                <option value="active">Active</option>
-                <option value="expired">Expired</option>
+                <option value="published">Published</option>
+                <option value="hidden">Hidden</option>
               </select>
 
               <select
@@ -161,6 +166,7 @@ export default function MoviesListAdmin() {
                 fields={["ID", "Ten", "Nam", "Loai", "Tap", "Trang_thai"]}
                 fileName="DanhSachPhim"
               />
+
               <button
                 onClick={fetchMovies}
                 className="flex items-center gap-2 px-4 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600"
@@ -180,37 +186,38 @@ export default function MoviesListAdmin() {
           </div>
           <div className="bg-white rounded-xl shadow flex-1 overflow-hidden">
             <div className="overflow-auto">
-              <table className="w-full text-xs">
+              <table className="w-full text-xs table-fixed">
                 <thead className="bg-gray-100 text-gray-500 uppercase">
                   <tr>
-                    <th className="p-2">ID</th>
-                    <th className="p-2">Poster</th>
-                    <th className="p-2">Tên</th>
-                    <th className="p-2">Năm</th>
-                    <th className="p-2">Loại</th>
-                    <th className="p-2">Tập</th>
-                    <th className="p-2">Status</th>
-                    <th className="p-2">Action</th>
+                    <th className="p-2 w-15">ID</th>
+                    <th className="p-2 w-20">Poster</th>
+                    <th className="p-2 w-55 text-left">Tên</th>
+                    <th className="p-2 w-20">Năm</th>
+                    <th className="p-2 w-20">Loại</th>
+                    <th className="p-2 w-20">Tập</th>
+                    <th className="p-2 w-25">Premium</th>
+                    <th className="p-2 w-25">Status</th>
+                    <th className="p-2 w-20">Action</th>
                   </tr>
                 </thead>
 
                 <tbody>
                   {loading ? (
                     <tr>
-                      <td colSpan="8" className="text-center py-4">
+                      <td colSpan="9" className="text-center py-4">
                         Loading...
                       </td>
                     </tr>
                   ) : movies.length === 0 ? (
                     <tr>
-                      <td colSpan="8" className="text-center py-4">
+                      <td colSpan="9" className="text-center py-4">
                         No data
                       </td>
                     </tr>
                   ) : (
                     movies.map((m) => (
                       <tr key={m.id} className="border-t hover:bg-gray-50">
-                        <td className="p-2">{m.id}</td>
+                        <td className="p-2 text-center">{m.id}</td>
 
                         <td className="p-2">
                           <img
@@ -219,10 +226,15 @@ export default function MoviesListAdmin() {
                           />
                         </td>
 
-                        <td className="p-2 font-medium">{m.name}</td>
+                        <td className="p-2 text-left truncate">{m.name}</td>
+
                         <td className="p-2 text-center">{m.year || "-"}</td>
                         <td className="p-2 text-center">{m.type}</td>
                         <td className="p-2 text-center">{m.episode_total}</td>
+
+                        <td className="p-2 text-center">
+                          {m.is_premium ? "VIP" : "Free"}
+                        </td>
 
                         <td className="p-2 text-center">
                           <span
@@ -268,6 +280,7 @@ export default function MoviesListAdmin() {
               </table>
             </div>
           </div>
+
           <div className="bg-white py-2 flex justify-center rounded-lg">
             <Pagination
               currentPage={page}
