@@ -7,7 +7,7 @@ import ExportCSV from "../../components/common/ExportCSV";
 import Pagination from "../../components/Admin/Pagination";
 import MoviesModal from "../../components/Admin/Movies/MoviesModal";
 
-import { getAllMovies } from "../../api/moviesApi";
+import { getAllMovies } from "../../api/moviesAdminApi";
 
 export default function MoviesListAdmin() {
   const [movies, setMovies] = useState([]);

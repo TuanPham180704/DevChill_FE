@@ -8,8 +8,8 @@ import {
   updateMovieMeta,
   updateMovieMedia,
   updateMovieSetting,
-  createMovie, // ✅ thêm cho CREATE
-} from "../../../api/moviesApi";
+  createMovie,
+} from "../../../api/moviesAdminApi";
 
 import { getContracts } from "../../../api/contractApi";
 
@@ -47,12 +47,11 @@ export default function MoviesModal({
     if (mode === "create") {
       setMovie({});
       setEdit({
-        // ================= INFO FIELD =================
         name: "",
-        origin_name: "", 
+        origin_name: "",
         year: "",
         type: "",
-        duration: "", 
+        duration: "",
         episode_total: "",
         content: "",
 
@@ -80,7 +79,7 @@ export default function MoviesModal({
       const res = await getContracts();
       setContracts(res.data || []);
     } catch {
-      toast.error("Load contract failed");
+      toast.error("Lỗi khi tải hợp đồng");
     }
   };
 
@@ -95,7 +94,7 @@ export default function MoviesModal({
         thumb_mode: "url",
       });
     } catch {
-      toast.error("Load movie failed");
+      toast.error("Lỗi khi tải phim");
     }
   };
 
@@ -103,12 +102,11 @@ export default function MoviesModal({
     setEdit((prev) => ({ ...prev, [field]: value }));
   };
 
-  /* ================= SAVE ================= */
   const handleSave = async () => {
     try {
       if (mode === "create") {
         await createMovie(edit);
-        toast.success("Created successfully");
+        toast.success("Thêm Phim Thành Công");
         onReload();
         onClose();
         return;
@@ -145,15 +143,14 @@ export default function MoviesModal({
         });
       }
 
-      toast.success("Updated successfully");
+      toast.success("Cập Nhật Thành Công");
       fetchMovie();
       onReload();
+      onClose();
     } catch {
       toast.error(mode === "create" ? "Create failed" : "Update failed");
     }
   };
-
-  /* ================= EPISODES ================= */
   function addEpisode() {
     setEdit((prev) => ({
       ...prev,
@@ -203,19 +200,14 @@ export default function MoviesModal({
       return { ...prev, episodes: eps };
     });
   }
-
-  /* ================= FILE ================= */
   function handleFileChange(field, file) {
     if (!file) return;
     const url = URL.createObjectURL(file);
     handleChange(field, url);
   }
-
-  /* ================= UI ================= */
   return (
     <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
       <div className="bg-white w-275 h-175 rounded-xl flex flex-col">
-        {/* HEADER */}
         <div className="flex justify-between items-center p-4 border-b">
           <h2 className="text-xl font-bold">
             {mode === "create" ? "Create Movie" : "Movie Detail"}
@@ -235,10 +227,7 @@ export default function MoviesModal({
             </button>
           ))}
         </div>
-
-        {/* CONTENT */}
         <div className="flex-1 overflow-auto p-4">
-          {/* ================= INFO ================= */}
           {activeTab === TAB.INFO && (
             <div className="grid grid-cols-2 gap-4">
               <Input
@@ -463,9 +452,6 @@ export default function MoviesModal({
     </div>
   );
 }
-
-/* ================= COMPONENTS ================= */
-
 function Input({ label, value, onChange }) {
   return (
     <div>
@@ -478,7 +464,6 @@ function Input({ label, value, onChange }) {
     </div>
   );
 }
-
 function Textarea({ label, value, onChange }) {
   return (
     <div>
@@ -504,7 +489,6 @@ function Checkbox({ label, checked, onChange }) {
     </div>
   );
 }
-
 function MetaInput({ label, data, onChange, hasRole }) {
   const update = (i, field, value) => {
     const arr = [...data];
@@ -543,7 +527,6 @@ function MetaInput({ label, data, onChange, hasRole }) {
     </div>
   );
 }
-
 function MediaInput({ label, value, mode, onChange, onFile, onMode }) {
   return (
     <div>

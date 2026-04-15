@@ -32,8 +32,3 @@ export const getMovieById = async (id) => {
   const res = await api.get(`/admin/movies/${id}`);
   return res.data;
 };
-
-export const getRecommendMovies = async (id) => {
-  const res = await api.get(`/admin/movies/${id}/recommend`);
-  return res.data;
-};
