@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
+
 import { useEffect, useState } from "react";
 import { getPublicMovies, getCategories } from "../api/moviesPublicApi";
 import { Link } from "react-router-dom";
@@ -15,8 +16,10 @@ export default function Home() {
 
   const [activeSlide, setActiveSlide] = useState(0);
   const [prevSlide, setPrevSlide] = useState(0);
+
   const countrySlugs = ["han-quoc", "trung-quoc", "viet-nam"];
   const unwrap = (res) => res?.data?.data ?? res?.data ?? [];
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -35,6 +38,7 @@ export default function Home() {
         setNewestMovies(unwrap(movieRes));
         setCategories(unwrap(cateRes));
         setUpcomingMovies(unwrap(upcomingRes));
+
         const results = await Promise.all(
           countrySlugs.map((slug) =>
             getPublicMovies({
@@ -60,6 +64,7 @@ export default function Home() {
 
     fetchData();
   }, []);
+
   useEffect(() => {
     if (!newestMovies.length) return;
 
@@ -80,8 +85,10 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-gray-500 bg-white">
-        Đang tải dữ liệu...
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="animate-pulse text-gray-400 text-sm">
+          Loading cinematic experience...
+        </div>
       </div>
     );
   }
@@ -91,127 +98,80 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white text-gray-900">
-      <div className="relative w-full h-130 overflow-hidden">
-        <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/30 to-transparent z-10" />
-        {prevMovie && (
-          <img
-            src={prevMovie.thumb_url || prevMovie.poster_url}
-            className="absolute inset-0 w-full h-full object-cover opacity-0 scale-110 transition-all duration-700"
-          />
-        )}
+      <div className="relative w-full h-155 overflow-hidden">
+        <div className="absolute inset-0 bg-white/40 backdrop-blur-2xl z-0" />
+
         {activeMovie && (
           <img
-            key={activeSlide}
             src={activeMovie.thumb_url || activeMovie.poster_url}
-            className="absolute inset-0 w-full h-full object-cover transition-all duration-700"
+            className="absolute inset-0 w-full h-full object-cover"
           />
         )}
-        {activeMovie && (
-          <div className="absolute inset-0 z-20 flex items-center">
-            <div className="px-16 max-w-2xl text-white">
-              <h1 className="text-5xl font-extrabold leading-tight drop-shadow-lg">
-                {activeMovie.name}
-              </h1>
 
-              <div className="flex items-center gap-3 text-sm text-white/70 mt-3">
-                {activeMovie.year && <span>{activeMovie.year}</span>}
-                {activeMovie.duration && (
-                  <span>• {activeMovie.duration} phút</span>
-                )}
-                {activeMovie.episode_total && (
-                  <span>• {activeMovie.episode_total} tập</span>
-                )}
-              </div>
+        <div className="absolute inset-0 bg-linear-to-r from-white via-white/70 to-transparent z-10" />
 
-              <p className="text-sm text-white/80 line-clamp-3 mt-4 leading-relaxed">
-                {activeMovie.content}
-              </p>
+        <div className="absolute inset-0 z-20 flex items-center">
+          <div className="px-20 max-w-2xl">
+            <h1 className="text-6xl font-black leading-tight">
+              {activeMovie?.name}
+            </h1>
 
-              <div className="mt-6 flex gap-3">
-                <Link
-                  to={`/movies/${activeMovie.slug}`}
-                  className="inline-flex items-center gap-2 bg-red-600 px-6 py-3 rounded-full hover:bg-red-500 transition shadow-lg"
-                >
-                  <Play size={18} />
-                  Xem ngay
-                </Link>
+            <p className="text-gray-600 mt-4 line-clamp-3">
+              {activeMovie?.content}
+            </p>
 
-                <Link
-                  to={`/movies/${activeMovie.slug}`}
-                  className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-6 py-3 rounded-full hover:bg-white/20 transition"
-                >
-                  Chi tiết
-                </Link>
-              </div>
+            <div className="mt-6 flex gap-3">
+              <Link
+                to={`/movies/${activeMovie.slug}`}
+                className="flex items-center gap-2 bg-black text-white px-7 py-3 rounded-full shadow-xl hover:scale-105 transition"
+              >
+                <Play size={18} />
+                Xem ngay
+              </Link>
             </div>
           </div>
-        )}
-        <div className="absolute bottom-6 right-6 z-30 w-85">
-          <div
-            className="backdrop-blur-xl bg-white/10 p-3 rounded-2xl border border-white/20 shadow-2xl grid gap-2"
-            style={{
-              gridTemplateColumns: `repeat(${Math.min(
-                newestMovies.length,
-                5,
-              )}, 1fr)`,
-            }}
-          >
-            {newestMovies.map((movie, index) => (
-              <div
-                key={movie.id || index}
-                onClick={() => goToSlide(index)}
-                className={`cursor-pointer rounded-lg overflow-hidden border transition-all duration-300 ${
-                  index === activeSlide
-                    ? "border-red-500 scale-105"
-                    : "border-white/10 opacity-70 hover:opacity-100"
-                }`}
-              >
-                <img
-                  src={movie.poster_url || "/fallback.jpg"}
-                  className="w-full h-20 object-cover"
-                />
-              </div>
-            ))}
-          </div>
+        </div>
+
+        {/* thumbnails */}
+        <div className="absolute bottom-6 right-6 z-30 flex gap-2">
+          {newestMovies.map((movie, index) => (
+            <div
+              key={movie.id || index}
+              onClick={() => goToSlide(index)}
+              className={`w-20 h-12 rounded-lg overflow-hidden cursor-pointer border transition ${
+                index === activeSlide
+                  ? "border-red-500 scale-105"
+                  : "border-gray-200 opacity-60 hover:opacity-100"
+              }`}
+            >
+              <img
+                src={movie.poster_url || "/fallback.jpg"}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          ))}
         </div>
       </div>
+
       <Section title="Thể loại">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6">
-          {categories.slice(0, 5).map((cate, idx) => {
-            const gradients = [
-              "from-rose-500/90 to-red-600/90",
-              "from-blue-500/90 to-indigo-600/90",
-              "from-emerald-500/90 to-green-600/90",
-              "from-yellow-400/90 to-orange-500/90",
-              "from-purple-500/90 to-pink-600/90",
-            ];
-
-            return (
-              <Link
-                key={cate.id || cate.slug}
-                to={`/movies/category/${cate.slug}`}
-                className="group relative h-36 rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
-              >
-                <div
-                  className={`absolute inset-0 bg-linear-to-br ${
-                    gradients[idx % gradients.length]
-                  }`}
-                />
-                <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition" />
-
-                <div className="absolute inset-0 p-4 flex flex-col justify-between text-white">
-                  <h3 className="text-lg font-semibold group-hover:translate-x-1 transition">
-                    {cate.name}
-                  </h3>
-                  <span className="text-xs opacity-90 group-hover:translate-x-2 transition">
-                    Khám phá →
-                  </span>
-                </div>
-              </Link>
-            );
-          })}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+          {categories.slice(0, 5).map((cate) => (
+            <Link
+              key={cate.id || cate.slug}
+              to={`/movies/category/${cate.slug}`}
+              className="group p-5 rounded-2xl bg-white border border-gray-100 hover:border-red-400 transition shadow-sm hover:shadow-lg"
+            >
+              <h3 className="text-lg font-semibold group-hover:text-red-500 transition">
+                {cate.name}
+              </h3>
+              <span className="text-xs text-gray-400 group-hover:text-red-400">
+                Khám phá →
+              </span>
+            </Link>
+          ))}
         </div>
       </Section>
+
       {countrySlugs.map((slug) => {
         const movies = moviesByCountry[slug] || [];
 
@@ -228,32 +188,26 @@ export default function Home() {
           </Section>
         );
       })}
-      <Section
-        title="Phim sắp chiếu"
-        action={{
-          text: "Xem tất cả",
-          to: "/movies?lifecycle_status=upcoming",
-        }}
-      >
-        <MovieGrid movies={upcomingMovies} showStatus />
-      </Section>
 
       <DevChillApp />
     </div>
   );
 }
+
 function Section({ title, action, children }) {
   return (
-    <div className="max-w-7xl mx-auto px-6 py-10">
+    <div className="max-w-7xl mx-auto px-6 py-12">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold capitalize tracking-tight">
-          {title}
-        </h2>
+        <div className="flex items-center gap-3">
+          <div className="w-1.5 h-6 bg-red-500 rounded-full" />
+          <h2 className="text-2xl font-bold capitalize">{title}</h2>
+          <div className="flex-1 h-px bg-gray-200 ml-4" />
+        </div>
 
         {action && (
           <Link
             to={action.to}
-            className="flex items-center gap-1 text-sm text-gray-500 hover:text-red-500 transition"
+            className="flex items-center gap-1 text-sm text-gray-500 hover:text-red-500"
           >
             {action.text}
             <ChevronRight size={16} />
@@ -265,38 +219,32 @@ function Section({ title, action, children }) {
     </div>
   );
 }
-function MovieGrid({ movies, showStatus }) {
+
+function MovieGrid({ movies }) {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6">
-      {!movies?.length && (
-        <div className="col-span-full h-60 rounded-2xl bg-gray-50 border flex items-center justify-center text-gray-400 text-sm">
-          Đang cập nhật
-        </div>
-      )}
+    <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
       {movies?.map((movie) => (
         <Link
           key={movie.id || movie.slug}
           to={`/movies/${movie.slug}`}
-          className="group relative rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-xl transition duration-300"
+          className="group relative rounded-2xl overflow-hidden bg-white transition duration-300 hover:-translate-y-1 hover:shadow-xl"
         >
+          {movie.is_premium && (
+            <div className="absolute inset-0 rounded-2xl border border-blue-300/60 pointer-events-none" />
+          )}
+
           <img
             src={movie.poster_url || "/fallback.jpg"}
-            className="h-64 w-full object-cover group-hover:scale-110 transition duration-500"
+            className="h-64 w-full object-cover transition duration-500 group-hover:scale-105"
           />
-
-          <div className="p-3">
-            <h3 className="text-sm font-medium truncate group-hover:text-red-500 transition">
-              {movie.name}
-            </h3>
-
-            {showStatus && (
-              <p className="text-xs text-gray-500 mt-1">Sắp chiếu</p>
-            )}
+          <div className="absolute inset-0 bg-linear-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition" />
+          <div className="absolute bottom-0 p-3 text-white opacity-0 group-hover:opacity-100 transition">
+            <h3 className="text-sm font-semibold line-clamp-2">{movie.name}</h3>
           </div>
-
           {movie.is_premium && (
-            <div className="absolute top-3 right-3 bg-yellow-400 p-1.5 rounded-full shadow">
-              <Star size={14} className="text-black" />
+            <div className="absolute top-3 right-3 backdrop-blur-md bg-white/20 px-2 py-1 rounded-full flex items-center gap-1 shadow-sm">
+              <Star size={12} className="text-yellow-400" />
+              <span className="text-[10px] font-semibold text-white">VIP</span>
             </div>
           )}
         </Link>
