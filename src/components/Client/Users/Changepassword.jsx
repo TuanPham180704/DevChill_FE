@@ -17,6 +17,7 @@ export default function ChangePassword({ isOpen, onClose, onSubmit }) {
   const [touched, setTouched] = useState({});
 
   if (!isOpen) return null;
+
   const validateForm = (updatedField = {}) => {
     const formData = {
       oldPassword,
@@ -26,6 +27,7 @@ export default function ChangePassword({ isOpen, onClose, onSubmit }) {
     };
 
     const result = changePasswordSchema.safeParse(formData);
+
     if (!result.success) {
       const fieldErrors = {};
       result.error.issues.forEach((issue) => {
@@ -51,7 +53,12 @@ export default function ChangePassword({ isOpen, onClose, onSubmit }) {
   };
 
   const handleSubmit = async () => {
-    setTouched({ oldPassword: true, newPassword: true, confirmPassword: true });
+    setTouched({
+      oldPassword: true,
+      newPassword: true,
+      confirmPassword: true,
+    });
+
     validateForm();
 
     const result = changePasswordSchema.safeParse({
@@ -71,10 +78,12 @@ export default function ChangePassword({ isOpen, onClose, onSubmit }) {
     try {
       setLoading(true);
       const res = await onSubmit(result.data);
+
       setOldPassword("");
       setNewPassword("");
       setConfirmPassword("");
       setTouched({});
+
       toast.success(res?.message || "Đổi mật khẩu thành công!");
       onClose();
     } catch (err) {
@@ -94,24 +103,32 @@ export default function ChangePassword({ isOpen, onClose, onSubmit }) {
     setValue,
   ) => (
     <div className="relative w-full min-h-14">
-      {" "}
       <input
         type={showPassword ? "text" : "password"}
         placeholder={placeholder}
         value={value}
         onChange={(e) => handleChange(fieldName, e.target.value, setValue)}
         onBlur={() => handleBlur(fieldName)}
-        className={`w-full px-5 py-3.5 rounded-xl bg-[rgba(15,23,42,0.6)] border ${
-          errors[fieldName] ? "border-red-500" : "border-dc-input-border"
-        } text-white text-sm outline-none placeholder-[#64748b] focus:border-[#00F2FF] focus:shadow-[0_0_0_3px_rgba(0,242,255,0.15)] transition-all pr-12`}
+        className={`
+          w-full px-5 py-3.5 rounded-xl
+          bg-white border text-gray-800 text-sm
+          placeholder-gray-400 outline-none transition-all pr-12
+          ${
+            errors[fieldName]
+              ? "border-red-400 focus:border-red-500"
+              : "border-gray-300 focus:border-blue-500 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.15)]"
+          }
+        `}
       />
+
       <button
         type="button"
         onClick={() => setShowPassword(!showPassword)}
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-white text-lg"
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-800"
       >
         {showPassword ? <FiEyeOff /> : <FiEye />}
       </button>
+
       <div className="min-h-4">
         {errors[fieldName] && (
           <p className="text-red-500 text-xs mt-1">{errors[fieldName]}</p>
@@ -119,25 +136,23 @@ export default function ChangePassword({ isOpen, onClose, onSubmit }) {
       </div>
     </div>
   );
-
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm transition-opacity"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
       <div
-        className="relative w-full max-w-md bg-[#111827] rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] border border-[rgba(0,242,255,0.1)] overflow-hidden"
+        className="relative w-full max-w-md bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-center pt-6 pb-4 border-b border-[rgba(100,116,139,0.2)] relative">
-          <h2 className="text-white text-xl font-bold tracking-wide">
-            Đổi mật khẩu
-          </h2>
+        <div className="flex items-center justify-center pt-6 pb-4 border-b border-gray-200 relative">
+          <h2 className="text-gray-900 text-xl font-bold">Đổi mật khẩu</h2>
+
           <button
             onClick={onClose}
-            className="absolute top-6 right-6 text-dc-text-muted hover:text-[#00F2FF] transition-colors"
+            className="absolute top-6 right-6 text-gray-500 hover:text-gray-900 transition"
           >
             <FiX className="text-2xl" />
           </button>
@@ -151,6 +166,7 @@ export default function ChangePassword({ isOpen, onClose, onSubmit }) {
             setShowOldPassword,
             setOldPassword,
           )}
+
           {renderPasswordInput(
             newPassword,
             "newPassword",
@@ -159,6 +175,7 @@ export default function ChangePassword({ isOpen, onClose, onSubmit }) {
             setShowNewPassword,
             setNewPassword,
           )}
+
           {renderPasswordInput(
             confirmPassword,
             "confirmPassword",
@@ -168,13 +185,12 @@ export default function ChangePassword({ isOpen, onClose, onSubmit }) {
             setConfirmPassword,
           )}
         </div>
-
         <div className="px-8 pb-8 pt-2 flex items-center justify-end gap-3">
           <button
             type="button"
             onClick={onClose}
             disabled={loading}
-            className="px-6 py-2.5 rounded-xl border border-[rgba(100,116,139,0.4)] bg-[rgba(15,23,42,0.6)] text-dc-text text-sm font-medium hover:border-[rgba(0,242,255,0.4)] hover:text-[#00F2FF] hover:bg-[rgba(15,23,42,0.8)] transition-all disabled:opacity-50"
+            className="px-6 py-2.5 rounded-xl border border-gray-300 bg-white text-gray-700 text-sm font-medium hover:bg-gray-100 transition disabled:opacity-50"
           >
             Hủy
           </button>
@@ -183,7 +199,7 @@ export default function ChangePassword({ isOpen, onClose, onSubmit }) {
             type="button"
             onClick={handleSubmit}
             disabled={loading}
-            className="px-6 py-2.5 rounded-xl bg-[#00F2FF] text-[#0A0E17] font-bold text-sm hover:shadow-[0_0_20px_rgba(0,242,255,0.45)] hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2.5 rounded-xl bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? "Đang xử lý..." : "Đổi mật khẩu"}
           </button>

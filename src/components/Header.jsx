@@ -1,4 +1,4 @@
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { removeToken } from "../utils/auth";
 import { useState, useEffect, useRef } from "react";
 import { FaUser, FaCrown } from "react-icons/fa";
@@ -9,8 +9,8 @@ import { toast } from "react-toastify";
 
 export default function Header() {
   const navigate = useNavigate();
-  const location = useLocation();
   const token = localStorage.getItem("token");
+
   const [categories, setCategories] = useState([]);
   const [countries, setCountries] = useState([]);
   const [years, setYears] = useState([]);
@@ -19,6 +19,7 @@ export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const userMenuRef = useRef(null);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -32,52 +33,39 @@ export default function Header() {
         setCountries(countryRes.data?.data?.data || []);
         setYears(yearRes.data?.data?.data || []);
       } catch (err) {
-        console.error("Load filter error:", err);
+        console.error(err);
       }
     };
 
     fetchData();
   }, []);
   const buildLink = (key, value) => {
-    const params = new URLSearchParams(location.search);
-
-    if (!value) return "/movies";
-
-    params.set(key, value);
+    const params = new URLSearchParams();
+    if (key && value) params.set(key, value);
     params.set("page", "1");
-
     return `/movies?${params.toString()}`;
   };
+
   const handleLogout = () => {
     removeToken();
     navigate("/login");
     toast.info("Đã đăng xuất!");
   };
+
   const handleGoPremium = () => {
     if (!token) {
       toast.warning("Bạn cần đăng nhập để vào Premium!");
       navigate("/login");
       return;
     }
-
     navigate("/premium");
   };
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
-        setOpenUserMenu(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   return (
     <>
-      <header className="bg-white text-gray-700 border-b shadow-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-3">
-          <div className="flex items-center gap-4">
+      <header className="bg-white border-b shadow-sm sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto flex justify-between items-center px-4 py-3">
+          <div className="flex items-center gap-3">
             <button
               className="lg:hidden text-2xl"
               onClick={() => setMobileOpen(true)}
@@ -85,7 +73,7 @@ export default function Header() {
               <HiMenu />
             </button>
 
-            <Link to="/" className="font-bold text-gray-800">
+            <Link to="/" className="font-bold text-xl">
               🎬 DevChill
             </Link>
 
@@ -94,39 +82,36 @@ export default function Header() {
             </div>
           </div>
           <nav className="hidden lg:flex items-center gap-6 text-sm font-medium">
-            <Link
-              to={buildLink("type", "movie")}
-              className="hover:text-blue-600"
-            >
+            <button onClick={() => navigate(buildLink("type", "movie"))}>
               Phim Lẻ
-            </Link>
+            </button>
 
-            <Link
-              to={buildLink("type", "series")}
-              className="hover:text-blue-600"
-            >
+            <button onClick={() => navigate(buildLink("type", "series"))}>
               Phim Bộ
-            </Link>
+            </button>
 
             <Dropdown
               title="Thể loại"
               items={categories}
-              onSelect={(s) => buildLink("category", s)}
+              type="category"
+              buildLink={buildLink}
             />
             <Dropdown
               title="Quốc gia"
               items={countries}
-              onSelect={(s) => buildLink("country", s)}
+              type="country"
+              buildLink={buildLink}
             />
             <Dropdown
               title="Năm"
               items={years}
-              onSelect={(s) => buildLink("year", s)}
+              type="year"
+              buildLink={buildLink}
             />
 
             <button
               onClick={handleGoPremium}
-              className="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-500"
+              className="text-blue-600 font-semibold"
             >
               <FaCrown className="inline mr-1" />
               Premium
@@ -136,40 +121,43 @@ export default function Header() {
             {token ? (
               <div className="relative" ref={userMenuRef}>
                 <button
-                  onClick={() => setOpenUserMenu(!openUserMenu)}
+                  onClick={() => setOpenUserMenu((p) => !p)}
                   className="flex items-center gap-2 bg-gray-100 px-3 py-1.5 rounded-full"
                 >
                   <FaUser />
                   Tài khoản
                 </button>
-                {openUserMenu && (
-                  <div className="absolute right-0 mt-2 w-44 bg-white border rounded shadow-lg py-2">
-                    <Link
-                      className="block px-4 py-2 hover:bg-gray-100"
-                      to="/profile"
-                    >
-                      Hồ sơ
-                    </Link>
-                    <Link
-                      className="block px-4 py-2 hover:bg-gray-100"
-                      to="/my-tickets"
-                    >
-                      Vé đã đặt
-                    </Link>
-                    <Link
-                      className="block px-4 py-2 hover:bg-gray-100"
-                      to="/my-premium"
-                    >
-                      Premium
-                    </Link>
-                    <button
-                      onClick={handleLogout}
-                      className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50"
-                    >
-                      Đăng xuất
-                    </button>
-                  </div>
-                )}
+
+                <div
+                  className={`absolute right-0 mt-2 w-44 bg-white border rounded shadow-lg py-2 transition-all duration-200
+                  ${openUserMenu ? "opacity-100 visible pointer-events-auto translate-y-0" : "opacity-0 invisible pointer-events-none -translate-y-2"}`}
+                >
+                  <Link
+                    to="/profile"
+                    className="block px-4 py-2 hover:bg-gray-100"
+                  >
+                    Hồ sơ
+                  </Link>
+                  <Link
+                    to="/my-tickets"
+                    className="block px-4 py-2 hover:bg-gray-100"
+                  >
+                    Vé đã đặt
+                  </Link>
+                  <Link
+                    to="/my-premium"
+                    className="block px-4 py-2 hover:bg-gray-100"
+                  >
+                    Premium
+                  </Link>
+
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50"
+                  >
+                    Đăng xuất
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="flex gap-2">
@@ -196,101 +184,102 @@ export default function Header() {
           onClick={() => setMobileOpen(false)}
         />
       )}
+
       <div
         className={`fixed top-0 left-0 h-full w-72 bg-white z-50 shadow-xl transform transition-transform duration-300
         ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
-        <div className="p-4 border-b font-bold flex justify-between">
+        <div className="p-4 border-b flex justify-between font-bold">
           Menu
           <button onClick={() => setMobileOpen(false)}>✕</button>
         </div>
 
         <div className="p-4 flex flex-col gap-3 text-sm">
-          <Link
-            onClick={() => setMobileOpen(false)}
-            to={buildLink("type", "movie")}
-          >
+          <button onClick={() => navigate(buildLink("type", "movie"))}>
             Phim Lẻ
-          </Link>
-
-          <Link
-            onClick={() => setMobileOpen(false)}
-            to={buildLink("type", "series")}
-          >
+          </button>
+          <button onClick={() => navigate(buildLink("type", "series"))}>
             Phim Bộ
-          </Link>
+          </button>
 
           <MobileDropdown
             title="Thể loại"
             items={categories}
-            onSelect={buildLink}
-            setOpen={setMobileOpen}
             type="category"
+            buildLink={buildLink}
           />
           <MobileDropdown
             title="Quốc gia"
             items={countries}
-            onSelect={buildLink}
-            setOpen={setMobileOpen}
             type="country"
+            buildLink={buildLink}
           />
           <MobileDropdown
             title="Năm"
             items={years}
-            onSelect={buildLink}
-            setOpen={setMobileOpen}
             type="year"
+            buildLink={buildLink}
           />
-
-          <button
-            onClick={() => {
-              setMobileOpen(false);
-
-              if (!token) {
-                toast.warning("Bạn cần đăng nhập để vào Premium!");
-                navigate("/login");
-                return;
-              }
-
-              navigate("/premium");
-            }}
-            className="text-blue-600 font-semibold text-left"
-          >
-            Premium
-          </button>
         </div>
       </div>
     </>
   );
 }
-function Dropdown({ title, items = [], onSelect }) {
+
+function Dropdown({ title, items = [], type, buildLink }) {
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  const timeoutRef = useRef(null);
+
+  const handleEnter = () => {
+    clearTimeout(timeoutRef.current);
+    setOpen(true);
+  };
+
+  const handleLeave = () => {
+    timeoutRef.current = setTimeout(() => setOpen(false), 150);
+  };
 
   return (
     <div
       className="relative"
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
+      onMouseEnter={handleEnter}
+      onMouseLeave={handleLeave}
     >
-      <button className="hover:text-blue-600">{title}</button>
+      <button
+        className={`px-3 py-2 rounded ${open ? "text-blue-600" : "hover:bg-gray-100"}`}
+      >
+        {title}
+      </button>
 
-      {open && (
-        <div className="absolute top-full mt-2 w-48 bg-white border rounded shadow-lg p-2 z-50">
-          {items.map((item, idx) => (
-            <Link
-              key={idx}
-              to={onSelect(item.slug)}
-              className="block px-3 py-1.5 hover:bg-gray-100 text-sm rounded"
+      <div
+        className={`absolute top-full left-0 mt-2 w-52 bg-white border shadow-lg rounded transition-all duration-200 z-50
+        ${open ? "opacity-100 visible pointer-events-auto translate-y-0" : "opacity-0 invisible pointer-events-none -translate-y-2"}`}
+        onMouseEnter={handleEnter}
+        onMouseLeave={handleLeave}
+      >
+        {items.length > 0 ? (
+          items.map((item) => (
+            <button
+              key={item.id || item.slug}
+              onClick={() => {
+                navigate(buildLink(type, item.slug));
+                setOpen(false);
+              }}
+              className="block w-full text-left px-3 py-2 hover:bg-gray-100 text-sm"
             >
               {item.name || item.year}
-            </Link>
-          ))}
-        </div>
-      )}
+            </button>
+          ))
+        ) : (
+          <div className="px-3 py-2 text-gray-400 text-sm">Đang tải...</div>
+        )}
+      </div>
     </div>
   );
 }
-function MobileDropdown({ title, items = [], type, onSelect, setOpen }) {
+
+function MobileDropdown({ title, items = [], type, buildLink }) {
   const navigate = useNavigate();
 
   return (
@@ -298,14 +287,11 @@ function MobileDropdown({ title, items = [], type, onSelect, setOpen }) {
       <summary className="cursor-pointer font-medium">{title}</summary>
 
       <div className="flex flex-col gap-2 pl-3 mt-2">
-        {items.map((item, idx) => (
+        {items.map((item) => (
           <button
-            key={idx}
+            key={item.id || item.slug}
             className="text-left hover:text-blue-600"
-            onClick={() => {
-              navigate(onSelect(type, item.slug));
-              setOpen(false);
-            }}
+            onClick={() => navigate(buildLink(type, item.slug))}
           >
             {item.name || item.year}
           </button>

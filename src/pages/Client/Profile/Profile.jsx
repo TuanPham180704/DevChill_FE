@@ -8,20 +8,22 @@ import {
   changePassword,
 } from "../../../api/userApi";
 import { removeToken } from "../../../utils/auth";
-import ReactDatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import { FiCalendar } from "react-icons/fi";
+
 export default function Profile() {
   const [user, setUser] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
+  const [loading, setLoading] = useState(true);
+
   const [formData, setFormData] = useState({
     username: "",
     gender: "unknown",
     birth_date: "",
     avatar_url: "",
   });
+
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const fileInputRef = useRef(null);
+
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -34,14 +36,18 @@ export default function Profile() {
           birth_date: data.birth_date || "",
           avatar_url: data.avatar_url || "",
         });
+
         setAvatarPreview(data.avatar_url || null);
       } catch (err) {
         console.error(err);
         toast.error(
           err?.response?.data?.message || "Không thể tải thông tin tài khoản!",
         );
+      } finally {
+        setLoading(false);
       }
     };
+
     fetchProfile();
   }, []);
 
@@ -77,14 +83,17 @@ export default function Profile() {
         avatar_url: formData.avatar_url,
         birth_date: formData.birth_date,
       });
+
       setUser(updatedUser);
       setAvatarPreview(updatedUser.avatar_url);
+
       toast.success("Cập nhật thông tin thành công!");
     } catch (err) {
       console.error(err);
       toast.error(err?.response?.data?.message || "Cập nhật thất bại!");
     }
   };
+
   const handleChangePassword = async (data) => {
     return await changePassword(data);
   };
@@ -95,121 +104,143 @@ export default function Profile() {
     window.location.href = "/login";
   };
 
-  if (!user) {
-    return (
-      <div className="flex items-center justify-center h-screen text-white">
-        Đang tải...
-      </div>
-    );
-  }
+  const menuSkeleton = (
+    <div className="h-10 w-full bg-gray-100 rounded-xl animate-pulse" />
+  );
 
   return (
-    <div className="min-h-screen bg-[#0A0E17] flex">
+    <div className="min-h-screen bg-gray-50 flex text-gray-900">
+      {/* SIDEBAR */}
       <Sidebar
         active="profile"
-        customAvatar={avatarPreview || user.avatar_url}
+        customAvatar={avatarPreview || user?.avatar_url}
         user={user}
         onLogout={handleLogout}
       />
 
-      <main className="flex-1 bg-[#111827] px-16 py-12">
-        <h1 className="text-white text-3xl font-bold mb-1">Tài khoản</h1>
-        <p className="text-dc-text-muted text-sm mb-8">
+      {/* MAIN */}
+      <main className="flex-1 bg-white px-16 py-12">
+        <h1 className="text-3xl font-bold mb-1">Tài khoản</h1>
+        <p className="text-gray-500 text-sm mb-8">
           Cập nhật thông tin tài khoản của bạn
         </p>
 
         <div className="flex gap-10">
-          {/* Form */}
+          {/* LEFT FORM */}
           <div className="flex-1 space-y-6">
-            <div>
-              <label className="block text-dc-text text-sm font-medium mb-2">
-                Email
-              </label>
-              <input
-                type="email"
-                value={user.email}
-                readOnly
-                className="w-full px-4 py-3 rounded-xl bg-dc-input-bg border border-dc-input-border text-dc-text-muted text-sm outline-none cursor-not-allowed"
-              />
-            </div>
-
-            <div>
-              <label className="block text-dc-text text-sm font-medium mb-2">
-                Tên hiển thị
-              </label>
-              <input
-                type="text"
-                name="username"
-                value={formData.username}
-                onChange={handleChange}
-                placeholder="Nhập tên hiển thị"
-                className="w-full px-4 py-3 rounded-xl bg-dc-input-bg border border-dc-input-border text-white text-sm outline-none placeholder-[#4b5563] focus:border-[#00F2FF] focus:shadow-[0_0_0_3px_rgba(0,242,255,0.15)] transition-all"
-              />
-            </div>
-
-            <div>
-              <label className="block text-dc-text text-sm font-medium mb-2">
-                Ngày sinh
-              </label>
-              <input
-                type="date"
-                name="birth_date"
-                value={formData.birth_date}
-                onChange={handleChange}
-                className="w-full px-4 py-3 rounded-xl bg-dc-input-bg border border-dc-input-border text-white text-sm outline-none focus:border-[#00F2FF] focus:shadow-[0_0_0_3px_rgba(0,242,255,0.15)] transition-all"
-              />
-            </div>
-
-            <div>
-              <label className="block text-dc-text text-sm font-medium mb-3">
-                Giới tính
-              </label>
-              <div className="flex items-center gap-6">
-                {["male", "female", "other"].map((g) => (
-                  <label
-                    key={g}
-                    className="flex items-center gap-2 cursor-pointer group"
-                  >
-                    <input
-                      type="radio"
-                      name="gender"
-                      value={g}
-                      checked={formData.gender === g}
-                      onChange={handleChange}
-                      className="peer hidden"
-                    />
-                    <div className="w-5 h-5 rounded-full border-2 border-[#64748b] peer-checked:border-[#00F2FF] peer-checked:shadow-[0_0_12px_rgba(0,242,255,0.4)] flex items-center justify-center transition-all">
-                      <div className="w-2.5 h-2.5 rounded-full bg-[#00F2FF] opacity-0 peer-checked:opacity-100 transition-all"></div>
-                    </div>
-                    <span className="text-dc-text-muted peer-checked:text-[#00F2FF] peer-checked:font-bold text-sm transition-all group-hover:text-white">
-                      {g === "male"
-                        ? "Nam"
-                        : g === "female"
-                          ? "Nữ"
-                          : "Không xác định"}
-                    </span>
+            {loading ? (
+              <>
+                {menuSkeleton}
+                {menuSkeleton}
+                {menuSkeleton}
+                {menuSkeleton}
+              </>
+            ) : (
+              <>
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Email
                   </label>
-                ))}
-              </div>
-            </div>
+                  <input
+                    type="email"
+                    value={user?.email || ""}
+                    readOnly
+                    className="w-full px-4 py-3 rounded-xl bg-gray-100 border border-gray-200 text-gray-500 cursor-not-allowed"
+                  />
+                </div>
 
-            <button
-              onClick={handleUpdateProfile}
-              className="px-8 py-3 rounded-xl bg-[#00F2FF] text-[#0A0E17] font-bold text-sm tracking-wide hover:shadow-[0_0_20px_rgba(0,242,255,0.45)] hover:-translate-y-0.5 transition-all duration-200"
-            >
-              Cập nhật
-            </button>
+                {/* IS PREMIUM - READ ONLY FIELD */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Trạng thái tài khoản
+                  </label>
+                  <input
+                    type="text"
+                    value={user?.is_premium ? "Premium" : "Free"}
+                    readOnly
+                    className={`w-full px-4 py-3 rounded-xl border cursor-not-allowed ${
+                      user?.is_premium
+                        ? "bg-yellow-50 border-yellow-300 text-yellow-700 font-semibold"
+                        : "bg-gray-100 border-gray-200 text-gray-500"
+                    }`}
+                  />
+                </div>
 
-            <p className="mt-5 text-dc-text-muted text-sm">
-              Đổi mật khẩu, nhấn vào{" "}
-              <span
-                onClick={() => setShowPasswordModal(true)}
-                className="text-[#00F2FF] underline cursor-pointer hover:text-white"
-              >
-                đây
-              </span>
-            </p>
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Tên hiển thị
+                  </label>
+                  <input
+                    type="text"
+                    name="username"
+                    value={formData.username}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 rounded-xl bg-white border border-gray-300 focus:border-blue-500 outline-none transition"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Ngày sinh
+                  </label>
+                  <input
+                    type="date"
+                    name="birth_date"
+                    value={formData.birth_date}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 rounded-xl bg-white border border-gray-300 focus:border-blue-500 outline-none"
+                    style={{ colorScheme: "light" }}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-3">
+                    Giới tính
+                  </label>
+
+                  <div className="flex gap-6">
+                    {["male", "female", "other"].map((g) => (
+                      <label key={g} className="flex items-center gap-2">
+                        <input
+                          type="radio"
+                          name="gender"
+                          value={g}
+                          checked={formData.gender === g}
+                          onChange={handleChange}
+                        />
+                        <span>
+                          {g === "male"
+                            ? "Nam"
+                            : g === "female"
+                              ? "Nữ"
+                              : "Không xác định"}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleUpdateProfile}
+                  className="px-8 py-3 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
+                >
+                  Cập nhật
+                </button>
+
+                <p className="text-sm text-gray-500">
+                  Đổi mật khẩu, nhấn vào{" "}
+                  <span
+                    onClick={() => setShowPasswordModal(true)}
+                    className="text-blue-600 underline cursor-pointer"
+                  >
+                    đây
+                  </span>
+                </p>
+              </>
+            )}
           </div>
+
+          {/* RIGHT AVATAR */}
           <div className="flex flex-col items-center gap-4 shrink-0">
             <input
               type="file"
@@ -218,24 +249,21 @@ export default function Profile() {
               accept="image/*"
               className="hidden"
             />
+
             <div
               onClick={handleTriggerClick}
-              className="relative w-32 h-32 rounded-full p-1 ring-2 ring-[#00F2FF] bg-[#111827] flex items-center justify-center shadow-[0_0_30px_rgba(0,242,255,0.2)] cursor-pointer group hover:ring-[3px] transition-all duration-300"
+              className="w-32 h-32 rounded-full ring-2 ring-blue-500 overflow-hidden cursor-pointer bg-gray-100"
             >
               <img
-                src={avatarPreview || user.avatar_url}
+                src={avatarPreview || user?.avatar_url}
                 alt="Avatar"
-                className="w-full h-full rounded-full object-cover transition-transform duration-300 group-hover:scale-105"
+                className="w-full h-full object-cover"
               />
-              <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-[1px]">
-                <span className="text-[#00F2FF] text-sm font-semibold tracking-wider uppercase">
-                  Đổi ảnh
-                </span>
-              </div>
             </div>
+
             <button
               onClick={handleTriggerClick}
-              className="w-36 py-2.5 rounded-xl border border-[rgba(100,116,139,0.4)] bg-[rgba(15,23,42,0.6)] text-dc-text text-sm font-medium cursor-pointer hover:border-[rgba(0,242,255,0.4)] hover:text-[#00F2FF] hover:bg-[rgba(15,23,42,0.8)] transition-all duration-200"
+              className="px-4 py-2 rounded-xl border border-gray-300 hover:border-blue-500 hover:text-blue-600 transition"
             >
               Chọn ảnh
             </button>

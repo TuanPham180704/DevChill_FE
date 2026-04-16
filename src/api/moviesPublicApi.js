@@ -1,39 +1,23 @@
 import api from "./apiClient.js";
 
-export const getPublicMovies = async (params) => {
-  const res = await api.get("/movies", { params });
-  return res.data;
-};
+const cleanParams = (params = {}) => {
+  const newParams = {};
 
-export const getPublicMovieById = async (id) => {
-  const res = await api.get(`/movies/${id}`);
-  return res.data;
-};
-export const getCategories = async () => {
-  const res = await api.get("/movies/category");
-  return res.data;
-};
-export const getCountries = async () => {
-  const res = await api.get("/movies/country");
-  return res.data;
-};
-export const getYears = async () => {
-  const res = await api.get("/movies/year");
-  return res.data;
-};
-export const searchMovies = async (keyword) => {
-  const res = await api.get("/movies", {
-    params: {
-      keyword,
-      page: 1,
-      limit: 10,
-    },
+  Object.keys(params).forEach((key) => {
+    if (
+      params[key] !== undefined &&
+      params[key] !== null &&
+      params[key] !== ""
+    ) {
+      newParams[key] = params[key];
+    }
   });
 
-  return res.data;
+  return newParams;
 };
+
 export const buildMovieQuery = (filters = {}) => {
-  return {
+  return cleanParams({
     page: filters.page || 1,
     limit: filters.limit || 10,
     keyword: filters.keyword,
@@ -42,5 +26,53 @@ export const buildMovieQuery = (filters = {}) => {
     category: filters.category,
     country: filters.country,
     status: filters.status,
-  };
+    lifecycle_status: filters.lifecycle_status,
+  });
+};
+
+export const getPublicMovies = async (filters = {}) => {
+  const params = buildMovieQuery(filters);
+
+  const res = await api.get("/movies", { params });
+  return res.data;
+};
+
+export const getPublicMovieBySlug = async (id) => {
+  if (!id) throw new Error("Movie ID is required");
+
+  const res = await api.get(`/movies/${id}`);
+  return res.data;
+};
+
+export const searchMovies = async (filters = {}) => {
+  const params = buildMovieQuery({
+    ...filters,
+    page: filters.page || 1,
+    limit: filters.limit || 10,
+  });
+
+  const res = await api.get("/movies", { params });
+  return res.data;
+};
+
+export const getCategories = async () => {
+  const res = await api.get("/movies/category");
+  return res.data;
+};
+
+export const getCountries = async () => {
+  const res = await api.get("/movies/country");
+  return res.data;
+};
+
+export const getYears = async () => {
+  const res = await api.get("/movies/year");
+  return res.data;
+};
+
+export const watchMovie = async (slug) => {
+  if (!slug) throw new Error("Movie slug is required");
+
+  const res = await api.get(`/movies/watch/${slug}`);
+  return res.data;
 };

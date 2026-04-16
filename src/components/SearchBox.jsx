@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { FaSearch, FaTimes } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
 import { searchMovies } from "../api/moviesPublicApi";
+
 export default function SearchBox() {
   const [search, setSearch] = useState("");
   const [suggests, setSuggests] = useState([]);
@@ -11,18 +12,31 @@ export default function SearchBox() {
   const navigate = useNavigate();
   const location = useLocation();
   const timerRef = useRef(null);
+
+  // ✅ FIX: tránh re-set input sau khi clear/search
+  const skipSyncRef = useRef(false);
+
+  /* ================= INIT FROM URL ================= */
   useEffect(() => {
+    if (skipSyncRef.current) {
+      skipSyncRef.current = false;
+      return;
+    }
+
     const params = new URLSearchParams(location.search);
     setSearch(params.get("keyword") || "");
   }, [location.search]);
 
+  /* ================= DEBOUNCE SEARCH ================= */
   useEffect(() => {
     const q = search.trim();
 
     if (!q) {
       setSuggests([]);
+      setShowSuggest(false);
       return;
     }
+
     if (timerRef.current) clearTimeout(timerRef.current);
 
     timerRef.current = setTimeout(async () => {
@@ -31,10 +45,17 @@ export default function SearchBox() {
 
         const res = await searchMovies(q);
 
-        setSuggests(res.data || []);
+        const data = res?.data?.data ?? res?.data ?? [];
+
+        const filtered = data.filter((m) =>
+          m?.name?.toLowerCase().includes(q.toLowerCase()),
+        );
+
+        setSuggests(filtered);
         setShowSuggest(true);
       } catch (err) {
         console.error("search error:", err);
+        setSuggests([]);
       } finally {
         setLoading(false);
       }
@@ -42,21 +63,31 @@ export default function SearchBox() {
 
     return () => clearTimeout(timerRef.current);
   }, [search]);
+
+  /* ================= SEARCH SUBMIT ================= */
   const handleSearch = (e) => {
     e.preventDefault();
 
     const q = search.trim();
     if (!q) return;
 
+    skipSyncRef.current = true;
+
     const params = new URLSearchParams(location.search);
     params.set("keyword", q);
     params.set("page", "1");
 
-    setShowSuggest(false);
     navigate(`/movies?${params.toString()}`);
+
+    setSearch("");
+    setSuggests([]);
+    setShowSuggest(false);
   };
 
+  /* ================= CLEAR ================= */
   const clearSearch = () => {
+    skipSyncRef.current = true;
+
     setSearch("");
     setSuggests([]);
     setShowSuggest(false);
@@ -68,27 +99,23 @@ export default function SearchBox() {
     navigate(`/movies?${params.toString()}`);
   };
 
+  /* ================= SELECT MOVIE ================= */
   const handleSelectMovie = (movie) => {
-    setSearch(movie.name);
+    skipSyncRef.current = true;
+
+    setSearch("");
+    setSuggests([]);
     setShowSuggest(false);
-    navigate(`/movies/${movie.id}`);
+
+    navigate(`/movies/${movie.slug}`);
   };
 
   return (
     <div className="relative w-72">
+      {/* ================= INPUT ================= */}
       <form
         onSubmit={handleSearch}
-        className="
-          flex items-center
-          h-10 px-3
-          rounded-full
-          bg-white
-          border border-gray-200
-          shadow-sm
-          hover:shadow-md
-          transition
-          focus-within:ring-2 focus-within:ring-blue-400/40
-        "
+        className="flex items-center h-10 px-3 rounded-full bg-white border border-gray-200 shadow-sm hover:shadow-md transition focus-within:ring-2 focus-within:ring-blue-400/40"
       >
         <FaSearch className="text-gray-400 text-sm mr-2" />
 
@@ -97,14 +124,8 @@ export default function SearchBox() {
           placeholder="Tìm kiếm phim..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          onFocus={() => setShowSuggest(true)}
-          className="
-            flex-1
-            bg-transparent
-            outline-none
-            text-sm
-            text-gray-700
-          "
+          onFocus={() => search.trim() && setShowSuggest(true)}
+          className="flex-1 bg-transparent outline-none text-sm text-gray-700"
         />
 
         {search && (
@@ -118,9 +139,7 @@ export default function SearchBox() {
         )}
       </form>
 
-      {/* ==========================
-          SUGGEST DROPDOWN
-      ========================== */}
+      {/* ================= SUGGEST ================= */}
       {showSuggest && search.trim() && (
         <div className="absolute top-12 left-0 w-full bg-white shadow-lg rounded-md overflow-hidden z-50">
           {loading && (

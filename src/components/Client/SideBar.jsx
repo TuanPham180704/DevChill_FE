@@ -18,14 +18,11 @@ export default function Sidebar({
     if (!propUser) {
       const fetchUser = async () => {
         setLoading(true);
-        const token = localStorage.getItem("token");
-        if (!token) {
-          toast.error("Bạn chưa đăng nhập!");
-          setLoading(false);
-          return;
-        }
+
         try {
-          const data = await getProfile(token);
+          // ❌ bỏ token truyền tay nếu API đã dùng interceptor
+          const data = await getProfile();
+
           setUser(data);
         } catch (err) {
           console.error(err);
@@ -34,6 +31,7 @@ export default function Sidebar({
           setLoading(false);
         }
       };
+
       fetchUser();
     }
   }, [propUser]);
@@ -57,38 +55,50 @@ export default function Sidebar({
       label: "Gói đã mua",
       path: "/my-premium",
     },
-    { id: "support", icon: <FaCrown />, label: "Hỗ trợ", path: "/support" },
+    {
+      id: "support",
+      icon: <FaCrown />,
+      label: "Hỗ trợ",
+      path: "/support",
+    },
   ];
+
   const avatarSrc = customAvatar || user?.avatar_url || avatarImg;
 
+  const handleLogout = () => {
+    toast.info("Bạn đã đăng xuất khỏi hệ thống");
+    onLogout?.();
+  };
+
   return (
-    <aside className="w-80 border-r border-dc-input-border bg-[rgba(15,23,42,0.4)] md:bg-transparent p-6 flex flex-col justify-between min-h-screen">
+    <aside className="w-80 border-r border-gray-200 bg-white p-6 flex flex-col justify-between min-h-screen shadow-sm">
       <div>
-        <h2 className="text-white text-xl font-bold mb-8 tracking-wide">
+        <h2 className="text-gray-900 text-xl font-bold mb-8 tracking-wide">
           Quản lý tài khoản
         </h2>
-        <ul className="space-y-3">
+
+        <ul className="space-y-2">
           {menuItems.map((item) => (
             <li key={item.id}>
               <Link
                 to={item.path}
-                className={`flex items-center gap-4 px-4 py-3 rounded-xl cursor-pointer transition-all duration-300 ${
+                className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 border ${
                   active === item.id
-                    ? "text-[#00F2FF] bg-[rgba(0,242,255,0.1)] font-semibold shadow-[0_0_15px_rgba(0,242,255,0.15)] border border-[rgba(0,242,255,0.2)]"
-                    : "text-dc-text-muted hover:text-white hover:bg-[rgba(100,116,139,0.2)] border border-transparent"
+                    ? "text-blue-600 bg-blue-50 border-blue-200 font-semibold"
+                    : "text-gray-600 border-transparent hover:text-gray-900 hover:bg-gray-100"
                 }`}
               >
-                {item.icon} {item.label}
+                <span className="text-lg">{item.icon}</span>
+                {item.label}
               </Link>
             </li>
           ))}
         </ul>
       </div>
-
-      <div className="border-t border-dc-input-border pt-6 pb-4">
+      <div className="border-t border-gray-200 pt-6 pb-4">
         {loading ? (
-          <p className="text-dc-text-muted text-sm flex items-center gap-2">
-            <span className="btn-spinner border-[#00F2FF] border-t-transparent w-4 h-4" />
+          <p className="text-gray-500 text-sm flex items-center gap-2">
+            <span className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
             Đang tải thông tin...
           </p>
         ) : (
@@ -97,37 +107,40 @@ export default function Sidebar({
               <img
                 src={avatarSrc}
                 alt="avatar"
-                className="w-12 h-12 rounded-full object-cover ring-2 ring-[#00F2FF] p-0.5"
+                className="w-12 h-12 rounded-full object-cover ring-2 ring-blue-500 p-0.5"
               />
               {user?.is_premium && (
-                <div className="absolute -bottom-1 -right-1 bg-[#111827] rounded-full p-0.5">
-                  <span className="flex w-4 h-4 bg-linear-to-r from-[#FFB703] to-[#FFD000] rounded-full text-[8px] items-center justify-center text-[#111827] font-bold">
+                <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5 shadow">
+                  <span className="flex w-4 h-4 bg-yellow-400 rounded-full text-[8px] items-center justify-center text-black font-bold">
                     ★
                   </span>
                 </div>
               )}
             </div>
             <div className="overflow-hidden">
-              <p className="text-dc-text font-bold truncate">
-                {user?.username || "Người dùng"}
-              </p>
-              {user?.is_premium && (
-                <span className="text-[#FFB703] text-xs font-semibold uppercase tracking-wider">
-                  Premium
-                </span>
-              )}
-              <p className="text-dc-text-muted text-xs truncate mt-0.5">
+              <div className="flex items-center gap-2">
+                <p className="text-gray-900 font-bold truncate">
+                  {user?.username || "Người dùng"}
+                </p>
+                {user?.is_premium && (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-yellow-400 text-black font-semibold">
+                    PRO
+                  </span>
+                )}
+              </div>
+
+              <p className="text-gray-500 text-xs truncate mt-0.5">
                 {user?.email || ""}
               </p>
             </div>
           </div>
         )}
-
         <button
-          onClick={onLogout}
-          className="w-full flex items-center justify-center gap-2 mt-6 px-4 py-3 rounded-xl border border-[rgba(244,63,94,0.3)] text-dc-error font-medium hover:bg-[rgba(244,63,94,0.1)] hover:border-dc-error transition-all duration-300 shadow-[0_4px_14px_0_rgba(244,63,94,0.1)] hover:shadow-[0_6px_20px_rgba(244,63,94,0.23)]"
+          onClick={handleLogout}
+          className="w-full flex items-center justify-center gap-2 mt-6 px-4 py-3 rounded-xl border border-red-200 text-red-600 font-medium hover:bg-red-50 hover:border-red-300 transition-all duration-200"
         >
-          <FaSignOutAlt /> Đăng xuất
+          <FaSignOutAlt />
+          Đăng xuất
         </button>
       </div>
     </aside>

@@ -13,6 +13,7 @@ export default function Footer() {
   return (
     <footer className="relative bg-white text-gray-700 border-t border-gray-200">
       <div className="absolute inset-0 bg-linear-to-t from-gray-50 to-transparent pointer-events-none" />
+
       <div className="w-full flex justify-center py-2 relative z-10">
         <div className="flex items-center gap-2 bg-red-500 text-white px-3 py-1 rounded-md text-xs font-medium shadow-sm">
           <svg viewBox="0 0 30 20" className="w-5 h-3.5">
@@ -25,7 +26,9 @@ export default function Footer() {
           <span>Hoàng Sa & Trường Sa là của Việt Nam</span>
         </div>
       </div>
-      <div className="relative z-10 max-w-7xl mx-auto px-6 py-10">
+
+      {/* FIX Ở ĐÂY */}
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-3">
@@ -46,7 +49,6 @@ export default function Footer() {
               🎬 DevChill — xem phim online miễn phí, Vietsub & thuyết minh.
             </p>
 
-            {/* social */}
             <div className="flex items-center gap-2">
               {[
                 FaTelegramPlane,
@@ -67,6 +69,7 @@ export default function Footer() {
               ))}
             </div>
           </div>
+
           <div>
             <h3 className="text-sm font-medium text-gray-600 mb-3">Trang</h3>
 
@@ -82,6 +85,7 @@ export default function Footer() {
               )}
             </ul>
           </div>
+
           <div>
             <h3 className="text-sm font-medium text-gray-600 mb-3">Danh mục</h3>
 
@@ -95,6 +99,7 @@ export default function Footer() {
               ))}
             </ul>
           </div>
+
           <div>
             <h3 className="text-sm font-medium text-gray-600 mb-3">Liên hệ</h3>
 
@@ -112,6 +117,7 @@ export default function Footer() {
           </div>
         </div>
       </div>
+
       <div className="border-t border-gray-200 text-center py-3 text-xs text-gray-400">
         © {new Date().getFullYear()} 🎬 DevChill — Bản Quyền Thuộc Về KaiJun
       </div>

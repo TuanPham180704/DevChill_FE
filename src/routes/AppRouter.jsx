@@ -25,6 +25,7 @@ import UpgradePage from "../pages/Client/Premium/UpgradePage";
 import PaymentPage from "../pages/Client/Premium/PaymentPage";
 import SuccessPage from "../pages/Client/Premium/SuccessPage";
 import MoviesListAdmin from "../pages/Admin/MovieListAdmin";
+import WatchMovie from "../pages/WatchMovie";
 
 export default function AppRouter() {
   return (
@@ -33,15 +34,15 @@ export default function AppRouter() {
         <Routes>
           <Route path="/" element={<AppLayout />}>
             <Route index element={<Home />} />
+            <Route path="/movies" element={<MovieList />} />
+            <Route path="/movies/:slug" element={<MovieDetail />} />
+            <Route path="/movies/watch/:slug" element={<WatchMovie />} />
           </Route>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/verify-otp" element={<VerifyOtp />} />
-          <Route path="/movies" element={<MovieList />} />
-          <Route path="/movies/:id" element={<MovieDetail />} />
-          <Route path="/movies-view/:id" element={<MovieView />} />
 
           <Route element={<ProtectedRoute roles={["user"]} />}>
             <Route element={<AppLayout />}>
