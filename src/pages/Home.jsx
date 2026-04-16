@@ -35,8 +35,6 @@ export default function Home() {
         setNewestMovies(unwrap(movieRes));
         setCategories(unwrap(cateRes));
         setUpcomingMovies(unwrap(upcomingRes));
-
-        // FIX: parallel fetch countries correctly
         const results = await Promise.all(
           countrySlugs.map((slug) =>
             getPublicMovies({
@@ -62,10 +60,6 @@ export default function Home() {
 
     fetchData();
   }, []);
-
-  /* =========================
-     SLIDESHOW FIX (IMPORTANT)
-  ========================= */
   useEffect(() => {
     if (!newestMovies.length) return;
 

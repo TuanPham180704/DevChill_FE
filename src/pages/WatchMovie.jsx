@@ -7,17 +7,23 @@ export default function WatchMovie() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const ep = searchParams.get("ep") || 1;
+  const ep = Number(searchParams.get("ep") || 1);
   const server = searchParams.get("server");
 
   const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // 🔥 FIX: không full-screen loading
   const [selectedStream, setSelectedStream] = useState(null);
 
+  /* ================= FETCH DATA ================= */
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await watchMovie(slug);
+        setLoading(true); // chỉ loading nhẹ (optional)
+
+        const res = await watchMovie(slug, {
+          ep,
+          server,
+        });
 
         const payload = res?.data?.data || res?.data;
 
@@ -29,8 +35,11 @@ export default function WatchMovie() {
         setData(payload);
 
         const streams = payload?.streams || [];
+
         const defaultStream =
-          streams.find((s) => s.id == server) || payload.currentStream;
+          streams.find((s) => String(s.id) === String(server)) ||
+          payload.currentStream ||
+          null;
 
         setSelectedStream(defaultStream);
       } catch (err) {
@@ -41,15 +50,7 @@ export default function WatchMovie() {
     };
 
     fetchData();
-  }, [slug, server]);
-
-  if (loading) {
-    return (
-      <div className="h-screen flex items-center justify-center bg-white">
-        <div className="text-gray-500">Loading...</div>
-      </div>
-    );
-  }
+  }, [slug, ep, server]);
 
   if (!data) {
     return (
@@ -59,7 +60,6 @@ export default function WatchMovie() {
     );
   }
 
-  /* ================= LOCKED ================= */
   if (data.locked) {
     return (
       <div className="h-screen flex flex-col items-center justify-center bg-white text-center">
@@ -78,20 +78,35 @@ export default function WatchMovie() {
 
   const movie = data.movie;
   const episode = data.episode;
+  const episodes = data.episodes || [];
   const streams = data.streams || [];
 
   const changeServer = (stream) => {
     setSelectedStream(stream);
+
     setSearchParams({
       ep,
       server: stream.id,
     });
   };
 
+  const changeEpisode = (newEp) => {
+    setSearchParams({
+      ep: newEp,
+    });
+  };
+
   return (
     <div className="min-h-screen bg-white text-black">
       {/* ================= PLAYER ================= */}
-      <div className="w-full bg-black aspect-video">
+      <div className="w-full bg-black aspect-video relative">
+        {/* 🔥 small loading overlay (không giật UI) */}
+        {loading && (
+          <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-white text-sm">
+            Loading stream...
+          </div>
+        )}
+
         {selectedStream?.link_embed ? (
           <iframe
             src={selectedStream.link_embed}
@@ -107,7 +122,7 @@ export default function WatchMovie() {
         )}
       </div>
 
-      {/* ================= INFO BAR ================= */}
+      {/* ================= INFO ================= */}
       <div className="max-w-6xl mx-auto px-6 py-6 space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
@@ -126,7 +141,28 @@ export default function WatchMovie() {
           </button>
         </div>
 
-        {/* ================= SERVER SELECT ================= */}
+        {/* ================= EPISODES ================= */}
+        <div className="bg-gray-50 border rounded-2xl p-5 space-y-3">
+          <h3 className="text-sm text-gray-600">Chọn tập</h3>
+
+          <div className="grid grid-cols-10 gap-2">
+            {episodes.map((epItem) => (
+              <button
+                key={epItem.id}
+                onClick={() => changeEpisode(epItem.episode_number)}
+                className={`py-2 rounded text-sm border transition ${
+                  epItem.episode_number === ep
+                    ? "bg-black text-white"
+                    : "bg-white hover:bg-gray-100"
+                }`}
+              >
+                {epItem.name}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* ================= SERVER ================= */}
         <div className="bg-gray-50 border rounded-2xl p-5 space-y-3">
           <h3 className="text-sm text-gray-600">Chọn server</h3>
 

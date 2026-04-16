@@ -70,9 +70,15 @@ export const getYears = async () => {
   return res.data;
 };
 
-export const watchMovie = async (slug) => {
+export const watchMovie = async (slug, params = {}) => {
   if (!slug) throw new Error("Movie slug is required");
 
-  const res = await api.get(`/movies/watch/${slug}`);
+  const res = await api.get(`/movies/watch/${slug}`, {
+    params: {
+      ep: params.ep,
+      server: params.server,
+    },
+  });
+
   return res.data;
 };
