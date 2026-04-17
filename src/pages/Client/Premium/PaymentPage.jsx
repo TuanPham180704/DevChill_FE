@@ -45,7 +45,6 @@ export default function PaymentPage() {
   const handlePay = () => {
     if (!agreed) return;
     setLoading(true);
-    // Simulate payment — hook real API here later
     setTimeout(() => {
       setLoading(false);
       navigate('/payment/success', { state: { packageId: pkg.id, packageName: pkg.name } });
@@ -55,8 +54,6 @@ export default function PaymentPage() {
   return (
     <div className="min-h-screen py-10 px-4 md:px-8" style={{ background: '#F8FAFC' }}>
       <div className="max-w-4xl mx-auto">
-
-        {/* Back */}
         <button
           onClick={() => navigate('/upgrade')}
           className="flex items-center gap-2 text-sm mb-8 transition-colors hover:text-gray-900"
@@ -64,15 +61,10 @@ export default function PaymentPage() {
         >
           <ArrowLeft size={16} /> Quay lại chọn gói
         </button>
-
         <h1 className="text-3xl font-black mb-8" style={{ color: '#0F172A' }}>Thanh toán</h1>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-          {/* ── Left: Order Summary + Payment Methods ── */}
           <div className="flex flex-col gap-5">
-
-            {/* Order Summary */}
             <div
               className="p-5 rounded-2xl"
               style={{
@@ -113,8 +105,6 @@ export default function PaymentPage() {
                   {displayPrice.toLocaleString('vi-VN')} ₫
                 </span>
               </div>
-
-              {/* Terms */}
               <label className="flex items-start gap-3 mt-4 cursor-pointer group">
                 <div
                   onClick={() => setAgreed((v) => !v)}
@@ -138,8 +128,6 @@ export default function PaymentPage() {
                 </span>
               </label>
             </div>
-
-            {/* Payment Methods */}
             <div>
               <p className="text-sm font-semibold mb-3" style={{ color: '#94A3B8' }}>
                 Phương thức thanh toán

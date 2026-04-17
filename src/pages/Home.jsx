@@ -6,6 +6,7 @@ import { getPublicMovies, getCategories } from "../api/moviesPublicApi";
 import { Link } from "react-router-dom";
 import { Star, ChevronRight, Play } from "lucide-react";
 import DevChillApp from "./DevChillApp";
+import { getLifecycleStatus } from "../utils/getLifecycleStatus";
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
@@ -131,8 +132,6 @@ export default function Home() {
             </div>
           </div>
         </div>
-
-        {/* thumbnails */}
         <div className="absolute bottom-6 right-6 z-30 flex gap-2">
           {newestMovies.map((movie, index) => (
             <div
@@ -189,6 +188,16 @@ export default function Home() {
         );
       })}
 
+      <Section
+        title="Phim sắp chiếu"
+        action={{
+          text: "Xem tất cả",
+          to: "/movies?lifecycle_status=upcoming",
+        }}
+      >
+        <MovieGrid movies={upcomingMovies} />
+      </Section>
+
       <DevChillApp />
     </div>
   );
@@ -223,32 +232,51 @@ function Section({ title, action, children }) {
 function MovieGrid({ movies }) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
-      {movies?.map((movie) => (
-        <Link
-          key={movie.id || movie.slug}
-          to={`/movies/${movie.slug}`}
-          className="group relative rounded-2xl overflow-hidden bg-white transition duration-300 hover:-translate-y-1 hover:shadow-xl"
-        >
-          {movie.is_premium && (
-            <div className="absolute inset-0 rounded-2xl border border-blue-300/60 pointer-events-none" />
-          )}
+      {movies?.map((movie) => {
+        const status = getLifecycleStatus(movie.lifecycle_status);
 
-          <img
-            src={movie.poster_url || "/fallback.jpg"}
-            className="h-64 w-full object-cover transition duration-500 group-hover:scale-105"
-          />
-          <div className="absolute inset-0 bg-linear-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition" />
-          <div className="absolute bottom-0 p-3 text-white opacity-0 group-hover:opacity-100 transition">
-            <h3 className="text-sm font-semibold line-clamp-2">{movie.name}</h3>
-          </div>
-          {movie.is_premium && (
-            <div className="absolute top-3 right-3 backdrop-blur-md bg-white/20 px-2 py-1 rounded-full flex items-center gap-1 shadow-sm">
-              <Star size={12} className="text-yellow-400" />
-              <span className="text-[10px] font-semibold text-white">VIP</span>
+        return (
+          <Link
+            key={movie.id || movie.slug}
+            to={`/movies/${movie.slug}`}
+            className="group relative rounded-2xl overflow-hidden bg-white transition duration-300 hover:-translate-y-1 hover:shadow-xl"
+          >
+            {movie.is_premium && (
+              <div className="absolute inset-0 rounded-2xl border border-blue-300/60 pointer-events-none" />
+            )}
+
+            <img
+              src={movie.poster_url || "/fallback.jpg"}
+              className="h-64 w-full object-cover transition duration-500 group-hover:scale-105"
+            />
+
+            {/* 👇 luôn hiển thị status */}
+            {movie.lifecycle_status && (
+              <div
+                className={`absolute top-3 left-3 text-white text-[10px] px-2 py-1 rounded ${status.color}`}
+              >
+                {status.label}
+              </div>
+            )}
+
+            <div className="absolute inset-0 bg-linear-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition" />
+            <div className="absolute bottom-0 p-3 text-white opacity-0 group-hover:opacity-100 transition">
+              <h3 className="text-sm font-semibold line-clamp-2">
+                {movie.name}
+              </h3>
             </div>
-          )}
-        </Link>
-      ))}
+
+            {movie.is_premium && (
+              <div className="absolute top-3 right-3 backdrop-blur-md bg-white/20 px-2 py-1 rounded-full flex items-center gap-1 shadow-sm">
+                <Star size={12} className="text-yellow-400" />
+                <span className="text-[10px] font-semibold text-white">
+                  VIP
+                </span>
+              </div>
+            )}
+          </Link>
+        );
+      })}
     </div>
   );
 }

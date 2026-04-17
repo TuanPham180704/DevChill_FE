@@ -14,20 +14,18 @@ import HistoryView from "../pages/Client/Profile/HistoryView";
 import PremiumHistory from "../pages/Client/Profile/PremiumHistory";
 import MovieList from "@/pages/MovieList";
 import MovieDetail from "@/pages/MovieDetail";
-import MovieView from "@/pages/MovieView";
 import Support from "../pages/Client/Profile/Support";
 import CustomerList from "../pages/Admin/CustomerList";
 import ContractList from "../pages/Admin/ContractList";
 import AdminLayout from "../layouts/AdminLayout";
 import ProtectedRoute from "../routes/ProtectedRoute";
 import DashBoard from "../pages/Admin/DashBoard";
-import UpgradePage from "../pages/Client/Premium/UpgradePage";
 import PaymentPage from "../pages/Client/Premium/PaymentPage";
 import SuccessPage from "../pages/Client/Premium/SuccessPage";
 import MoviesListAdmin from "../pages/Admin/MovieListAdmin";
 import WatchMovie from "../pages/WatchMovie";
 import CategoryMovies from "../pages/CategoryMovies ";
-
+import PremiumPage from "../pages/Client/Premium/PremiumPage";
 export default function AppRouter() {
   return (
     <>
@@ -39,8 +37,12 @@ export default function AppRouter() {
             <Route path="/movies/:slug" element={<MovieDetail />} />
             <Route path="/movies/category/:slug" element={<CategoryMovies />} />
             <Route path="/movies/watch/:slug" element={<WatchMovie />} />
+            <Route path="/premium" element={<PremiumPage />} />
+            <Route path="/payment/:packageId" element={<PaymentPage />} />
+            <Route path="/payment/success" element={<SuccessPage />} />
           </Route>
           <Route path="/login" element={<Login />} />
+
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
@@ -53,10 +55,6 @@ export default function AppRouter() {
               <Route path="/history" element={<HistoryView />} />
               <Route path="/support" element={<Support />} />
             </Route>
-            {/* Premium flow — standalone pages (no AppLayout header/footer) */}
-            <Route path="/upgrade" element={<UpgradePage />} />
-            <Route path="/payment/:packageId" element={<PaymentPage />} />
-            <Route path="/payment/success" element={<SuccessPage />} />
           </Route>
 
           <Route element={<ProtectedRoute roles={["admin"]} />}>

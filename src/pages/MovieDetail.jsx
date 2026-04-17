@@ -7,6 +7,7 @@ import { getProfile } from "../api/userApi";
 import Pagination from "../components/Pagination";
 import { toast } from "react-toastify";
 import { getToken } from "../utils/auth";
+import { getLifecycleStatus } from "../utils/getLifecycleStatus";
 
 export default function MovieDetail() {
   const { slug } = useParams();
@@ -33,12 +34,13 @@ export default function MovieDetail() {
         const data = movieRes?.data?.data || movieRes?.data;
 
         setMovie(data);
+
         if (token) {
           try {
             const profileRes = await getProfile();
             setProfile(profileRes?.data || profileRes);
           } catch (err) {
-            console.log("Profile error ignore");
+            console.error(err);
           }
         }
 
@@ -59,7 +61,7 @@ export default function MovieDetail() {
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center bg-white">
-        <div className="text-gray-500">Loading...</div>
+        <div className="text-gray-400 text-lg animate-pulse">Loading...</div>
       </div>
     );
   }
@@ -71,115 +73,196 @@ export default function MovieDetail() {
       </div>
     );
   }
+
   const isPremiumUser = profile?.is_premium === true;
+  const isPremiumMovie = movie.is_premium === true;
+
   const handleWatch = () => {
     if (!token) {
       toast.warning("Bạn cần đăng nhập để xem phim");
       navigate("/login");
       return;
     }
-    if (movie.is_premium && !isPremiumUser) {
-      toast.error("Hãy nâng cấp gói premium để thưởng thức phim");
+
+    if (isPremiumMovie && !isPremiumUser) {
+      toast.error("Phim này yêu cầu tài khoản Premium 👑");
       return;
     }
+
     navigate(`/movies/watch/${movie.slug}`);
   };
+
   const isUpcoming = movie.lifecycle_status === "upcoming";
   const episodes = movie.episodes || [];
   const totalPages = Math.ceil(episodes.length / EP_PER_PAGE);
   const start = (currentPage - 1) * EP_PER_PAGE;
   const currentEpisodes = episodes.slice(start, start + EP_PER_PAGE);
+
   const getYoutubeEmbed = (url) => {
     if (!url) return null;
     const id = url.split("v=")[1];
     return `https://www.youtube.com/embed/${id}`;
   };
+
+  // ✅ ADD lifecycle status
+  const { label, color } = getLifecycleStatus(movie.lifecycle_status);
+
   return (
     <div className="bg-white min-h-screen text-gray-900">
-      <div className="relative h-[78vh] w-full overflow-hidden">
+      {/* HERO */}
+      <div className="relative w-full h-[60vh] overflow-hidden">
         <img
           src={movie.poster_url}
-          className="absolute w-full h-full object-cover scale-105"
+          className="absolute w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-black/70" />
 
-        <div className="relative z-10 h-full max-w-6xl mx-auto px-10 flex flex-col justify-end pb-14">
-          <h1 className="text-5xl font-bold text-white">{movie.name}</h1>
+        <div className="absolute inset-0 bg-linear-to-t from-white via-white/70 to-transparent" />
 
-          <p className="text-gray-200 mt-2">{movie.origin_name}</p>
+        {/* PREMIUM BADGE */}
+        {isPremiumMovie && (
+          <div className="absolute top-6 left-6 z-20">
+            <span
+              className={`px-4 py-2 text-xs rounded-full font-semibold shadow ${
+                isPremiumUser
+                  ? "bg-yellow-400 text-black"
+                  : "bg-black text-white"
+              }`}
+            >
+              {isPremiumUser ? "👑 Premium" : "🔒 Premium"}
+            </span>
+          </div>
+        )}
+
+        {/* ✅ LIFECYCLE BADGE */}
+        <div className="absolute top-6 right-6 z-20">
+          <span
+            className={`px-4 py-2 text-xs rounded-full font-semibold shadow text-white ${color}`}
+          >
+            {label}
+          </span>
+        </div>
+
+        <div className="relative z-10 max-w-6xl mx-auto px-6 h-full flex flex-col justify-end pb-10">
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
+            {movie.name}
+          </h1>
+          <p className="text-gray-500 mt-2">{movie.origin_name}</p>
 
           <div className="flex gap-3 mt-6">
             <button
               onClick={() => setShowTrailer(true)}
-              className="px-6 py-3 bg-white text-black rounded-full font-semibold"
+              className="px-5 py-2 rounded-xl border border-gray-300 hover:bg-gray-100 transition"
             >
               ▶ Trailer
             </button>
 
             {!isUpcoming && (
-              <button
-                onClick={handleWatch}
-                className="px-6 py-3 bg-red-600 text-white rounded-full font-semibold"
-              >
-                Xem phim
-              </button>
+              <div className="relative group">
+                <button
+                  onClick={handleWatch}
+                  className={`px-5 py-2 rounded-xl transition ${
+                    isPremiumMovie && !isPremiumUser
+                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      : "bg-black text-white hover:opacity-90"
+                  }`}
+                >
+                  {isPremiumMovie && !isPremiumUser
+                    ? "🔒 Cần Premium"
+                    : "Xem phim"}
+                </button>
+
+                {/* TOOLTIP */}
+                {isPremiumMovie && !isPremiumUser && (
+                  <div
+                    className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 
+                    opacity-0 group-hover:opacity-100 transition pointer-events-none"
+                  >
+                    <div className="bg-black text-white text-xs px-3 py-2 rounded-lg shadow-lg whitespace-nowrap">
+                      Nâng cấp Premium để xem phim này 👑
+                    </div>
+
+                    {/* arrow */}
+                    <div className="w-2 h-2 bg-black rotate-45 mx-auto -mt-1"></div>
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </div>
       </div>
+
+      {/* MAIN */}
       <div className="max-w-6xl mx-auto px-6 py-12 space-y-12">
         <div className="grid md:grid-cols-3 gap-10">
-          <img src={movie.poster_url} className="rounded-xl" />
+          <div>
+            <img
+              src={movie.poster_url}
+              className="rounded-2xl shadow-md w-full"
+            />
+          </div>
 
           <div className="md:col-span-2 space-y-6">
-            <p className="text-gray-700">{movie.content}</p>
+            <div className="space-y-4">
+              <p className="text-gray-700 leading-relaxed">{movie.content}</p>
 
-            <div className="flex flex-wrap gap-2">
-              {movie.categories?.map((c) => (
-                <span
-                  key={c.id}
-                  className="px-3 py-1 bg-gray-100 rounded-full text-sm"
-                >
-                  {c.name}
-                </span>
-              ))}
+              <div className="flex flex-wrap gap-2">
+                {movie.categories?.map((c) => (
+                  <span
+                    key={c.id}
+                    className="px-3 py-1 text-xs bg-gray-100 rounded-full"
+                  >
+                    {c.name}
+                  </span>
+                ))}
+              </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+            <div className="grid grid-cols-2 gap-6 text-sm">
               <div>
-                <b>Năm:</b> {movie.year}
+                <p className="text-gray-400">Năm</p>
+                <p className="font-semibold">{movie.year}</p>
               </div>
+
               <div>
-                <b>Thời lượng:</b> {movie.duration} phút
+                <p className="text-gray-400">Thời lượng</p>
+                <p className="font-semibold">{movie.duration} phút</p>
               </div>
+
               <div>
-                <b>Số Tập:</b> {movie.episode_total}
+                <p className="text-gray-400">Số tập</p>
+                <p className="font-semibold">{movie.episode_total}</p>
               </div>
+
               <div>
-                <b>Quốc gia:</b>{" "}
-                {movie.countries?.map((c) => c.name).join(", ")}
+                <p className="text-gray-400">Quốc gia</p>
+                <p className="font-semibold">
+                  {movie.countries?.map((c) => c.name).join(", ")}
+                </p>
+              </div>
+
+              <div className="col-span-2">
+                <p className="text-gray-400">Diễn viên</p>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {movie.people?.map((p) => (
+                    <span
+                      key={p.id}
+                      className="px-2 py-1 bg-gray-100 rounded-full text-xs"
+                    >
+                      {p.name}
+                    </span>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
         </div>
-        <div>
-          <h2 className="text-xl font-semibold mb-4">Diễn viên</h2>
-          <div className="flex flex-wrap gap-2">
-            {movie.people?.map((p) => (
-              <span
-                key={p.id}
-                className="px-3 py-1 bg-gray-100 rounded-full text-sm"
-              >
-                {p.name} ({p.role})
-              </span>
-            ))}
-          </div>
-        </div>
+
+        {/* EPISODES */}
         {!isUpcoming && (
           <div>
-            <h2 className="text-xl font-semibold mb-4">Danh Sách Tập</h2>
+            <h2 className="text-lg font-semibold mb-4">Danh sách tập</h2>
 
-            <div className="grid grid-cols-5 md:grid-cols-10 gap-3">
+            <div className="flex flex-wrap gap-2">
               {currentEpisodes.map((ep) => (
                 <button
                   key={ep.id}
@@ -187,10 +270,10 @@ export default function MovieDetail() {
                     setSelectedEpisode(ep);
                     setSelectedServer(ep.streams?.[0]);
                   }}
-                  className={`py-2 rounded border ${
+                  className={`px-4 py-2 rounded-full text-sm border transition ${
                     selectedEpisode?.id === ep.id
-                      ? "bg-black text-white"
-                      : "bg-white"
+                      ? "bg-black text-white border-black"
+                      : "bg-white hover:bg-gray-100"
                   }`}
                 >
                   {ep.name}
@@ -199,29 +282,40 @@ export default function MovieDetail() {
             </div>
 
             {totalPages >= 1 && (
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-              />
+              <div className="mt-6">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={setCurrentPage}
+                />
+              </div>
             )}
           </div>
         )}
       </div>
+
+      {/* TRAILER */}
       {showTrailer && (
-        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
-          <div className="w-[90%] max-w-5xl aspect-video">
-            <iframe
-              src={getYoutubeEmbed(movie.trailer_url)}
-              className="w-full h-full rounded-xl"
-              allowFullScreen
-            />
-            <button
-              onClick={() => setShowTrailer(false)}
-              className="mt-4 px-5 py-2 bg-red-600 text-white rounded-full"
-            >
-              Close
-            </button>
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="w-[90%] max-w-4xl">
+            <div className="bg-black rounded-2xl overflow-hidden shadow-xl">
+              <div className="aspect-video">
+                <iframe
+                  src={getYoutubeEmbed(movie.trailer_url)}
+                  className="w-full h-full"
+                  allowFullScreen
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-4">
+              <button
+                onClick={() => setShowTrailer(false)}
+                className="px-4 py-2 bg-white rounded-lg hover:bg-gray-100"
+              >
+                Đóng
+              </button>
+            </div>
           </div>
         </div>
       )}
