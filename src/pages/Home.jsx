@@ -36,9 +36,9 @@ export default function Home() {
           }),
         ]);
 
-        setNewestMovies(unwrap(movieRes));
-        setCategories(unwrap(cateRes));
-        setUpcomingMovies(unwrap(upcomingRes));
+        setNewestMovies(unwrap(movieRes) || []);
+        setCategories(unwrap(cateRes) || []);
+        setUpcomingMovies(unwrap(upcomingRes) || []);
 
         const results = await Promise.all(
           countrySlugs.map((slug) =>
@@ -52,7 +52,7 @@ export default function Home() {
 
         const countryData = {};
         countrySlugs.forEach((slug, idx) => {
-          countryData[slug] = unwrap(results[idx]);
+          countryData[slug] = unwrap(results[idx]) || [];
         });
 
         setMoviesByCountry(countryData);
@@ -67,7 +67,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (!newestMovies.length) return;
+    if (!newestMovies?.length) return;
 
     const interval = setInterval(() => {
       setActiveSlide((prev) => {
@@ -77,7 +77,7 @@ export default function Home() {
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [newestMovies.length]);
+  }, [newestMovies]);
 
   const goToSlide = (index) => {
     setPrevSlide(activeSlide);
@@ -94,85 +94,104 @@ export default function Home() {
     );
   }
 
-  const activeMovie = newestMovies[activeSlide];
-  const prevMovie = newestMovies[prevSlide];
+  const activeMovie = newestMovies?.[activeSlide];
+  const prevMovie = newestMovies?.[prevSlide];
 
   return (
     <div className="min-h-screen bg-white text-gray-900">
+      {/* HERO */}
       <div className="relative w-full h-155 overflow-hidden">
         <div className="absolute inset-0 bg-white/40 backdrop-blur-2xl z-0" />
 
-        {activeMovie && (
-          <img
-            src={activeMovie.thumb_url || activeMovie.poster_url}
-            className="absolute inset-0 w-full h-full object-cover"
-          />
+        {activeMovie ? (
+          <>
+            <img
+              src={activeMovie.thumb_url || activeMovie.poster_url}
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+
+            <div className="absolute inset-0 bg-linear-to-r from-white via-white/70 to-transparent z-10" />
+
+            <div className="absolute inset-0 z-20 flex items-center">
+              <div className="px-20 max-w-2xl">
+                <h1 className="text-6xl font-black leading-tight">
+                  {activeMovie.name}
+                </h1>
+
+                <p className="text-gray-600 mt-4 line-clamp-3">
+                  {activeMovie.content}
+                </p>
+
+                <div className="mt-6 flex gap-3">
+                  <Link
+                    to={`/movies/${activeMovie.slug}`}
+                    className="flex items-center gap-2 bg-black text-white px-7 py-3 rounded-full shadow-xl hover:scale-105 transition"
+                  >
+                    <Play size={18} />
+                    Xem ngay
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="flex items-center justify-center h-full text-gray-400">
+            Đang cập nhật phim mới...
+          </div>
         )}
 
-        <div className="absolute inset-0 bg-linear-to-r from-white via-white/70 to-transparent z-10" />
-
-        <div className="absolute inset-0 z-20 flex items-center">
-          <div className="px-20 max-w-2xl">
-            <h1 className="text-6xl font-black leading-tight">
-              {activeMovie?.name}
-            </h1>
-
-            <p className="text-gray-600 mt-4 line-clamp-3">
-              {activeMovie?.content}
-            </p>
-
-            <div className="mt-6 flex gap-3">
-              <Link
-                to={`/movies/${activeMovie.slug}`}
-                className="flex items-center gap-2 bg-black text-white px-7 py-3 rounded-full shadow-xl hover:scale-105 transition"
-              >
-                <Play size={18} />
-                Xem ngay
-              </Link>
-            </div>
+        {/* THUMB SLIDER */}
+        {newestMovies?.length > 0 && (
+          <div className="absolute bottom-6 right-6 z-30 flex gap-2">
+            {newestMovies.map((movie, index) =>
+              movie ? (
+                <div
+                  key={movie.id || index}
+                  onClick={() => goToSlide(index)}
+                  className={`w-20 h-12 rounded-lg overflow-hidden cursor-pointer border ${
+                    index === activeSlide
+                      ? "border-red-500 scale-105"
+                      : "border-gray-200 opacity-60 hover:opacity-100"
+                  }`}
+                >
+                  <img
+                    src={movie.poster_url || "/fallback.jpg"}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ) : null,
+            )}
           </div>
-        </div>
-        <div className="absolute bottom-6 right-6 z-30 flex gap-2">
-          {newestMovies.map((movie, index) => (
-            <div
-              key={movie.id || index}
-              onClick={() => goToSlide(index)}
-              className={`w-20 h-12 rounded-lg overflow-hidden cursor-pointer border transition ${
-                index === activeSlide
-                  ? "border-red-500 scale-105"
-                  : "border-gray-200 opacity-60 hover:opacity-100"
-              }`}
-            >
-              <img
-                src={movie.poster_url || "/fallback.jpg"}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          ))}
-        </div>
+        )}
       </div>
 
+      {/* CATEGORY */}
       <Section title="Thể loại">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
-          {categories.slice(0, 5).map((cate) => (
-            <Link
-              key={cate.id || cate.slug}
-              to={`/movies/category/${cate.slug}`}
-              className="group p-5 rounded-2xl bg-white border border-gray-100 hover:border-red-400 transition shadow-sm hover:shadow-lg"
-            >
-              <h3 className="text-lg font-semibold group-hover:text-red-500 transition">
-                {cate.name}
-              </h3>
-              <span className="text-xs text-gray-400 group-hover:text-red-400">
-                Khám phá →
-              </span>
-            </Link>
-          ))}
-        </div>
+        {categories?.length > 0 ? (
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+            {categories.slice(0, 5).map((cate) =>
+              cate ? (
+                <Link
+                  key={cate.id || cate.slug}
+                  to={`/movies/category/${cate.slug}`}
+                  className="group p-5 rounded-2xl bg-white border hover:border-red-400 transition shadow-sm hover:shadow-lg"
+                >
+                  <h3 className="text-lg font-semibold group-hover:text-red-500">
+                    {cate.name}
+                  </h3>
+                  <span className="text-xs text-gray-400">Khám phá →</span>
+                </Link>
+              ) : null,
+            )}
+          </div>
+        ) : (
+          <Empty text="Đang cập nhật thể loại..." />
+        )}
       </Section>
 
+      {/* COUNTRY */}
       {countrySlugs.map((slug) => {
-        const movies = moviesByCountry[slug] || [];
+        const movies = moviesByCountry?.[slug] || [];
 
         return (
           <Section
@@ -188,6 +207,7 @@ export default function Home() {
         );
       })}
 
+      {/* UPCOMING */}
       <Section
         title="Phim sắp chiếu"
         action={{
@@ -229,28 +249,37 @@ function Section({ title, action, children }) {
   );
 }
 
+function Empty({ text }) {
+  return (
+    <div className="text-center py-10 text-gray-400 text-sm">
+      {text || "Đang cập nhật..."}
+    </div>
+  );
+}
+
 function MovieGrid({ movies }) {
+  if (!movies || movies.length === 0) {
+    return <Empty text="Đang cập nhật phim..." />;
+  }
+
   return (
     <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
-      {movies?.map((movie) => {
+      {movies.map((movie) => {
+        if (!movie) return null;
+
         const status = getLifecycleStatus(movie.lifecycle_status);
 
         return (
           <Link
             key={movie.id || movie.slug}
             to={`/movies/${movie.slug}`}
-            className="group relative rounded-2xl overflow-hidden bg-white transition duration-300 hover:-translate-y-1 hover:shadow-xl"
+            className="group relative rounded-2xl overflow-hidden bg-white hover:-translate-y-1 hover:shadow-xl transition"
           >
-            {movie.is_premium && (
-              <div className="absolute inset-0 rounded-2xl border border-blue-300/60 pointer-events-none" />
-            )}
-
             <img
               src={movie.poster_url || "/fallback.jpg"}
-              className="h-64 w-full object-cover transition duration-500 group-hover:scale-105"
+              className="h-64 w-full object-cover group-hover:scale-105 transition"
             />
 
-            {/* 👇 luôn hiển thị status */}
             {movie.lifecycle_status && (
               <div
                 className={`absolute top-3 left-3 text-white text-[10px] px-2 py-1 rounded ${status.color}`}
@@ -259,7 +288,6 @@ function MovieGrid({ movies }) {
               </div>
             )}
 
-            <div className="absolute inset-0 bg-linear-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition" />
             <div className="absolute bottom-0 p-3 text-white opacity-0 group-hover:opacity-100 transition">
               <h3 className="text-sm font-semibold line-clamp-2">
                 {movie.name}
@@ -267,11 +295,8 @@ function MovieGrid({ movies }) {
             </div>
 
             {movie.is_premium && (
-              <div className="absolute top-3 right-3 backdrop-blur-md bg-white/20 px-2 py-1 rounded-full flex items-center gap-1 shadow-sm">
+              <div className="absolute top-3 right-3 bg-white/20 px-2 py-1 rounded-full">
                 <Star size={12} className="text-yellow-400" />
-                <span className="text-[10px] font-semibold text-white">
-                  VIP
-                </span>
               </div>
             )}
           </Link>
