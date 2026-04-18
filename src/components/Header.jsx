@@ -6,11 +6,11 @@ import { HiMenu } from "react-icons/hi";
 import axios from "axios";
 import SearchBox from "./SearchBox";
 import { toast } from "react-toastify";
-
+import { getProfile } from "../api/userApi";
 export default function Header() {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
-
+  const [user, setUser] = useState(null);
   const [categories, setCategories] = useState([]);
   const [countries, setCountries] = useState([]);
   const [years, setYears] = useState([]);
@@ -39,6 +39,20 @@ export default function Header() {
 
     fetchData();
   }, []);
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (!token) return;
+
+      try {
+        const data = await getProfile();
+        setUser(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchUser();
+  }, [token]);
   const buildLink = (key, value) => {
     const params = new URLSearchParams();
     if (key && value) params.set(key, value);
@@ -108,7 +122,6 @@ export default function Header() {
               type="year"
               buildLink={buildLink}
             />
-
             <button
               onClick={handleGoPremium}
               className="text-blue-600 font-semibold"
@@ -122,28 +135,72 @@ export default function Header() {
               <div className="relative" ref={userMenuRef}>
                 <button
                   onClick={() => setOpenUserMenu((p) => !p)}
-                  className="flex items-center gap-2 bg-gray-100 px-3 py-1.5 rounded-full"
+                  className="flex items-center gap-2 bg-gray-100 px-3 py-1.5 rounded-full hover:bg-gray-200 transition"
                 >
-                  <FaUser />
-                  Tài khoản
+          
+                  <img
+                    src={user?.avatar_url || "/default-avatar.png"}
+                    onError={(e) => (e.target.src = "/default-avatar.png")}
+                    className="w-8 h-8 rounded-full object-cover border"
+                  />
+                  <span className="font-medium">
+                    {user?.username || "User"}
+                  </span>
+                  {user?.is_premium ? (
+                    <FaCrown className="text-yellow-500" title="Premium" />
+                  ) : (
+                    <span className="text-xs text-gray-500"></span>
+                  )}
                 </button>
-
                 <div
-                  className={`absolute right-0 mt-2 w-44 bg-white border rounded shadow-lg py-2 transition-all duration-200
-                  ${openUserMenu ? "opacity-100 visible pointer-events-auto translate-y-0" : "opacity-0 invisible pointer-events-none -translate-y-2"}`}
+                  className={`absolute right-0 mt-2 w-56 bg-white border rounded-lg shadow-lg py-2 transition-all duration-200
+        ${
+          openUserMenu
+            ? "opacity-100 visible pointer-events-auto translate-y-0"
+            : "opacity-0 invisible pointer-events-none -translate-y-2"
+        }`}
                 >
+                  {/* Info user */}
+                  <div className="px-4 py-3 border-b flex items-center gap-3">
+                    <img
+                      src={user?.avatar_url || "/default-avatar.png"}
+                      onError={(e) => (e.target.src = "/default-avatar.png")}
+                      className="w-10 h-10 rounded-full border"
+                    />
+
+                    <div>
+                      <div className="font-semibold text-sm">
+                        {user?.username}
+                      </div>
+
+                      <div className="text-xs text-gray-500 flex items-center gap-1">
+                        {user?.is_premium ? (
+                          <>
+                            <FaCrown className="text-yellow-500" />
+                            Premium
+                          </>
+                        ) : (
+                          "Free"
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Menu */}
                   <Link
                     to="/profile"
                     className="block px-4 py-2 hover:bg-gray-100"
                   >
                     Hồ sơ
                   </Link>
+
                   <Link
                     to="/my-tickets"
                     className="block px-4 py-2 hover:bg-gray-100"
                   >
                     Vé đã đặt
                   </Link>
+
                   <Link
                     to="/my-premium"
                     className="block px-4 py-2 hover:bg-gray-100"
@@ -151,6 +208,7 @@ export default function Header() {
                     Premium
                   </Link>
 
+                  {/* Logout */}
                   <button
                     onClick={handleLogout}
                     className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50"

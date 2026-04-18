@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
 import { FaTimes, FaSave, FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
@@ -46,8 +47,6 @@ export default function MoviesModal({
   const [movie, setMovie] = useState(null);
   const [edit, setEdit] = useState({});
   const [contracts, setContracts] = useState([]);
-
-  /* ================= LOAD ================= */
   useEffect(() => {
     // eslint-disable-next-line react-hooks/immutability
     fetchContracts();
@@ -69,22 +68,17 @@ export default function MoviesModal({
         duration: "",
         episode_total: "",
         content: "",
-
         contract_id: "",
         status: "draft",
         lifecycle_status: "ongoing",
-        production_status: null,
+        production_status: "",
         source: "",
-        tmdb_id: "",
-
         is_available: false,
         is_premium: false,
-
         categories: [],
         countries: [],
         people: [],
         episodes: [],
-
         poster_mode: "url",
         thumb_mode: "url",
       });
@@ -158,7 +152,6 @@ export default function MoviesModal({
           is_available: edit.is_available,
           is_premium: edit.is_premium,
           source: edit.source,
-          tmdb_id: edit.tmdb_id,
         });
       }
 
@@ -221,8 +214,14 @@ export default function MoviesModal({
   }
   function handleFileChange(field, file) {
     if (!file) return;
-    const url = URL.createObjectURL(file);
-    handleChange(field, url);
+
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      handleChange(field, reader.result);
+    };
+
+    reader.readAsDataURL(file);
   }
   return (
     <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
@@ -330,21 +329,33 @@ export default function MoviesModal({
             <div className="space-y-4">
               <MediaInput
                 label="Poster"
-                value={edit.poster_url}
                 mode={edit.poster_mode}
                 onChange={(v) => handleChange("poster_url", v)}
                 onFile={(f) => handleFileChange("poster_url", f)}
                 onMode={(v) => handleChange("poster_mode", v)}
               />
+              {edit.poster_url && (
+                <img
+                  src={edit.poster_url}
+                  alt="poster"
+                  className="w-32 mt-2 rounded"
+                />
+              )}
 
               <MediaInput
                 label="Thumb"
-                value={edit.thumb_url}
                 mode={edit.thumb_mode}
                 onChange={(v) => handleChange("thumb_url", v)}
                 onFile={(f) => handleFileChange("thumb_url", f)}
                 onMode={(v) => handleChange("thumb_mode", v)}
               />
+              {edit.thumb_url && (
+                <img
+                  src={edit.thumb_url}
+                  alt="poster"
+                  className="w-32 mt-2 rounded"
+                />
+              )}
 
               <Input
                 label="Trailer"
@@ -451,13 +462,6 @@ export default function MoviesModal({
                 value={edit.source}
                 onChange={(v) => handleChange("source", v)}
               />
-
-              <Input
-                label="TMDB"
-                value={edit.tmdb_id}
-                onChange={(v) => handleChange("tmdb_id", v)}
-              />
-
               <Checkbox
                 label="Available"
                 checked={edit.is_available}
