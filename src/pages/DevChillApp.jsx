@@ -1,71 +1,56 @@
+import React from "react";
+
 export default function DevChillApp() {
   return (
-    <div className="flex justify-center items-center min-h-screen bg-white px-4">
-      <div
-        className="flex flex-col md:flex-row items-center justify-between gap-8 p-6 md:p-8 rounded-2xl 
-        bg-linear-to-br from-blue-50 via-white to-blue-100 
-        w-full max-w-4xl shadow-md border border-blue-100"
-      >
-        <div className="relative w-48 h-95 rounded-[2rem] bg-linear-to-b from-gray-900 to-black shadow-xl p-2">
-          <div className="w-full h-full rounded-[1.7rem] bg-white overflow-hidden flex flex-col">
-            <div className="h-5 bg-gray-100 flex items-center justify-center text-[9px] text-gray-500">
-              18:07
-            </div>
-            <div className="flex-1 bg-linear-to-br from-blue-100 via-white to-blue-200 flex flex-col items-center justify-center p-3">
-              <div className="w-16 h-16 rounded-xl bg-blue-600 shadow mb-3 flex items-center justify-center text-white font-semibold text-sm">
-                App
-              </div>
-              <div className="text-sm font-semibold text-gray-800">
-                DevChill
-              </div>
-              <div className="text-[11px] text-gray-500 mt-1 text-center leading-tight">
-                Xem phim mọi lúc, mọi nơi
-              </div>
-            </div>
-
-            <div className="h-3 bg-gray-100" />
-          </div>
+    <div className="relative min-h-screen bg-[#FDFDFD] flex items-center justify-center p-6 overflow-hidden">
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
+        <div className="absolute -top-[10%] -left-[10%] w-125 h-125 bg-blue-50 rounded-full blur-[120px] opacity-60"></div>
+        <div className="absolute top-[20%] -right-[10%] w-100 h-100 bg-indigo-50 rounded-full blur-[100px] opacity-60"></div>
+      </div>
+      <div className="relative z-10 w-full max-w-2xl text-center">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 text-white text-[10px] font-medium tracking-widest uppercase mb-8">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+          </span>
+          New Version Available
         </div>
-        <div className="text-gray-900 max-w-md text-center md:text-left">
-          <h2 className="text-2xl md:text-3xl font-bold mb-3 leading-snug">
-            Trải nghiệm <span className="text-blue-600">DevChill</span> mọi lúc,
-            mọi nơi
-          </h2>
+        <h1 className="text-5xl md:text-6xl font-bold tracking-tighter text-slate-900 mb-6 leading-[1.1]">
+          Trải nghiệm <br />
+          <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-indigo-600">
+            DevChill
+          </span>{" "}
+          ở tầm cao mới.
+        </h1>
 
-          <p className="text-sm md:text-base text-gray-600 leading-relaxed mb-5">
-            Tải ứng dụng DevChill để xem phim yêu thích ngay trên điện thoại.
-            Giao diện nhẹ, mượt, hỗ trợ đồng bộ tiến trình xem giữa các thiết
-            bị.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-3">
-            <button
-              className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 
-              text-white px-4 py-2.5 rounded-lg text-sm font-medium shadow-sm transition"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-4 h-4"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path d="M17.6 9.48l1.84-3.18a.5.5 0 10-.87-.5l-1.88 3.26A8.94 8.94 0 0012 8c-1.67 0-3.23.46-4.59 1.26L5.53 5.8a.5.5 0 10-.87.5l1.84 3.18A9 9 0 003 16h18a9 9 0 00-3.4-6.52zM7 14a1 1 0 110-2 1 1 0 010 2zm10 0a1 1 0 110-2 1 1 0 010 2z" />
+        <p className="text-lg text-slate-500 mb-10 max-w-lg mx-auto leading-relaxed font-light">
+          Xem phim chất lượng cao, đồng bộ hóa thông minh trên mọi thiết bị. Tải
+          ứng dụng ngay hôm nay để bắt đầu hành trình giải trí không giới hạn.
+        </p>
+        <div className="flex flex-col items-center gap-8">
+          <div className="flex flex-wrap justify-center gap-4">
+            <button className="flex items-center gap-3 px-8 py-4 bg-slate-900 text-white rounded-2xl hover:bg-black transition-all duration-300 shadow-[0_10px_20px_-5px_rgba(0,0,0,0.3)] active:scale-95">
+              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M17.523 15.3414c-.5511 0-.9993.4486-.9993.9997 0 .5511.4482.9997.9993.9997.5511 0 .9993-.4486.9993-.9997 0-.5511-.4482-.9997-.9993-.9997zm-11.046 0c-.5511 0-.9993.4486-.9993.9997 0 .5511.4482.9997.9993.9997.5511 0 .9993-.4486.9993-.9997 0-.5511-.4482-.9997-.9993-.9997zm11.4045-6.0065l1.6163-2.799c.1408-.2439.0573-.5549-.1866-.6957-.2439-.1408-.5549-.0573-.6957.1866l-1.6423 2.8439c-1.3195-.5896-2.7938-.9206-4.3432-.9206s-3.0237.331-4.3432.9206L6.4651 6.0275c-.1408-.2439-.4518-.3274-.6957-.1866-.2439.1408-.3274.4518-.1866.6957l1.6163 2.799C4.103 10.9351 2.0234 13.7297 2.0234 17h19.9532c0-3.2703-2.0796-6.0649-5.1821-7.6651z" />
               </svg>
-              Android
+              <div className="text-left">
+                <div className="text-[10px] opacity-70 uppercase tracking-wider">
+                  Download for
+                </div>
+                <div className="text-sm font-semibold">Android</div>
+              </div>
             </button>
-            <button
-              className="flex items-center justify-center gap-2 bg-gray-900 hover:bg-black 
-              text-white px-4 py-2.5 rounded-lg text-sm font-medium shadow-sm transition"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-4 h-4"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path d="M16.365 1.43c0 1.14-.46 2.21-1.22 3.02-.82.87-2.17 1.54-3.32 1.44-.14-1.11.47-2.24 1.2-3.03.82-.89 2.23-1.55 3.34-1.43zM20.4 17.5c-.9 2.1-1.34 3.03-2.5 4.76-1.6 2.43-3.85 2.5-4.47 2.5-.63 0-1.05-.17-1.77-.17-.74 0-1.22.16-1.88.17-.61 0-2.1-.23-3.43-2.02C4.02 20.7 2 16.85 2 12.9c0-4.8 3.12-7.34 6.19-7.34 1.63 0 2.99 1.06 4.02 1.06.98 0 2.5-1.12 4.35-1.12.79 0 3.05.07 4.49 2.15-.12.07-2.67 1.53-2.67 4.55 0 3.6 3.12 4.86 3.02 4.3z" />
+
+            <button className="flex items-center gap-3 px-8 py-4 bg-white border border-slate-200 text-slate-900 rounded-2xl hover:bg-slate-50 hover:border-slate-300 transition-all duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.05)] active:scale-95">
+              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.1 2.48-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.89 1.22-2.11 1.09-3.33-1.04.04-2.3.7-3.05 1.57-.67.77-1.26 2.02-1.11 3.21 1.15.09 2.34-.56 3.07-1.45z" />
               </svg>
-              iOS
+              <div className="text-left">
+                <div className="text-[10px] opacity-70 uppercase tracking-wider">
+                  Download for
+                </div>
+                <div className="text-sm font-semibold">iOS</div>
+              </div>
             </button>
           </div>
         </div>
