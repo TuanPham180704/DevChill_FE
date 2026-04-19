@@ -114,7 +114,7 @@ export default function Home() {
 
             <div className="absolute inset-0 z-20 flex items-center">
               <div className="px-20 max-w-2xl">
-                <h1 className="text-6xl font-black leading-tight">
+                <h1 className="text-4xl md:text-6xl font-bold leading-snug tracking-wide text-white drop-shadow-[0_4px_20px_rgba(0,0,0,0.6)] max-w-3xl">
                   {activeMovie.name}
                 </h1>
 
