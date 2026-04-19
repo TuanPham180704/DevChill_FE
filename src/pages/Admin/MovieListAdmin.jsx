@@ -17,6 +17,12 @@ export default function MoviesListAdmin() {
   const [keyword, setKeyword] = useState("");
   const [debouncedKeyword, setDebouncedKeyword] = useState("");
   const [status, setStatus] = useState("");
+  const [stats, setStats] = useState({
+    total: 0,
+    draft: 0,
+    published: 0,
+    hidden: 0,
+  });
   const [type, setType] = useState("");
   const [total, setTotal] = useState(0);
   const [selectedMovieId, setSelectedMovieId] = useState(null);
@@ -46,6 +52,14 @@ export default function MoviesListAdmin() {
 
       setMovies(res?.data || []);
       setTotal(res?.pagination?.total || 0);
+      setStats(
+        res?.stats || {
+          total: 0,
+          draft: 0,
+          published: 0,
+          hidden: 0,
+        },
+      );
     } catch (err) {
       toast.error("Lỗi tải danh sách phim");
     } finally {
@@ -56,15 +70,6 @@ export default function MoviesListAdmin() {
   useEffect(() => {
     fetchMovies();
   }, [fetchMovies]);
-
-  const stats = useMemo(() => {
-    return {
-      totalMovies: movies.length,
-      draft: movies.filter((m) => m.status === "draft").length,
-      published: movies.filter((m) => m.status === "published").length,
-      hidden: movies.filter((m) => m.status === "hidden").length,
-    };
-  }, [movies]);
 
   const csvData = movies.map((m) => ({
     ID: m.id,
@@ -103,7 +108,7 @@ export default function MoviesListAdmin() {
 
           <div className="grid grid-cols-4 gap-3">
             {[
-              ["Tổng", stats.totalMovies, "blue"],
+              ["Tổng", stats.total, "blue"],
               ["Draft", stats.draft, "yellow"],
               ["Published", stats.published, "green"],
               ["Hidden", stats.hidden, "red"],

@@ -22,58 +22,51 @@ export default function LockModal({
   }, [isOpen]);
 
   if (!isOpen || !user) return null;
+
   const isLocked = user.is_locked;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Overlay */}
-      <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-        onClick={onClose}
-      />
+  const inputStyle =
+    "w-full h-10 px-3 text-sm border rounded-md outline-none focus:ring-2 focus:ring-indigo-400";
+  const labelStyle = "text-xs font-medium text-gray-600 mb-1";
 
-      {/* Modal */}
-      <div className="relative w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden">
-        {/* HEADER */}
-        <div className="px-6 pt-8 pb-4 text-center">
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+      <div className="relative w-full max-w-md bg-white rounded-xl shadow-lg overflow-hidden flex flex-col">
+        <div className="px-6 py-6 text-center border-b">
           <div
-            className={`w-16 h-16 mx-auto flex items-center justify-center mb-4 rounded-xl shadow-sm ${
+            className={`w-14 h-14 mx-auto flex items-center justify-center rounded-lg mb-3 ${
               isLocked
                 ? "bg-green-100 text-green-600"
                 : "bg-red-100 text-red-600"
             }`}
           >
-            {isLocked ? <FaUnlock size={22} /> : <FaLock size={22} />}
+            {isLocked ? <FaUnlock size={18} /> : <FaLock size={18} />}
           </div>
 
-          <h3 className="font-semibold text-lg">
+          <h3 className="text-base font-semibold">
             {isLocked ? "Mở khóa tài khoản" : "Khóa tài khoản"}
           </h3>
 
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-xs text-gray-500 mt-1">
             {isLocked ? "Mở khóa cho" : "Khóa tài khoản"}{" "}
             <span className="font-medium text-gray-700">{user.username}</span>
           </p>
         </div>
-
-        {/* BODY */}
-        <div className="px-6 pb-6 space-y-4">
-          {/* Reason */}
-          <div className="flex flex-col gap-1">
-            <label className="text-sm text-gray-600">Lý do</label>
+        <div className="p-5 space-y-4">
+          <div>
+            <label className={labelStyle}>Lý do</label>
             <textarea
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               placeholder="Nhập lý do..."
-              className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
               rows={3}
+              className="w-full p-3 text-sm border rounded-md outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
             />
           </div>
-
-          {/* Lock options */}
           {!isLocked && (
             <>
-              <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+              <label className="flex items-center gap-2 text-sm text-gray-600">
                 <input
                   type="checkbox"
                   checked={isPermanent}
@@ -84,22 +77,23 @@ export default function LockModal({
               </label>
 
               {!isPermanent && (
-                <input
-                  type="date"
-                  value={lockUntil}
-                  onChange={(e) => setLockUntil(e.target.value)}
-                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                />
+                <div>
+                  <label className={labelStyle}>Thời gian khóa</label>
+                  <input
+                    type="date"
+                    value={lockUntil}
+                    onChange={(e) => setLockUntil(e.target.value)}
+                    className={inputStyle}
+                  />
+                </div>
               )}
             </>
           )}
         </div>
-
-        {/* FOOTER */}
-        <div className="flex gap-3 px-6 py-4 border-t bg-gray-50">
+        <div className="p-4 border-t bg-gray-50 flex gap-3">
           <button
             onClick={onClose}
-            className="flex-1 py-2 rounded-lg border bg-white hover:bg-gray-100 transition"
+            className="flex-1 h-10 text-sm border rounded-md hover:bg-gray-100"
           >
             Hủy
           </button>
@@ -116,7 +110,7 @@ export default function LockModal({
               }
             }}
             disabled={loading}
-            className={`flex-1 py-2 rounded-lg text-white shadow transition ${
+            className={`flex-1 h-10 text-sm rounded-md text-white transition ${
               isLocked
                 ? "bg-green-500 hover:bg-green-600"
                 : "bg-red-500 hover:bg-red-600"

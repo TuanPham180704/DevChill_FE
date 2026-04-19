@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 import { useState, useEffect, useMemo } from "react";
 import { FaSearch, FaRedo, FaEye, FaPlus, FaDownload } from "react-icons/fa";
@@ -20,15 +21,35 @@ export default function ContractList() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedContract, setSelectedContract] = useState(null);
   const [isContractModalOpen, setContractModalOpen] = useState(false);
-  const itemsPerPage = 6;
+  const [stats, setStats] = useState({
+    total: 0,
+    draft: 0,
+    active: 0,
+    expired: 0,
+    cancelled: 0,
+  });
+  const itemsPerPage = 5;
 
   const fetchContracts = async () => {
     try {
       setLoading(true);
-      const res = await getContracts({ page: 1, limit: 5, search: "" });
-      const contractList =
-        res?.data?.data || res?.data || (Array.isArray(res) ? res : []);
+      const res = await getContracts({
+        page: currentPage,
+        limit: itemsPerPage,
+        name: searchTerm,
+        status: statusFilter === "all" ? "" : statusFilter,
+      });
+      const contractList = res?.data?.data || res?.data || [];
       setContracts(contractList);
+      setStats(
+        res?.stats || {
+          total: 0,
+          draft: 0,
+          active: 0,
+          expired: 0,
+          cancelled: 0,
+        },
+      );
     } catch (err) {
       toast.error("Lỗi tải danh sách hợp đồng");
       setContracts([]);
@@ -39,7 +60,7 @@ export default function ContractList() {
 
   useEffect(() => {
     fetchContracts();
-  }, []);
+  }, [currentPage, searchTerm, statusFilter]);
 
   const filteredContracts = useMemo(() => {
     const keyword = searchTerm.toLowerCase();
@@ -129,32 +150,28 @@ export default function ContractList() {
           <div className="grid grid-cols-4 gap-3">
             <div className="bg-white p-3 rounded-lg shadow text-center">
               <div className="text-xl font-bold text-blue-600">
-                {contracts.length}
+                {stats.total}
               </div>
               <div className="text-xs text-gray-500">Tổng hợp đồng</div>
             </div>
 
             <div className="bg-white p-3 rounded-lg shadow text-center">
               <div className="text-xl font-bold text-green-600">
-                {contracts.filter((c) => c.status === "draft").length}
+                {stats.draft}
               </div>
               <div className="text-xs text-gray-500">Draft</div>
             </div>
 
             <div className="bg-white p-3 rounded-lg shadow text-center">
               <div className="text-xl font-bold text-blue-600">
-                {contracts.filter((c) => c.status === "active").length}
+                {stats.active}
               </div>
               <div className="text-xs text-gray-500">Active</div>
             </div>
 
             <div className="bg-white p-3 rounded-lg shadow text-center">
               <div className="text-xl font-bold text-red-600">
-                {
-                  contracts.filter(
-                    (c) => c.status === "expired" || c.status === "cancelled",
-                  ).length
-                }
+                {stats.expired + stats.cancelled}
               </div>
               <div className="text-xs text-gray-500">Expired</div>
             </div>

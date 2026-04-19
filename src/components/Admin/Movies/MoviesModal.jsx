@@ -40,6 +40,7 @@ export default function MoviesModal({
   const [errors, setErrors] = useState({});
 
   const streamLocks = useRef({});
+
   useEffect(() => {
     fetchContracts();
   }, []);
@@ -77,6 +78,7 @@ export default function MoviesModal({
       });
     }
   }, [movieId, mode]);
+
   const fetchContracts = async () => {
     try {
       const res = await getContracts();
@@ -99,6 +101,7 @@ export default function MoviesModal({
       toast.error("Lỗi khi tải phim");
     }
   };
+
   const cleanEpisodes = (episodes = []) =>
     episodes
       .map((ep) => {
@@ -122,6 +125,7 @@ export default function MoviesModal({
           : null;
       })
       .filter(Boolean);
+
   const handleChange = (field, value) => {
     setEdit((prev) => ({ ...prev, [field]: value }));
   };
@@ -134,6 +138,7 @@ export default function MoviesModal({
     };
     reader.readAsDataURL(file);
   };
+
   const addEpisode = () => {
     setEdit((prev) => ({
       ...prev,
@@ -195,6 +200,7 @@ export default function MoviesModal({
       return { ...prev, episodes: eps };
     });
   };
+
   const validateInfo = () => {
     const err = {};
 
@@ -222,7 +228,9 @@ export default function MoviesModal({
         setActiveTab(TAB.INFO);
         return;
       }
+
       const cleanedEpisodes = cleanEpisodes(edit.episodes);
+
       if (mode === "create") {
         await createMovie({
           name: edit.name,
@@ -255,6 +263,7 @@ export default function MoviesModal({
           toast.error("Thiếu movieId");
           return;
         }
+
         await updateMovieInfo(movieId, {
           name: edit.name,
           origin_name: edit.origin_name,
@@ -290,10 +299,13 @@ export default function MoviesModal({
           }),
         ]);
       }
+
       toast.success("Lưu Thành Công");
+
       if (mode === "edit") {
         await fetchMovie();
       }
+
       onReload();
       onClose();
     } catch (err) {
@@ -301,23 +313,35 @@ export default function MoviesModal({
       toast.error("Lưu Thất Bại");
     }
   };
+
   return (
-    <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
-      <div className="bg-white w-275 h-175 rounded-xl flex flex-col">
-        <div className="flex justify-between items-center p-4 border-b">
-          <h2 className="font-bold">
+    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="w-275 max-h-[90vh] bg-white rounded-2xl shadow-xl flex flex-col overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-linear-to-r from-slate-50 to-white">
+          <h2 className="text-lg font-bold text-slate-700">
             {mode === "create" ? "Create Movie" : "Movie Detail"}
           </h2>
-          <FaTimes onClick={onClose} className="cursor-pointer" />
+
+          <button
+            onClick={onClose}
+            className="p-2 rounded-lg hover:bg-slate-100 transition-colors"
+          >
+            <FaTimes className="text-slate-500" />
+          </button>
         </div>
 
-        <div className="flex border-b">
+        {/* Tabs */}
+        <div className="flex border-b border-slate-100 bg-slate-50/60">
           {Object.values(TAB).map((t) => (
             <button
               key={t}
               onClick={() => setActiveTab(t)}
-              className={`flex-1 p-3 ${
-                activeTab === t ? "bg-gray-200 font-bold" : ""
+              className={`flex-1 px-4 py-3 text-sm font-semibold transition-all
+              ${
+                activeTab === t
+                  ? "text-blue-600 bg-white border-b-2 border-blue-500"
+                  : "text-slate-500 hover:text-slate-700"
               }`}
             >
               {t.toUpperCase()}
@@ -325,7 +349,8 @@ export default function MoviesModal({
           ))}
         </div>
 
-        <div className="flex-1 overflow-auto p-4">
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-6 bg-slate-50/40">
           {activeTab === TAB.INFO && (
             <InfoTab
               edit={edit}
@@ -334,9 +359,11 @@ export default function MoviesModal({
               errors={errors}
             />
           )}
+
           {activeTab === TAB.META && (
             <MetaTab edit={edit} onChange={handleChange} />
           )}
+
           {activeTab === TAB.MEDIA && (
             <MediaTab
               edit={edit}
@@ -348,24 +375,38 @@ export default function MoviesModal({
               updateStream={updateStream}
             />
           )}
+
           {activeTab === TAB.SETTING && (
             <SettingTab edit={edit} onChange={handleChange} />
           )}
         </div>
+        <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100 bg-white">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-sm font-semibold rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-100 transition-all"
+          >
+            Hủy
+          </button>
 
-        <div className="p-4 border-t flex justify-between">
-          <button onClick={onClose}>Hủy</button>
-
-          <div className="flex gap-2">
+          <div className="flex items-center gap-3">
             {activeTab !== TAB.SETTING && (
-              <button onClick={handleNext}>Next</button>
+              <button
+                onClick={handleNext}
+                className="px-4 py-2 text-sm font-semibold rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-100 transition-all"
+              >
+                Next
+              </button>
             )}
 
             <button
               onClick={handleSaveAll}
-              className="bg-blue-500 text-white px-3 py-1 rounded flex items-center gap-1"
+              className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-xl 
+              bg-linear-to-r from-blue-600 to-indigo-600 text-white 
+              hover:from-blue-700 hover:to-indigo-700 
+              shadow-sm hover:shadow-md active:scale-95 transition-all"
             >
-              <FaSave /> Lưu
+              <FaSave size={13} />
+              Lưu
             </button>
           </div>
         </div>
