@@ -12,10 +12,9 @@ import Input from "../../Input";
 import Select from "../../Select";
 const SERVER_OPTIONS = [
   { label: "-- Chọn server --", value: "" },
-  { label: "#Hà Nội (Vietsub)", value: "hn_vietsub" },
-  { label: "#Hà Nội (Lồng Tiếng)", value: "hn_dub" },
-  { label: "#Hà Nội (Thuyết Minh)", value: "hn_voice" },
-  { label: "Hà Nội (Vietsub)", value: "hn_vietsub_2" },
+  { label: "#Hà Nội (Vietsub)", value: "#Hà Nội (Vietsub)" },
+  { label: "#Hà Nội (Lồng Tiếng)", value: "#Hà Nội (Lồng Tiếng)" },
+  { label: "#Hà Nội (Thuyết Minh)", value: "#Hà Nội (Thuyết Minh)" },
 ];
 
 const LANG_OPTIONS = [

@@ -8,6 +8,7 @@ import Pagination from "../components/Pagination";
 import { toast } from "react-toastify";
 import { getToken } from "../utils/auth";
 import { getLifecycleStatus } from "../utils/getLifecycleStatus";
+import { Lock, Crown } from "lucide-react";
 
 export default function MovieDetail() {
   const { slug } = useParams();
@@ -104,12 +105,10 @@ export default function MovieDetail() {
     return `https://www.youtube.com/embed/${id}`;
   };
 
-  // ✅ ADD lifecycle status
   const { label, color } = getLifecycleStatus(movie.lifecycle_status);
 
   return (
     <div className="bg-white min-h-screen text-gray-900">
-      {/* HERO */}
       <div className="relative w-full h-[60vh] overflow-hidden">
         <img
           src={movie.poster_url}
@@ -122,18 +121,26 @@ export default function MovieDetail() {
         {isPremiumMovie && (
           <div className="absolute top-6 left-6 z-20">
             <span
-              className={`px-4 py-2 text-xs rounded-full font-semibold shadow ${
+              className={`px-4 py-2 text-xs rounded-full font-semibold shadow flex items-center gap-2 ${
                 isPremiumUser
                   ? "bg-yellow-400 text-black"
                   : "bg-black text-white"
               }`}
             >
-              {isPremiumUser ? "👑 Premium" : "🔒 Premium"}
+              {isPremiumUser ? (
+                <>
+                  <Crown size={14} /> Premium
+                </>
+              ) : (
+                <>
+                  <Lock size={14} /> Premium
+                </>
+              )}
             </span>
           </div>
         )}
 
-        {/* ✅ LIFECYCLE BADGE */}
+        {/* LIFECYCLE */}
         <div className="absolute top-6 right-6 z-20">
           <span
             className={`px-4 py-2 text-xs rounded-full font-semibold shadow text-white ${color}`}
@@ -160,28 +167,25 @@ export default function MovieDetail() {
               <div className="relative group">
                 <button
                   onClick={handleWatch}
-                  className={`px-5 py-2 rounded-xl transition ${
+                  className={`px-5 py-2 rounded-xl transition flex items-center gap-2 ${
                     isPremiumMovie && !isPremiumUser
                       ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                       : "bg-black text-white hover:opacity-90"
                   }`}
                 >
-                  {isPremiumMovie && !isPremiumUser
-                    ? "🔒 Cần Premium"
-                    : "Xem phim"}
+                  {isPremiumMovie && !isPremiumUser && <Lock size={16} />}
+                  {isPremiumMovie && !isPremiumUser ? "Premium" : "Xem phim"}
                 </button>
 
-                {/* TOOLTIP */}
                 {isPremiumMovie && !isPremiumUser && (
                   <div
                     className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 
                     opacity-0 group-hover:opacity-100 transition pointer-events-none"
                   >
-                    <div className="bg-black text-white text-xs px-3 py-2 rounded-lg shadow-lg whitespace-nowrap">
-                      Nâng cấp Premium để xem phim này 👑
+                    <div className="bg-black text-white text-xs px-3 py-2 rounded-lg shadow-lg whitespace-nowrap flex items-center gap-2">
+                      <Lock size={12} />
+                      Nâng cấp Premium để xem phim này
                     </div>
-
-                    {/* arrow */}
                     <div className="w-2 h-2 bg-black rotate-45 mx-auto -mt-1"></div>
                   </div>
                 )}
@@ -190,8 +194,6 @@ export default function MovieDetail() {
           </div>
         </div>
       </div>
-
-      {/* MAIN */}
       <div className="max-w-6xl mx-auto px-6 py-12 space-y-12">
         <div className="grid md:grid-cols-3 gap-10">
           <div>
@@ -256,8 +258,6 @@ export default function MovieDetail() {
             </div>
           </div>
         </div>
-
-        {/* EPISODES */}
         {!isUpcoming && (
           <div>
             <h2 className="text-lg font-semibold mb-4">Danh sách tập</h2>

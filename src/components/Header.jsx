@@ -86,9 +86,11 @@ export default function Header() {
             >
               <HiMenu />
             </button>
-
             <Link to="/" className="font-bold text-xl">
-              🎬 DevChill
+              🎬
+              <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-indigo-600">
+                DevChill
+              </span>
             </Link>
 
             <div className="hidden sm:block">
@@ -137,7 +139,6 @@ export default function Header() {
                   onClick={() => setOpenUserMenu((p) => !p)}
                   className="flex items-center gap-2 bg-gray-100 px-3 py-1.5 rounded-full hover:bg-gray-200 transition"
                 >
-          
                   <img
                     src={user?.avatar_url || "/default-avatar.png"}
                     onError={(e) => (e.target.src = "/default-avatar.png")}
@@ -160,33 +161,6 @@ export default function Header() {
             : "opacity-0 invisible pointer-events-none -translate-y-2"
         }`}
                 >
-                  {/* Info user */}
-                  <div className="px-4 py-3 border-b flex items-center gap-3">
-                    <img
-                      src={user?.avatar_url || "/default-avatar.png"}
-                      onError={(e) => (e.target.src = "/default-avatar.png")}
-                      className="w-10 h-10 rounded-full border"
-                    />
-
-                    <div>
-                      <div className="font-semibold text-sm">
-                        {user?.username}
-                      </div>
-
-                      <div className="text-xs text-gray-500 flex items-center gap-1">
-                        {user?.is_premium ? (
-                          <>
-                            <FaCrown className="text-yellow-500" />
-                            Premium
-                          </>
-                        ) : (
-                          "Free"
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Menu */}
                   <Link
                     to="/profile"
                     className="block px-4 py-2 hover:bg-gray-100"
@@ -195,10 +169,10 @@ export default function Header() {
                   </Link>
 
                   <Link
-                    to="/my-tickets"
+                    to="/histoty-view"
                     className="block px-4 py-2 hover:bg-gray-100"
                   >
-                    Vé đã đặt
+                    Lịch Sử Xem
                   </Link>
 
                   <Link
@@ -206,6 +180,12 @@ export default function Header() {
                     className="block px-4 py-2 hover:bg-gray-100"
                   >
                     Premium
+                  </Link>
+                  <Link
+                    to="/support"
+                    className="block px-4 py-2 hover:bg-gray-100"
+                  >
+                    Hỗ Trợ
                   </Link>
 
                   {/* Logout */}

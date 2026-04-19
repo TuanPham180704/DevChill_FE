@@ -1,6 +1,7 @@
+
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { FaUser, FaTicketAlt, FaCrown, FaSignOutAlt } from "react-icons/fa";
+import { User, Ticket, Crown, LifeBuoy, LogOut } from "lucide-react";
 import { toast } from "react-toastify";
 import { getProfile } from "../../api/userApi";
 import avatarImg from "../../assets/devchill-logo.png";
@@ -18,11 +19,8 @@ export default function Sidebar({
     if (!propUser) {
       const fetchUser = async () => {
         setLoading(true);
-
         try {
-          // ❌ bỏ token truyền tay nếu API đã dùng interceptor
           const data = await getProfile();
-
           setUser(data);
         } catch (err) {
           console.error(err);
@@ -31,7 +29,6 @@ export default function Sidebar({
           setLoading(false);
         }
       };
-
       fetchUser();
     }
   }, [propUser]);
@@ -39,25 +36,25 @@ export default function Sidebar({
   const menuItems = [
     {
       id: "profile",
-      icon: <FaUser />,
+      icon: <User size={20} />,
       label: "Tài khoản cá nhân",
       path: "/profile",
     },
     {
       id: "tickets",
-      icon: <FaTicketAlt />,
+      icon: <Ticket size={20} />,
       label: "Lịch sử xem phim",
       path: "/history",
     },
     {
       id: "my-premium",
-      icon: <FaCrown />,
+      icon: <Crown size={20} />,
       label: "Gói đã mua",
       path: "/my-premium",
     },
     {
       id: "support",
-      icon: <FaCrown />,
+      icon: <LifeBuoy size={20} />,
       label: "Hỗ trợ",
       path: "/support",
     },
@@ -71,9 +68,10 @@ export default function Sidebar({
   };
 
   return (
-    <aside className="w-80 border-r border-gray-200 bg-white p-6 flex flex-col justify-between min-h-screen shadow-sm">
+    // Đã bỏ h-fit, sticky, max-h. Khi ở flex items-stretch, thẻ aside sẽ tự động cao bằng thẻ kế bên.
+    <aside className="w-full md:w-72 lg:w-80 shrink-0 bg-white rounded-[2rem] shadow-sm border border-slate-100 flex flex-col justify-between p-6 z-10">
       <div>
-        <h2 className="text-gray-900 text-xl font-bold mb-8 tracking-wide">
+        <h2 className="text-slate-900 text-xl font-extrabold mb-6 tracking-tight pl-2">
           Quản lý tài khoản
         </h2>
 
@@ -82,64 +80,64 @@ export default function Sidebar({
             <li key={item.id}>
               <Link
                 to={item.path}
-                className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 border ${
+                className={`flex items-center gap-4 px-5 py-3.5 rounded-2xl transition-all duration-300 border border-transparent ${
                   active === item.id
-                    ? "text-blue-600 bg-blue-50 border-blue-200 font-semibold"
-                    : "text-gray-600 border-transparent hover:text-gray-900 hover:bg-gray-100"
+                    ? "text-red-600 bg-red-50 border-red-100 font-bold shadow-sm"
+                    : "text-slate-500 hover:text-slate-900 hover:bg-slate-50 font-medium"
                 }`}
               >
-                <span className="text-lg">{item.icon}</span>
-                {item.label}
+                {item.icon}
+                <span className="text-[14px]">{item.label}</span>
               </Link>
             </li>
           ))}
         </ul>
       </div>
-      <div className="border-t border-gray-200 pt-6 pb-4">
+
+      {/* Phần user info & logout sẽ luôn nằm ở đáy Sidebar nhờ justify-between */}
+      <div className="border-t border-slate-100 pt-6 mt-8">
         {loading ? (
-          <p className="text-gray-500 text-sm flex items-center gap-2">
-            <span className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-            Đang tải thông tin...
-          </p>
+          <div className="flex items-center gap-3 px-2 animate-pulse">
+            <div className="w-12 h-12 bg-slate-200 rounded-full" />
+            <div className="flex-1 space-y-2">
+              <div className="h-3 bg-slate-200 rounded w-2/3" />
+              <div className="h-2 bg-slate-200 rounded w-1/2" />
+            </div>
+          </div>
         ) : (
-          <div className="flex items-center gap-4 px-2">
-            <div className="relative">
+          <div className="flex items-center gap-4 px-2 bg-slate-50 p-3 rounded-2xl border border-slate-100/50">
+            <div className="relative shrink-0">
               <img
                 src={avatarSrc}
                 alt="avatar"
-                className="w-12 h-12 rounded-full object-cover ring-2 ring-blue-500 p-0.5"
+                className="w-12 h-12 rounded-full object-cover ring-2 ring-white shadow-sm"
               />
               {user?.is_premium && (
-                <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5 shadow">
-                  <span className="flex w-4 h-4 bg-yellow-400 rounded-full text-[8px] items-center justify-center text-black font-bold">
-                    ★
+                <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5 shadow-md">
+                  <span className="flex w-4 h-4 bg-yellow-400 rounded-full text-[10px] items-center justify-center text-white">
+                    <Crown size={10} fill="currentColor" />
                   </span>
                 </div>
               )}
             </div>
             <div className="overflow-hidden">
               <div className="flex items-center gap-2">
-                <p className="text-gray-900 font-bold truncate">
+                <p className="text-slate-900 text-sm font-bold truncate">
                   {user?.username || "Người dùng"}
                 </p>
-                {user?.is_premium && (
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-yellow-400 text-black font-semibold">
-                    PRO
-                  </span>
-                )}
               </div>
-
-              <p className="text-gray-500 text-xs truncate mt-0.5">
-                {user?.email || ""}
+              <p className="text-slate-400 text-[11px] font-medium truncate mt-0.5">
+                {user?.email || "Chưa cập nhật email"}
               </p>
             </div>
           </div>
         )}
+
         <button
           onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-2 mt-6 px-4 py-3 rounded-xl border border-red-200 text-red-600 font-medium hover:bg-red-50 hover:border-red-300 transition-all duration-200"
+          className="w-full flex items-center justify-center gap-2 mt-4 px-4 py-3.5 rounded-2xl bg-slate-50 text-slate-600 font-bold text-sm hover:bg-red-50 hover:text-red-600 hover:shadow-sm transition-all duration-300"
         >
-          <FaSignOutAlt />
+          <LogOut size={18} />
           Đăng xuất
         </button>
       </div>

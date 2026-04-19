@@ -26,8 +26,6 @@ export default function Footer() {
           <span>Hoàng Sa & Trường Sa là của Việt Nam</span>
         </div>
       </div>
-
-      {/* FIX Ở ĐÂY */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
           <div className="flex flex-col gap-4">
@@ -40,12 +38,12 @@ export default function Footer() {
               </div>
 
               <div>
-                <h2 className="text-gray-900 font-semibold">🎬 DevChill</h2>
+                <h2 className=" font-semibold text-blue-600">🎬 DevChill</h2>
                 <p className="text-xs text-gray-500">Phim hay cả rổ</p>
               </div>
             </div>
 
-            <p className="text-sm text-gray-500 leading-relaxed">
+            <p className=" text-sm text-gray-500 leading-relaxed">
               🎬 DevChill — xem phim online miễn phí, Vietsub & thuyết minh.
             </p>
 
