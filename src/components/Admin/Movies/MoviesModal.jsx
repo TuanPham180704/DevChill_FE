@@ -120,9 +120,7 @@ export default function MoviesModal({
           }))
           .filter((s) => s.link_embed || s.link_m3u8);
 
-        return streams.length
-          ? { season, episode_number, name: ep.name, streams }
-          : null;
+        return { season, episode_number, name: ep.name, streams };
       })
       .filter(Boolean);
 
@@ -199,6 +197,16 @@ export default function MoviesModal({
 
       return { ...prev, episodes: eps };
     });
+  };
+
+  const handleImportEpisodes = (importedEpisodes) => {
+    if (!Array.isArray(importedEpisodes)) return;
+
+    setEdit((prev) => ({
+      ...prev,
+      episodes: [...(prev.episodes || []), ...importedEpisodes],
+    }));
+    toast.success(`Đã nhập thành công ${importedEpisodes.length} tập phim`);
   };
 
   const validateInfo = () => {
@@ -373,6 +381,7 @@ export default function MoviesModal({
               updateEpisode={updateEpisode}
               addStream={addStream}
               updateStream={updateStream}
+              handleImportEpisodes={handleImportEpisodes}
             />
           )}
 

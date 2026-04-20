@@ -65,9 +65,10 @@ export default function Sidebar() {
     <aside className="w-64 h-screen bg-white border-r border-gray-200 flex flex-col justify-between fixed left-0 top-0 text-gray-700 shadow-lg z-50">
       <div>
         <div className="p-6 border-b border-gray-200">
-          <h2 className="text-2xl font-black tracking-tighter text-gray-800">
+          <Link to="/"> <h2 className="text-2xl font-black tracking-tighter text-gray-800">
             DEV<span className="font-light text-cyan-500">CHILL</span>
-          </h2>
+          </h2></Link>
+
         </div>
         <nav className="p-4 space-y-2 mt-4">
           {menuItems.map((item) => {
@@ -80,11 +81,10 @@ export default function Sidebar() {
               <Link
                 key={item.name}
                 to={item.path}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 font-medium ${
-                  isActive
-                    ? "bg-cyan-50 text-cyan-600 shadow-sm border-l-4 border-cyan-500"
-                    : "text-gray-600 hover:text-cyan-600 hover:bg-gray-100"
-                }`}
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 font-medium ${isActive
+                  ? "bg-cyan-50 text-cyan-600 shadow-sm border-l-4 border-cyan-500"
+                  : "text-gray-600 hover:text-cyan-600 hover:bg-gray-100"
+                  }`}
               >
                 <span className="text-lg">{item.icon}</span>
                 <span className="truncate">{item.name}</span>

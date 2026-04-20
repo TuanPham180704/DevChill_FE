@@ -6,7 +6,11 @@ import {
   FaServer,
   FaLink,
   FaImage,
+  FaFileExcel,
 } from "react-icons/fa";
+import { useRef } from "react";
+import { toast } from "react-toastify";
+import * as XLSX from "xlsx";
 import MediaInput from "../../MediaInput";
 import Input from "../../Input";
 import Select from "../../Select";
@@ -32,7 +36,105 @@ export default function MediaTab({
   updateEpisode,
   addStream,
   updateStream,
+  handleImportEpisodes,
 }) {
+  const fileInputRef = useRef(null);
+
+  const onImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChangeLocal = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (
+      !file.type.includes("sheet") &&
+      !file.type.includes("excel") &&
+      !file.name.endsWith(".xlsx") &&
+      !file.name.endsWith(".xls") &&
+      !file.name.endsWith(".csv")
+    ) {
+      toast.error("Vui lòng chọn file Excel hoặc CSV");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const data = new Uint8Array(event.target.result);
+        const workbook = XLSX.read(data, { type: "array" });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+        if (!Array.isArray(jsonData) || jsonData.length === 0) {
+          toast.error("File Excel trống hoặc không hợp lệ");
+          return;
+        }
+
+        // Group rows by Season and Episode
+        const episodeMap = {};
+
+        const normalizeRow = (r) => {
+          const res = {};
+          Object.keys(r).forEach((k) => {
+            res[k.trim().toLowerCase()] = r[k];
+          });
+          return res;
+        };
+
+        jsonData.forEach((rawRow) => {
+          const row = normalizeRow(rawRow);
+          
+          const season = row["season"] || row["phần"] || row["phan"] || 1;
+          const epNum = row["episode"] || row["episodenumber"] || row["tập số"] || row["tập"] || row["tap so"] || row["tap"];
+          
+          if (epNum === undefined || epNum === null || epNum === "") {
+            return; // Skip rows without episode number
+          }
+
+          const key = `${season}_${epNum}`;
+
+          if (!episodeMap[key]) {
+            episodeMap[key] = {
+              season: Number(season) || 1,
+              episode_number: Number(epNum),
+              name: row["name"] || row["episodename"] || row["tên tập"] || row["ten tap"] || row["title"] || "",
+              streams: [],
+            };
+          }
+
+          const rawLang = row["language"] || row["ngôn ngữ"] || row["ngon ngu"] || row["lang"];
+          const parsedLang = rawLang ? String(rawLang).toLowerCase() : "vietsub";
+
+          const stream = {
+            server_name: row["server"] || row["máy chủ"] || row["may chu"] || "",
+            quality: row["quality"] || row["chất lượng"] || row["chat luong"] || "1080p",
+            lang: parsedLang,
+            link_embed: row["embed url"] || row["embedurl"] || row["embed"] || row["link embed"] || "",
+            link_m3u8: row["m3u8 url"] || row["m3u8url"] || row["m3u8"] || row["link m3u8"] || "",
+          };
+
+          if (stream.link_embed || stream.link_m3u8) {
+            episodeMap[key].streams.push(stream);
+          }
+        });
+
+        const importedEpisodes = Object.values(episodeMap);
+        if (importedEpisodes.length > 0) {
+          handleImportEpisodes(importedEpisodes);
+        } else {
+          toast.error("Không tìm thấy dữ liệu tập phim hợp lệ trong file");
+        }
+      } catch (err) {
+        toast.error("Lỗi khi đọc file Excel: " + err.message);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+    e.target.value = ""; // Reset input
+  };
+
   return (
     <div className="space-y-8 animate-fade-in text-slate-800">
       <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden transition-all hover:shadow-md">
@@ -119,15 +221,33 @@ export default function MediaTab({
               Danh sách Tập phim
             </h3>
           </div>
-          <button
-            type="button"
-            onClick={addEpisode}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl 
-            bg-linear-to-r from-indigo-600 to-blue-600 text-white hover:from-indigo-700 hover:to-blue-700 
-            transition-all shadow-sm hover:shadow-md active:scale-95"
-          >
-            <FaPlus size={12} /> Thêm tập mới
-          </button>
+          <div className="flex gap-2">
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChangeLocal}
+              accept=".xlsx, .xls, .csv"
+              className="hidden"
+            />
+            <button
+              type="button"
+              onClick={onImportClick}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl 
+              bg-white border border-slate-300 text-slate-600 hover:bg-slate-50 
+              transition-all shadow-sm hover:shadow-md active:scale-95"
+            >
+              <FaFileExcel className="text-green-600" size={12} /> Nhập Excel
+            </button>
+            <button
+              type="button"
+              onClick={addEpisode}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl 
+              bg-linear-to-r from-indigo-600 to-blue-600 text-white hover:from-indigo-700 hover:to-blue-700 
+              transition-all shadow-sm hover:shadow-md active:scale-95"
+            >
+              <FaPlus size={12} /> Thêm tập mới
+            </button>
+          </div>
         </div>
 
         <div className="p-6 space-y-6 bg-slate-50/30">
