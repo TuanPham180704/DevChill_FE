@@ -4,6 +4,7 @@ import { Play } from "lucide-react";
 export default function Top10WeeklySection({ movies }) {
   if (!movies || movies.length === 0) return null;
   const doubledMovies = [...movies, ...movies];
+
   return (
     <section className="w-full overflow-hidden relative py-8">
       <div className="max-w-7xl mx-auto px-4 mb-8">
@@ -38,11 +39,16 @@ export default function Top10WeeklySection({ movies }) {
                   className="w-full h-full object-cover"
                   loading="lazy"
                 />
-                <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-500" />
+                <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-500" />
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-opacity duration-500">
                   <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-[0_0_20px_rgba(37,99,235,0.6)] scale-75 group-hover/card:scale-100 transition-transform duration-500">
                     <Play size={20} fill="currentColor" className="ml-1" />
                   </div>
+                </div>
+                <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-4 opacity-0 group-hover/card:translate-y-0 group-hover/card:opacity-100 transition-all duration-500 ease-out">
+                  <h3 className="text-white font-bold text-xs md:text-sm line-clamp-2 text-center drop-shadow-md leading-tight">
+                    {movie.name}
+                  </h3>
                 </div>
               </div>
             </Link>
@@ -64,7 +70,7 @@ export default function Top10WeeklySection({ movies }) {
 
           @keyframes scroll-marquee {
             0% { transform: translateX(0); }
-            100% { transform: translateX(calc(-50% - 1.75rem)); } /* Đã bù trừ gap (14 = 3.5rem / 2) */
+            100% { transform: translateX(calc(-50% - 1.75rem)); }
           }
         `,
         }}
