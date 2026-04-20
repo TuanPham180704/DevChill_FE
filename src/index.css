@@ -1,12 +1,18 @@
+@import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800;900&display=swap");
 @import "tailwindcss";
 @import "@fontsource-variable/geist";
-
 @custom-variant dark (&:is(.dark *));
 
 /* ================================================
    DEVCHILL CINEMATIC DESIGN SYSTEM
    Dark movie-platform aesthetic with neon cyan accents
    ================================================ */
+
+@layer base {
+  body {
+    @apply font-sans antialiased text-slate-800 bg-[#F0F6FC];
+  }
+}
 
 @theme {
   --color-dc-dark: #0a0e17;
@@ -224,7 +230,7 @@
   animation: page-enter 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.input {
+/* .input {
   @apply w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400;
 }
 
@@ -234,7 +240,7 @@
 
 .label {
   @apply text-sm font-semibold mb-1 block;
-}
+} */
 
 @theme inline {
   --font-heading: var(--font-sans);
@@ -346,20 +352,4 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
-}
-
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-  html {
-    @apply font-sans;
-  }
-}
-input[type="date"]::-webkit-calendar-picker-indicator {
-  filter: invert(1); /* đổi icon lịch sang trắng */
-  cursor: pointer;
 }

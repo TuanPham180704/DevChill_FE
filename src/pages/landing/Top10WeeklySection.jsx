@@ -1,86 +1,74 @@
 import { Link } from "react-router-dom";
-import { TrendingUp, Play, Star } from "lucide-react";
-
-function Top10Card({ movie, rank }) {
-  return (
-    <div className="relative flex items-end justify-end w-48 md:w-60 group cursor-pointer">
-      <div className="absolute left-0 -bottom-2 md:-bottom-3 text-[100px] md:text-[140px] font-black leading-none z-0 select-none text-[#F8FAFC] drop-shadow-sm transition-all duration-500 [-webkit-text-stroke:2px_#CBD5E1] tracking-[-0.08em] group-hover:[-webkit-text-stroke:3px_#3B82F6] group-hover:-translate-x-1">
-        {rank}
-      </div>
-      <Link
-        to={`/movies/${movie.slug}`}
-        className="block relative z-10 w-32 md:w-40 rounded-xl overflow-hidden shadow-md shadow-slate-300/40 bg-white border border-slate-100 transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-xl group-hover:shadow-blue-500/30"
-      >
-        <div className="aspect-2/3 relative bg-slate-100">
-          <img
-            src={movie.poster_url || "/fallback.jpg"}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-            alt={movie.name}
-          />
-          <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/20 to-transparent opacity-90 transition-opacity duration-300 group-hover:opacity-100" />
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
-            <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center shadow-md transform scale-90 group-hover:scale-100 transition-transform duration-300">
-              <Play fill="#fff" size={14} className="ml-1 text-white" />
-            </div>
-          </div>
-          <div className="absolute bottom-0 left-0 p-3 w-full z-10">
-            <div className="flex items-center gap-1.5 mb-1.5">
-              {movie.is_premium && (
-                <span className="flex items-center gap-1 bg-yellow-400/90 backdrop-blur-md px-1 py-0.5 rounded shadow-sm">
-                  <Star size={8} className="fill-white text-white" />
-                </span>
-              )}
-              <span className="text-[8px] font-bold text-white/90 bg-white/20 backdrop-blur-md border border-white/10 px-1.5 py-0.5 rounded uppercase tracking-wider">
-                {movie.type === "series" ? "Phim Bộ" : "Phim Lẻ"}
-              </span>
-            </div>
-            <h3 className="text-white font-bold text-xs md:text-sm line-clamp-2 leading-tight tracking-tight shadow-sm drop-shadow-md">
-              {movie.name}
-            </h3>
-          </div>
-        </div>
-      </Link>
-    </div>
-  );
-}
+import { Play } from "lucide-react";
 
 export default function Top10WeeklySection({ movies }) {
-  if (!movies?.length) return null;
-  const top10 = movies.slice(0, 10);
-
+  if (!movies || movies.length === 0) return null;
+  const doubledMovies = [...movies, ...movies];
   return (
-    <section className="py-6 relative overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 mb-5">
+    <section className="w-full overflow-hidden relative py-8">
+      <div className="max-w-7xl mx-auto px-4 mb-8">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center shadow-inner">
-            <TrendingUp size={20} className="text-blue-600" />
-          </div>
-          <div>
-            <h2 className="text-xl lg:text-2xl font-extrabold text-slate-800 tracking-tight">
-              Top 10 Phim Tuần Này
-            </h2>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
-              Lựa chọn nhiều nhất
-            </p>
-          </div>
+          <div className="w-1.5 h-6 md:h-7 bg-blue-600 rounded-sm" />
+          <h2 className="text-xl md:text-2xl font-bold tracking-tight text-slate-800 uppercase">
+            Top 10 Xem Nhiều Nhất
+          </h2>
         </div>
       </div>
-      <div className="relative w-full flex overflow-hidden">
-        <div className="absolute left-0 top-0 bottom-0 w-12 md:w-24 bg-linear-to-r from-[#F8FAFC] to-transparent z-20 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-12 md:w-24 bg-linear-to-l from-[#F8FAFC] to-transparent z-20 pointer-events-none" />
-        <div className="flex w-max animate-marquee py-6">
-          <div className="flex gap-6 md:gap-10 pr-6 md:pr-10 pl-4 md:pl-8">
-            {top10.map((movie, index) => (
-              <Top10Card key={`1-${movie.id}`} movie={movie} rank={index + 1} />
-            ))}
-          </div>
-          <div className="flex gap-6 md:gap-10 pr-6 md:pr-10">
-            {top10.map((movie, index) => (
-              <Top10Card key={`2-${movie.id}`} movie={movie} rank={index + 1} />
-            ))}
-          </div>
+      <div className="relative flex overflow-hidden w-full group">
+        <div className="my-marquee-track flex gap-10 md:gap-14 pl-4 md:pl-10 pb-12 pt-8 items-end">
+          {doubledMovies.map((movie, idx) => (
+            <Link
+              to={`/movies/${movie.slug}`}
+              key={`${movie.id}-${idx}`}
+              className="relative flex items-end justify-end w-42.5 md:w-55 aspect-4/3 shrink-0 group/card outline-none"
+            >
+              <span
+                className="absolute -left-3.75 md:-left-6.25 -bottom-2.5 md:-bottom-5 text-[100px] md:text-[140px] font-black leading-none text-[#F0F6FC] z-0 select-none drop-shadow-md tracking-tighter opacity-40 translate-x-4 origin-bottom-right transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover/card:opacity-100 group-hover/card:-translate-x-4 group-hover/card:-translate-y-2 group-hover/card:-rotate-6 group-hover/card:scale-105"
+                style={{
+                  WebkitTextStroke: "3px #2563EB",
+                  textShadow: "4px 4px 0px rgba(37,99,235,0.2)",
+                }}
+              >
+                {(idx % movies.length) + 1}
+              </span>
+              <div className="relative w-32.5 md:w-40 aspect-2/3 rounded-xl overflow-hidden shadow-[0_10px_20px_rgba(0,0,0,0.15)] z-10 border border-white/80 origin-bottom-left transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover/card:translate-x-2 group-hover/card:-translate-y-6 group-hover/card:rotate-3 group-hover/card:scale-105 group-hover/card:shadow-2xl bg-slate-200">
+                <img
+                  src={movie.thumb_url || movie.poster_url}
+                  alt={movie.name}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-500" />
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-opacity duration-500">
+                  <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-[0_0_20px_rgba(37,99,235,0.6)] scale-75 group-hover/card:scale-100 transition-transform duration-500">
+                    <Play size={20} fill="currentColor" className="ml-1" />
+                  </div>
+                </div>
+              </div>
+            </Link>
+          ))}
         </div>
       </div>
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+          .my-marquee-track {
+            width: max-content;
+            animation: scroll-marquee 40s linear infinite;
+            will-change: transform;
+          }
+          
+          .my-marquee-track:hover {
+            animation-play-state: paused;
+          }
+
+          @keyframes scroll-marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(calc(-50% - 1.75rem)); } /* Đã bù trừ gap (14 = 3.5rem / 2) */
+          }
+        `,
+        }}
+      />
     </section>
   );
 }
