@@ -3,25 +3,29 @@
 import { useEffect, useState } from "react";
 import { getPublicMovies, getCategories } from "../api/moviesPublicApi";
 import { Link, useNavigate } from "react-router-dom";
-import { Play, ArrowRight, ChevronRight, Info } from "lucide-react";
+import { Play, ArrowRight, ChevronRight, Info, Lock } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { toast } from "react-toastify"; // Đã import toast
+import { toast } from "react-toastify";
 import DevChillApp from "./DevChillApp";
 import LoadingSkeleton from "../components/LoadingSkeleton";
-
-// Đã import các Component bóc tách
 import SectionHeader from "./landing/SectionHeader";
 import MovieGrid from "./landing/MovieGrid";
 import Upcoming3DCarousel from "./landing/Upcoming3DCarousel";
 import Top10WeeklySection from "./landing/Top10WeeklySection";
 import PremiumExclusiveSection from "./landing/PremiumExclusiveSection";
+import { getToken } from "../utils/auth";
+import { getProfile } from "../api/userApi";
 
 const countrySlugs = ["han-quoc", "trung-quoc", "viet-nam"];
 const unwrap = (res) => res?.data?.data ?? res?.data ?? [];
 
 export default function Home() {
   const navigate = useNavigate();
+  const token = getToken();
+
   const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState(null);
+
   const [newestMovies, setNewestMovies] = useState([]);
   const [categories, setCategories] = useState([]);
   const [moviesByCountry, setMoviesByCountry] = useState({});
@@ -29,6 +33,7 @@ export default function Home() {
   const [cartoonMovies, setCartoonMovies] = useState([]);
   const [top10Weekly, setTop10Weekly] = useState([]);
   const [premiumMovies, setPremiumMovies] = useState([]);
+
   const [activeSlide, setActiveSlide] = useState(0);
 
   useEffect(() => {
@@ -73,6 +78,18 @@ export default function Home() {
           countryData[slug] = unwrap(results[idx]) || [];
         });
         setMoviesByCountry(countryData);
+
+        // Logic gọi API lấy Profile y hệt MovieDetail
+        if (token) {
+          try {
+            const profileRes = await getProfile();
+            setProfile(
+              profileRes?.data?.data || profileRes?.data || profileRes,
+            );
+          } catch (err) {
+            console.error(err);
+          }
+        }
       } catch (err) {
         console.error("Home fetch error:", err);
       } finally {
@@ -80,7 +97,7 @@ export default function Home() {
       }
     };
     fetchData();
-  }, []);
+  }, [token]);
 
   useEffect(() => {
     if (!newestMovies?.length) return;
@@ -93,21 +110,22 @@ export default function Home() {
   if (loading) return <LoadingSkeleton />;
 
   const activeMovie = newestMovies?.[activeSlide];
+  const isPremiumUser = profile?.is_premium === true;
+  const isPremiumMovie = activeMovie?.is_premium === true;
   const handleWatchClick = (e) => {
     e.preventDefault();
-    const token = localStorage.getItem("token") || localStorage.getItem("access_token");
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
-    const isPremiumUser = user?.is_premium === true;
 
     if (!token) {
       toast.warning("Bạn cần đăng nhập để xem phim");
       navigate("/login");
       return;
     }
-    if (activeMovie?.is_premium && !isPremiumUser) {
-      toast.error("Phim này yêu cầu tài khoản Premium");
+
+    if (isPremiumMovie && !isPremiumUser) {
+      toast.error("Phim này yêu cầu tài khoản Premium 👑");
       return;
     }
+
     navigate(`/movies/watch/${activeMovie?.slug}`);
   };
 
@@ -172,13 +190,37 @@ export default function Home() {
             </p>
 
             <div className="mt-8 flex items-center gap-4">
-              <button
-                onClick={handleWatchClick}
-                className="group relative flex items-center gap-3 bg-white text-slate-900 px-8 py-3.5 rounded-full text-sm md:text-base font-bold overflow-hidden shadow-xl hover:scale-105 transition-all duration-300"
-              >
-                <Play fill="currentColor" size={18} className="relative z-10" />
-                <span className="relative z-10 tracking-wider">Xem Ngay</span>
-              </button>
+              <div className="relative group">
+                <button
+                  onClick={handleWatchClick}
+                  className={`relative flex items-center gap-3 px-8 py-3.5 rounded-full text-sm md:text-base font-bold overflow-hidden shadow-xl transition-all duration-300 ${
+                    isPremiumMovie && !isPremiumUser
+                      ? "bg-slate-300 text-slate-600 cursor-not-allowed" 
+                      : "bg-white text-slate-900 hover:scale-105"
+                  }`}
+                >
+                  {isPremiumMovie && !isPremiumUser ? (
+                    <Lock size={18} className="relative z-10" />
+                  ) : (
+                    <Play
+                      fill="currentColor"
+                      size={18}
+                      className="relative z-10"
+                    />
+                  )}
+                  <span className="relative z-10 tracking-wider">
+                    {isPremiumMovie && !isPremiumUser ? "Premium" : "Xem Ngay"}
+                  </span>
+                </button>
+                {isPremiumMovie && !isPremiumUser && (
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 opacity-0 group-hover:opacity-100 transition pointer-events-none z-50">
+                    <div className="bg-black/90 backdrop-blur-md text-white text-xs px-3 py-2 rounded-lg shadow-lg whitespace-nowrap flex items-center gap-2">
+                      <Lock size={12} /> Nâng cấp Premium để xem phim này
+                    </div>
+                    <div className="w-2 h-2 bg-black/90 rotate-45 mx-auto -mt-1 absolute -top-1 left-1/2 -translate-x-1/2"></div>
+                  </div>
+                )}
+              </div>
 
               <Link
                 to={`/movies/${activeMovie?.slug}`}
@@ -190,7 +232,6 @@ export default function Home() {
             </div>
           </motion.div>
         </div>
-
         <div className="absolute bottom-8 right-4 lg:right-8 flex items-end gap-2 z-20">
           {newestMovies.map((movie, idx) => {
             const isActive = activeSlide === idx;

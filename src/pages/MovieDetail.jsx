@@ -281,7 +281,7 @@ export default function MovieDetail() {
               ))}
             </div>
 
-            {totalPages >= 1 && (
+            {totalPages > 1 && (
               <div className="mt-6">
                 <Pagination
                   currentPage={currentPage}
