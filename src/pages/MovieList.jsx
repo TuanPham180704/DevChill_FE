@@ -89,7 +89,7 @@ export default function MoviesList() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] pb-12 font-sans selection:bg-red-100 selection:text-red-600">
+    <div className="min-h-screen bg-[#F8FAFC] pb-12 font-sans selection:bg-blue-100 selection:text-blue-600">
       <div className="bg-white border-b border-slate-100 mb-8">
         <div className="max-w-7xl mx-auto px-6 py-10 md:py-14">
           <motion.div
@@ -98,13 +98,13 @@ export default function MoviesList() {
             className="flex flex-col gap-3"
           >
             <div className="flex items-center gap-3">
-              <div className="w-1 h-6 bg-red-500 rounded-full" />
+              <div className="w-1 h-6 bg-blue-500 rounded-full" />
               <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-slate-400">
                 Collections
               </span>
             </div>
             <h1 className="text-2xl md:text-4xl font-light text-slate-800 capitalize tracking-tight leading-none">
-              {title} <span className="font-semibold text-red-600">.</span>
+              {title} <span className="font-semibold text-blue-600">.</span>
             </h1>
             <p className="text-slate-400 text-sm font-medium tracking-wide">
               Khám phá không gian điện ảnh với{" "}
@@ -184,7 +184,7 @@ export default function MoviesList() {
                         )}
 
                         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500">
-                          <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center shadow-lg transform scale-75 group-hover:scale-100 transition-transform">
+                          <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center shadow-lg transform scale-75 group-hover:scale-100 transition-transform">
                             <Play
                               fill="white"
                               size={16}
@@ -196,7 +196,7 @@ export default function MoviesList() {
 
                       <div className="p-4 flex-1 flex flex-col justify-between">
                         <div>
-                          <h3 className="text-[13px] font-semibold text-slate-800 line-clamp-1 group-hover:text-red-600 transition-colors leading-tight">
+                          <h3 className="text-[13px] font-semibold text-slate-800 line-clamp-1 group-hover:text-blue-600 transition-colors leading-tight">
                             {movie.name}
                           </h3>
                           <p className="text-[11px] text-slate-400 mt-1 truncate font-medium">
@@ -253,7 +253,7 @@ export default function MoviesList() {
             className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50"
           >
             <div className="bg-slate-800/90 backdrop-blur-xl text-white px-5 py-2 rounded-2xl text-[10px] font-bold shadow-xl flex items-center gap-3 border border-white/10 tracking-[0.2em]">
-              <div className="w-3 h-3 border border-red-500 border-t-transparent rounded-full animate-spin" />
+              <div className="w-3 h-3 border border-blue-500 border-t-transparent rounded-full animate-spin" />
               UPDATING
             </div>
           </motion.div>

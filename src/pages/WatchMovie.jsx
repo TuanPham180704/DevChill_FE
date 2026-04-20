@@ -1,4 +1,6 @@
+/* eslint-disable no-unused-vars */
 import { useEffect, useState } from "react";
+import VideoPlayer from "../components/VideoPlayer";
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { watchMovie, getPublicMovieBySlug } from "../api/moviesPublicApi";
 import {
@@ -56,13 +58,13 @@ export default function WatchMovie() {
     };
     fetchAllData();
   }, [slug, ep, serverId]);
+  const handleTimeUpdate = (currentTime) => {};
 
-  // Loading State
   if (!data || !movieDetail) {
     return (
       <div className="h-screen flex items-center justify-center bg-[#FAFAFA]">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-[3px] border-gray-200 border-t-red-500 rounded-full animate-spin"></div>
+          <div className="w-8 h-8 border-[3px] border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
           <span className="text-sm font-medium text-gray-400 tracking-tight">
             Đang tải dữ liệu phòng chiếu...
           </span>
@@ -71,7 +73,6 @@ export default function WatchMovie() {
     );
   }
 
-  // Locked State (Premium)
   if (data.locked) {
     return (
       <div className="h-screen flex flex-col items-center justify-center bg-[#FAFAFA] px-4 font-sans">
@@ -99,7 +100,6 @@ export default function WatchMovie() {
 
   return (
     <div className="min-h-screen bg-[#FDFDFD] text-gray-900 font-sans pb-24">
-      {/* HEADER TỐI GIẢN (Cố định chiều rộng để đồng nhất với Player) */}
       <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-gray-100">
         <div className="max-w-5xl mx-auto h-16 flex items-center justify-between px-4 lg:px-0">
           <button
@@ -121,46 +121,41 @@ export default function WatchMovie() {
                 {episode.name}
               </span>
               <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-              <span className="text-[11px] font-semibold text-red-500 uppercase tracking-widest">
+              <span className="text-[11px] font-semibold text-blue-500 uppercase tracking-widest">
                 Đang phát
               </span>
             </div>
           </div>
-          <div className="w-20"></div> {/* Spacer để cân bằng Header */}
+          <div className="w-20"></div>
         </div>
       </header>
 
-      {/* CONTAINER CHÍNH: Thu hẹp xuống max-w-5xl (Khoảng 1024px) để Player không bị quá to */}
       <main className="max-w-5xl mx-auto px-4 lg:px-0 mt-6 lg:mt-8">
-        {/* PLAYER TRUNG TÂM */}
         <div className="relative aspect-video bg-black rounded-2xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.08)] ring-1 ring-gray-900/5 group">
           {loading && (
             <div className="absolute inset-0 bg-black/50 z-10 flex items-center justify-center backdrop-blur-sm">
               <div className="w-10 h-10 border-[3px] border-white/20 border-t-white rounded-full animate-spin"></div>
             </div>
           )}
-          {selectedStream?.link_embed ? (
+          {selectedStream?.link_m3u8 ? (
+            <VideoPlayer
+              key={selectedStream?.link_m3u8}
+              url={selectedStream?.link_m3u8}
+              startTime={0}
+              onTimeUpdate={handleTimeUpdate}
+            />
+          ) : selectedStream?.link_embed ? (
             <iframe
               src={selectedStream.link_embed}
               className="w-full h-full"
               allowFullScreen
               title="Movie Player"
             />
-          ) : (
-            <video
-              key={selectedStream?.link_m3u8}
-              src={selectedStream?.link_m3u8}
-              controls
-              className="w-full h-full"
-            />
-          )}
+          ) : null}
         </div>
 
-        {/* BỐ CỤC 2 CỘT DƯỚI PLAYER */}
         <div className="mt-10 grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-          {/* CỘT TRÁI: DANH SÁCH TẬP PHIM (8 Cột) */}
           <div className="lg:col-span-8">
-            {/* Tiêu đề phân cấp typography */}
             <div className="mb-6 px-1">
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
                 Nội dung phát
@@ -174,8 +169,6 @@ export default function WatchMovie() {
                 </span>
               </div>
             </div>
-
-            {/* Khung scroll tập phim */}
             <div className="flex flex-col gap-3 max-h-125 overflow-y-auto pr-2 custom-scrollbar">
               {episodes.map((epItem) => {
                 const isActive = epItem.episode_number === ep;
@@ -190,11 +183,10 @@ export default function WatchMovie() {
                     }
                     className={`group flex items-center p-3 rounded-2xl cursor-pointer transition-all duration-200 border bg-white ${
                       isActive
-                        ? "border-red-400 shadow-sm ring-4 ring-red-50"
+                        ? "border-blue-400 shadow-sm ring-4 ring-blue-50"
                         : "border-gray-200/70 hover:border-gray-300 hover:shadow-sm"
                     }`}
                   >
-                    {/* Ảnh Thumbnail */}
                     <div className="relative w-28 h-16 sm:w-32 sm:h-20 shrink-0 rounded-[10px] overflow-hidden bg-gray-100">
                       <img
                         src={movieDetail.poster_url}
@@ -218,14 +210,12 @@ export default function WatchMovie() {
                         </div>
                       )}
                     </div>
-
-                    {/* Thông tin tập */}
                     <div className="flex-1 min-w-0 ml-4">
                       <h4
                         className={`text-sm font-semibold truncate tracking-tight transition-colors ${
                           isActive
-                            ? "text-red-600"
-                            : "text-gray-900 group-hover:text-red-500"
+                            ? "text-blue-600"
+                            : "text-gray-900 group-hover:text-blue-500"
                         }`}
                       >
                         {epItem.name}
@@ -235,10 +225,8 @@ export default function WatchMovie() {
                         <span className="mx-1 text-gray-300">•</span> HD
                       </p>
                     </div>
-
-                    {/* Dấu check Đang xem */}
                     {isActive && (
-                      <div className="ml-4 pr-3 flex items-center gap-1.5 text-red-500">
+                      <div className="ml-4 pr-3 flex items-center gap-1.5 text-blue-500">
                         <span className="text-[11px] font-semibold hidden sm:inline">
                           Đang xem
                         </span>
@@ -251,7 +239,6 @@ export default function WatchMovie() {
             </div>
           </div>
 
-          {/* CỘT PHẢI: CHỌN SERVER (4 Cột - Dính trên màn hình) */}
           <div className="lg:col-span-4 lg:sticky lg:top-24 space-y-6">
             <div className="bg-white p-6 rounded-2xl border border-gray-200/70 shadow-sm">
               <div className="flex items-center gap-2 mb-5 text-gray-900">
@@ -301,11 +288,7 @@ export default function WatchMovie() {
           __html: `
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
-        
-        /* Spin chậm cho icon đĩa CD đang phát */
         .animate-spin-slow { animation: spin 3s linear infinite; }
-
-        /* Scrollbar tinh tế */
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #E5E7EB; border-radius: 10px; }

@@ -115,7 +115,7 @@ export default function Profile() {
   );
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-800 font-sans antialiased selection:bg-red-500 selection:text-white pb-24 pt-10">
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-800 font-sans antialiased selection:bg-blue-500 selection:text-white pb-24 pt-10">
       {/* WRAPPER ĐỒNG BỘ VỚI TRANG HOME */}
       <div className="max-w-7xl mx-auto px-6 lg:px-16">
         {/* Header Tiêu đề */}
@@ -205,7 +205,7 @@ export default function Profile() {
                       </label>
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                          <Mail size={16} className="text-slate-400" />
+                          <Mail size={16} className="text-slate-900" />
                         </div>
                         <input
                           type="email"
@@ -223,7 +223,7 @@ export default function Profile() {
                       </label>
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                          <User size={16} className="text-slate-400" />
+                          <User size={16} className="text-slate-900" />
                         </div>
                         <input
                           type="text"
@@ -231,28 +231,32 @@ export default function Profile() {
                           value={formData.username}
                           onChange={handleChange}
                           placeholder="Nhập tên của bạn"
-                          className="w-full pl-10 pr-4 py-3 rounded-xl bg-white border border-slate-200 text-slate-900 text-sm font-semibold focus:border-red-500 focus:ring-2 focus:ring-red-500/10 outline-none transition-all"
+                          className="w-full pl-10 pr-4 py-3 rounded-xl bg-white border border-slate-200 text-slate-900 text-sm font-semibold focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 outline-none transition-all"
                         />
                       </div>
                     </div>
 
-                    {/* Ngày sinh */}
+                    {/* Ngày sinh (Đã Fix Icon Xanh Cuối Ô Trực Quan) */}
                     <div>
                       <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
                         Ngày sinh
                       </label>
                       <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                          <Calendar size={16} className="text-slate-400" />
-                        </div>
                         <input
                           type="date"
                           name="birth_date"
                           value={formData.birth_date}
                           onChange={handleChange}
-                          className="w-full pl-10 pr-4 py-3 rounded-xl bg-white border border-slate-200 text-slate-900 text-sm font-semibold focus:border-red-500 focus:ring-2 focus:ring-red-500/10 outline-none transition-all"
-                          style={{ colorScheme: "dark" }}
+                          /* Ẩn icon mặc định (opacity-0) nhưng cho nó tràn kích thước lên đè icon thật để user bấm được */
+                          className="w-full pl-4 pr-12 py-3 rounded-xl bg-white border border-slate-200 text-slate-900 text-sm font-semibold focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 outline-none transition-all cursor-pointer [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-12 [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:z-10"
                         />
+                        {/* Custom Icon Lịch Màu Xanh nằm bên dưới vùng click trong suốt */}
+                        <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none z-0">
+                          <Calendar
+                            size={18}
+                            className="text-blue-500 drop-shadow-sm"
+                          />
+                        </div>
                       </div>
                     </div>
 
@@ -271,7 +275,7 @@ export default function Profile() {
                             key={g.id}
                             className={`relative flex items-center justify-center px-5 py-2.5 rounded-xl border font-semibold text-xs cursor-pointer transition-all ${
                               formData.gender === g.id
-                                ? "bg-red-500 border-red-500 text-white shadow-md shadow-red-500/20"
+                                ? "bg-blue-500 border-blue-500 text-white shadow-md shadow-blue-500/20"
                                 : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-700"
                             }`}
                           >
