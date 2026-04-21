@@ -1,7 +1,17 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 import { useState, useEffect, useMemo } from "react";
-import { FaSearch, FaRedo, FaEye, FaPlus, FaDownload } from "react-icons/fa";
+import {
+  Search,
+  RefreshCw,
+  Eye,
+  Plus,
+  Download,
+  FileText,
+  FileEdit,
+  CheckCircle,
+  AlertCircle,
+} from "lucide-react";
 import ExportCSV from "../../components/common/ExportCSV";
 import Pagination from "../../components/Admin/Pagination";
 import ContractModal from "../../components/Admin/Contracts/ContractModal";
@@ -134,76 +144,125 @@ export default function ContractList() {
     Trạng_thái: c.status,
     File: c.file_url ? "Có" : "Không",
   }));
+  const getStatusBadge = (status) => {
+    const baseStyle =
+      "inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide";
+    switch (status?.toLowerCase()) {
+      case "active":
+        return `${baseStyle} bg-emerald-50 text-emerald-600`;
+      case "draft":
+        return `${baseStyle} bg-slate-100 text-slate-500`;
+      case "expired":
+        return `${baseStyle} bg-amber-50 text-amber-600`;
+      case "cancelled":
+        return `${baseStyle} bg-rose-50 text-rose-600`;
+      default:
+        return `${baseStyle} bg-slate-50 text-slate-500`;
+    }
+  };
 
   return (
-    <div className="flex min-h-screen bg-[#F4F6FA]">
+    <div className="flex min-h-screen bg-[#FCFDFE]">
       <div className="flex-1 ml-64 flex flex-col">
-        <div className="p-6 flex-1 flex flex-col gap-5">
-          <div>
-            <h1 className="text-xl font-bold text-gray-800">
+        <div className="p-6 space-y-5 flex-1 max-w-325 mx-auto w-full">
+          {/* Header */}
+          <div className="flex flex-col gap-1">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-800">
               Quản lý hợp đồng
             </h1>
-            <p className="text-sm text-gray-500">
+            <p className="text-[14px] text-slate-500 font-medium">
               Theo dõi, chỉnh sửa và quản lý hợp đồng dễ dàng ✨
             </p>
           </div>
-          <div className="grid grid-cols-4 gap-3">
-            <div className="bg-white p-3 rounded-lg shadow text-center">
-              <div className="text-xl font-bold text-blue-600">
-                {stats.total}
+
+          {/* Stat Cards - Cùng style 8/10 với trang Khách hàng */}
+          <div className="grid grid-cols-4 gap-4 mb-2">
+            <div className="bg-white p-4 rounded-2xl shadow-[0_4px_40px_rgba(0,0,0,0.02)] flex items-center gap-4">
+              <div className="w-11 h-11 rounded-xl bg-blue-50/70 flex items-center justify-center text-blue-500">
+                <FileText size={20} strokeWidth={2} />
               </div>
-              <div className="text-xs text-gray-500">Tổng hợp đồng</div>
+              <div>
+                <div className="text-slate-400 text-[11px] font-semibold mb-0.5 uppercase tracking-wider">
+                  Tổng hợp đồng
+                </div>
+                <div className="text-2xl font-black text-slate-800">
+                  {stats.total}
+                </div>
+              </div>
             </div>
 
-            <div className="bg-white p-3 rounded-lg shadow text-center">
-              <div className="text-xl font-bold text-green-600">
-                {stats.draft}
+            <div className="bg-white p-4 rounded-2xl shadow-[0_4px_40px_rgba(0,0,0,0.02)] flex items-center gap-4">
+              <div className="w-11 h-11 rounded-xl bg-slate-50 flex items-center justify-center text-slate-500">
+                <FileEdit size={20} strokeWidth={2} />
               </div>
-              <div className="text-xs text-gray-500">Draft</div>
+              <div>
+                <div className="text-slate-400 text-[11px] font-semibold mb-0.5 uppercase tracking-wider">
+                  Nháp (Draft)
+                </div>
+                <div className="text-2xl font-black text-slate-800">
+                  {stats.draft}
+                </div>
+              </div>
             </div>
 
-            <div className="bg-white p-3 rounded-lg shadow text-center">
-              <div className="text-xl font-bold text-blue-600">
-                {stats.active}
+            <div className="bg-white p-4 rounded-2xl shadow-[0_4px_40px_rgba(0,0,0,0.02)] flex items-center gap-4">
+              <div className="w-11 h-11 rounded-xl bg-emerald-50/70 flex items-center justify-center text-emerald-500">
+                <CheckCircle size={20} strokeWidth={2} />
               </div>
-              <div className="text-xs text-gray-500">Active</div>
+              <div>
+                <div className="text-slate-400 text-[11px] font-semibold mb-0.5 uppercase tracking-wider">
+                  Đang hiệu lực
+                </div>
+                <div className="text-2xl font-black text-slate-800">
+                  {stats.active}
+                </div>
+              </div>
             </div>
 
-            <div className="bg-white p-3 rounded-lg shadow text-center">
-              <div className="text-xl font-bold text-red-600">
-                {stats.expired + stats.cancelled}
+            <div className="bg-white p-4 rounded-2xl shadow-[0_4px_40px_rgba(0,0,0,0.02)] flex items-center gap-4">
+              <div className="w-11 h-11 rounded-xl bg-rose-50/70 flex items-center justify-center text-rose-500">
+                <AlertCircle size={20} strokeWidth={2} />
               </div>
-              <div className="text-xs text-gray-500">Expired</div>
+              <div>
+                <div className="text-slate-400 text-[11px] font-semibold mb-0.5 uppercase tracking-wider">
+                  Hết hạn / Hủy
+                </div>
+                <div className="text-2xl font-black text-slate-800">
+                  {stats.expired + stats.cancelled}
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* FILTER */}
-          <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3 rounded-lg shadow-sm">
-            <div className="flex items-center gap-2 flex-wrap">
+          {/* Bộ lọc và Công cụ */}
+          <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3 rounded-2xl shadow-[0_4px_40px_rgba(0,0,0,0.02)]">
+            <div className="flex items-center gap-3 flex-wrap pl-1">
               <div className="relative w-64">
-                <FaSearch className="absolute left-3 top-3 text-gray-400 text-sm" />
+                <Search
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                  size={16}
+                />
                 <input
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Tìm kiếm..."
-                  className="w-full pl-9 pr-3 py-2 text-sm border rounded-lg"
+                  placeholder="Tìm kiếm hợp đồng..."
+                  className="w-full pl-10 pr-3 py-2.5 text-[13px] bg-slate-50/50 rounded-xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-400 text-slate-700 font-medium"
                 />
               </div>
-
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-3 py-2 text-sm border rounded-lg"
+                className="px-4 py-2.5 text-[13px] bg-slate-50/50 rounded-xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 text-slate-600 font-medium outline-none cursor-pointer transition-all appearance-none min-w-35"
               >
-                <option value="all">Tất cả</option>
-                <option value="draft">Draft</option>
-                <option value="active">Active</option>
-                <option value="expired">Expired</option>
-                <option value="cancelled">Cancelled</option>
+                <option value="all">Tất cả trạng thái</option>
+                <option value="draft">Nháp (Draft)</option>
+                <option value="active">Đang hiệu lực (Active)</option>
+                <option value="expired">Hết hạn (Expired)</option>
+                <option value="cancelled">Đã hủy (Cancelled)</option>
               </select>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 pr-1">
               <ExportCSV
                 data={csvData}
                 fields={[
@@ -219,10 +278,10 @@ export default function ContractList() {
 
               <button
                 onClick={fetchContracts}
-                className="flex items-center gap-2 px-4 py-2 text-sm bg-blue-500 text-white rounded-lg"
+                className="flex items-center gap-1.5 px-4 py-2.5 text-[13px] font-semibold text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all"
               >
-                <FaRedo />
-                Refresh
+                <RefreshCw size={15} />
+                Làm mới
               </button>
 
               <button
@@ -230,95 +289,143 @@ export default function ContractList() {
                   setSelectedContract(null);
                   setContractModalOpen(true);
                 }}
-                className="flex items-center gap-2 px-3 py-2 text-sm bg-green-500 text-white rounded-lg"
+                className="flex items-center gap-1.5 px-4 py-2.5 text-[13px] font-semibold text-white bg-blue-500 hover:bg-blue-600 shadow-sm shadow-blue-200 rounded-xl transition-all"
               >
-                <FaPlus />
-                Thêm
+                <Plus size={16} strokeWidth={2.5} />
+                Thêm mới
               </button>
             </div>
           </div>
+          <div className="bg-white rounded-2xl shadow-[0_4px_40px_rgba(0,0,0,0.02)] overflow-hidden p-1.5">
+            <table className="w-full text-sm text-left border-collapse">
+              <thead>
+                <tr>
+                  <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50">
+                    ID
+                  </th>
+                  <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50">
+                    Tên Hợp Đồng
+                  </th>
+                  <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 text-center">
+                    Bắt đầu
+                  </th>
+                  <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 text-center">
+                    Kết thúc
+                  </th>
+                  <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 text-center">
+                    Trạng thái
+                  </th>
+                  <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 text-center">
+                    Tập tin
+                  </th>
+                  <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 text-right">
+                    Thao tác
+                  </th>
+                </tr>
+              </thead>
 
-          {/* TABLE */}
-          <div className="bg-white rounded-xl shadow flex-1 overflow-hidden">
-            <div className="overflow-auto">
-              <table className="w-full text-xs">
-                <thead className="bg-gray-100 text-gray-500 uppercase">
+              <tbody>
+                {loading ? (
                   <tr>
-                    <th className="p-3 text-left">ID</th>
-                    <th className="p-3 text-left">Tên</th>
-                    <th className="p-3 text-center">Start</th>
-                    <th className="p-3 text-center">End</th>
-                    <th className="p-3 text-center">Status</th>
-                    <th className="p-3 text-center">File</th>
-                    <th className="p-3 text-center">Action</th>
+                    <td colSpan="7" className="text-center py-12">
+                      <div className="flex flex-col items-center gap-3 text-slate-400">
+                        <RefreshCw
+                          className="animate-spin text-blue-400"
+                          size={24}
+                        />
+                        <span className="text-[13px] font-medium">
+                          Đang tải dữ liệu...
+                        </span>
+                      </div>
+                    </td>
                   </tr>
-                </thead>
-
-                <tbody>
-                  {loading ? (
-                    <tr>
-                      <td colSpan="7" className="text-center py-4">
-                        Loading...
+                ) : currentContracts.length === 0 ? (
+                  <tr>
+                    <td colSpan="7" className="text-center py-12">
+                      <div className="flex flex-col items-center gap-2 text-slate-400">
+                        <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mb-1">
+                          <FileText size={24} className="text-slate-300" />
+                        </div>
+                        <span className="text-[13px] font-medium">
+                          Chưa có hợp đồng nào.
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  currentContracts.map((c) => (
+                    <tr
+                      key={c.id}
+                      className="group hover:bg-[#F8FAFC] transition-colors duration-200 rounded-xl"
+                    >
+                      <td className="px-5 py-3.5 font-semibold text-slate-400 text-[13px] rounded-l-xl">
+                        #{c.id}
                       </td>
-                    </tr>
-                  ) : currentContracts.length === 0 ? (
-                    <tr>
-                      <td colSpan="7" className="text-center py-4">
-                        No data
+                      <td className="px-5 py-3.5 font-bold text-slate-700 text-[13.5px]">
+                        {c.name}
                       </td>
-                    </tr>
-                  ) : (
-                    currentContracts.map((c) => (
-                      <tr key={c.id} className="border-t hover:bg-gray-50">
-                        <td className="p-4">{c.id}</td>
-                        <td className="p-4 font-medium">{c.name}</td>
-                        <td className="p-4 text-center">{c.start_date}</td>
-                        <td className="p-4 text-center">{c.end_date}</td>
-                        <td className="p-4 text-center">{c.status}</td>
+                      <td className="px-5 py-3.5 font-medium text-slate-500 text-[13px] text-center">
+                        {c.start_date || "-"}
+                      </td>
+                      <td className="px-5 py-3.5 font-medium text-slate-500 text-[13px] text-center">
+                        {c.end_date || "-"}
+                      </td>
+                      <td className="px-5 py-3.5 text-center">
+                        <span className={getStatusBadge(c.status)}>
+                          {c.status}
+                        </span>
+                      </td>
 
-                        <td className="p-4 text-center">
-                          {c.file_url ? (
-                            <button
-                              onClick={() => handleDownload(c)}
-                              className="text-blue-600 flex items-center gap-1 justify-center mx-auto"
-                            >
-                              <FaDownload />
-                              File
-                            </button>
-                          ) : (
-                            "No"
-                          )}
-                        </td>
+                      <td className="px-5 py-3.5 text-center">
+                        {c.file_url ? (
+                          <button
+                            onClick={() => handleDownload(c)}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors mx-auto"
+                          >
+                            <Download size={14} strokeWidth={2.5} />
+                            Tải về
+                          </button>
+                        ) : (
+                          <span className="text-[13px] text-slate-300 italic">
+                            Trống
+                          </span>
+                        )}
+                      </td>
 
-                        <td className="p-4 text-center">
+                      <td className="px-5 py-3.5 rounded-r-xl">
+                        <div className="flex justify-end">
                           <button
                             onClick={() => {
                               setSelectedContract(c);
                               setContractModalOpen(true);
                             }}
-                            className="p-1 bg-blue-100 rounded text-blue-600"
+                            className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all duration-200"
+                            title="Xem chi tiết"
                           >
-                            <FaEye />
+                            <Eye size={16} strokeWidth={2.5} />
                           </button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-          <div className="bg-white py-2 flex justify-center rounded-lg">
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-              totalItems={filteredContracts.length}
-              itemsPerPage={itemsPerPage}
-            />
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
+
+        {/* Thanh phân trang */}
+        <div className="sticky bottom-0 bg-white/70 backdrop-blur-xl border-t border-slate-100 py-3 flex justify-center z-10">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+            totalItems={filteredContracts.length}
+            itemsPerPage={itemsPerPage}
+          />
+        </div>
       </div>
+
       <ContractModal
         isOpen={isContractModalOpen}
         onClose={() => {

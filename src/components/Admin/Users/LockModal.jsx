@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FaLock, FaUnlock } from "react-icons/fa";
+import { Lock, Unlock, X, Loader2 } from "lucide-react"; 
 
 export default function LockModal({
   isOpen,
@@ -24,78 +24,102 @@ export default function LockModal({
   if (!isOpen || !user) return null;
 
   const isLocked = user.is_locked;
+  const baseInputStyle =
+    "w-full px-4 py-3 text-[14px] text-slate-700 bg-slate-50/50 border border-slate-200 rounded-2xl outline-none transition-all placeholder:text-slate-400 focus:bg-white focus:ring-4";
 
-  const inputStyle =
-    "w-full h-10 px-3 text-sm border rounded-md outline-none focus:ring-2 focus:ring-indigo-400";
-  const labelStyle = "text-xs font-medium text-gray-600 mb-1";
+  const focusRing = isLocked
+    ? "focus:border-emerald-400 focus:ring-emerald-500/10"
+    : "focus:border-rose-400 focus:ring-rose-500/10";
+
+  const labelStyle =
+    "text-[12px] font-bold text-slate-400 uppercase tracking-wider mb-2 block pl-1";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative w-full max-w-md bg-white rounded-xl shadow-lg overflow-hidden flex flex-col">
-        <div className="px-6 py-6 text-center border-b">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div
+        className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm transition-opacity"
+        onClick={onClose}
+      />
+      <div className="relative w-full max-w-105 bg-white rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.08)] overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-xl transition-all"
+        >
+          <X size={20} strokeWidth={2.5} />
+        </button>
+        <div className="px-8 pt-10 pb-6 text-center">
           <div
-            className={`w-14 h-14 mx-auto flex items-center justify-center rounded-lg mb-3 ${
+            className={`w-16 h-16 mx-auto flex items-center justify-center rounded-2xl mb-4 shadow-sm ${
               isLocked
-                ? "bg-green-100 text-green-600"
-                : "bg-red-100 text-red-600"
+                ? "bg-emerald-50 text-emerald-500 ring-4 ring-emerald-50/50"
+                : "bg-rose-50 text-rose-500 ring-4 ring-rose-50/50"
             }`}
           >
-            {isLocked ? <FaUnlock size={18} /> : <FaLock size={18} />}
+            {isLocked ? (
+              <Unlock size={28} strokeWidth={2} />
+            ) : (
+              <Lock size={28} strokeWidth={2} />
+            )}
           </div>
 
-          <h3 className="text-base font-semibold">
+          <h3 className="text-xl font-bold text-slate-800 tracking-tight">
             {isLocked ? "Mở khóa tài khoản" : "Khóa tài khoản"}
           </h3>
 
-          <p className="text-xs text-gray-500 mt-1">
-            {isLocked ? "Mở khóa cho" : "Khóa tài khoản"}{" "}
-            <span className="font-medium text-gray-700">{user.username}</span>
+          <p className="text-[14px] text-slate-500 mt-2">
+            {isLocked
+              ? "Xác nhận mở khóa hoạt động cho"
+              : "Bạn đang thực hiện khóa tài khoản"}{" "}
+            <span className="font-bold text-slate-700">{user.username}</span>
           </p>
         </div>
-        <div className="p-5 space-y-4">
+        <div className="px-8 py-2 space-y-5">
           <div>
-            <label className={labelStyle}>Lý do</label>
+            <label className={labelStyle}>
+              Lý do {isLocked ? "mở khóa" : "khóa"}
+            </label>
             <textarea
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              placeholder="Nhập lý do..."
+              placeholder={`Nhập lý do ${isLocked ? "mở khóa" : "khóa"}...`}
               rows={3}
-              className="w-full p-3 text-sm border rounded-md outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
+              className={`${baseInputStyle} ${focusRing} resize-none`}
             />
           </div>
+
           {!isLocked && (
-            <>
-              <label className="flex items-center gap-2 text-sm text-gray-600">
+            <div className="space-y-4 pt-1">
+              <label className="flex items-center gap-3 text-[14px] font-medium text-slate-600 cursor-pointer p-3 bg-slate-50/50 border border-slate-100 rounded-2xl hover:bg-slate-50 transition-colors">
                 <input
                   type="checkbox"
                   checked={isPermanent}
                   onChange={(e) => setIsPermanent(e.target.checked)}
-                  className="accent-red-500"
+                  className="w-4 h-4 rounded text-rose-500 bg-white border-slate-300 focus:ring-rose-500/20 focus:ring-2 accent-rose-500 cursor-pointer"
                 />
                 Khóa vĩnh viễn
               </label>
 
               {!isPermanent && (
-                <div>
-                  <label className={labelStyle}>Thời gian khóa</label>
+                <div className="animate-in slide-in-from-top-2 fade-in duration-200">
+                  <label className={labelStyle}>Thời hạn khóa (Đến ngày)</label>
                   <input
                     type="date"
                     value={lockUntil}
                     onChange={(e) => setLockUntil(e.target.value)}
-                    className={inputStyle}
+                    className={`${baseInputStyle} ${focusRing} cursor-pointer`}
                   />
                 </div>
               )}
-            </>
+            </div>
           )}
         </div>
-        <div className="p-4 border-t bg-gray-50 flex gap-3">
+        <div className="p-6 pt-4 flex gap-3">
           <button
             onClick={onClose}
-            className="flex-1 h-10 text-sm border rounded-md hover:bg-gray-100"
+            disabled={loading}
+            className="flex-1 h-12 text-[14px] font-bold text-slate-500 bg-slate-50 hover:bg-slate-100 hover:text-slate-700 rounded-2xl transition-all"
           >
-            Hủy
+            Hủy bỏ
           </button>
 
           <button
@@ -110,21 +134,21 @@ export default function LockModal({
               }
             }}
             disabled={loading}
-            className={`flex-1 h-10 text-sm rounded-md text-white transition ${
+            className={`flex-1 h-12 text-[14px] font-bold rounded-2xl text-white transition-all shadow-sm flex items-center justify-center gap-2 ${
               isLocked
-                ? "bg-green-500 hover:bg-green-600"
-                : "bg-red-500 hover:bg-red-600"
-            }`}
+                ? "bg-emerald-500 hover:bg-emerald-600 shadow-emerald-200/50"
+                : "bg-rose-500 hover:bg-rose-600 shadow-rose-200/50"
+            } ${loading ? "opacity-80 cursor-not-allowed" : ""}`}
           >
             {loading ? (
-              <div className="flex items-center justify-center gap-2">
-                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <>
+                <Loader2 size={18} className="animate-spin" />
                 <span>Đang xử lý...</span>
-              </div>
+              </>
             ) : isLocked ? (
-              "Mở khóa"
+              "Xác nhận Mở khóa"
             ) : (
-              "Khóa"
+              "Xác nhận Khóa"
             )}
           </button>
         </div>

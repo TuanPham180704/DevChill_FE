@@ -1,12 +1,13 @@
 import {
-  FaChartBar,
-  FaUsers,
-  FaFilm,
-  FaFileContract,
-  FaBoxOpen,
-  FaHeadset,
-  FaSignOutAlt,
-} from "react-icons/fa";
+  LayoutDashboard,
+  Users,
+  Film,
+  FileText,
+  Package,
+  Headphones,
+  LogOut,
+  ChevronRight,
+} from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { getProfile } from "../../api/userApi";
@@ -45,85 +46,102 @@ export default function Sidebar() {
     logout();
     navigate("/login");
   };
-
   const menuItems = [
-    { name: "Tổng quan", icon: <FaChartBar />, path: "/admin" },
-    { name: "Quản lý khách hàng", icon: <FaUsers />, path: "/admin/customers" },
-    { name: "Quản lý phim", icon: <FaFilm />, path: "/admin/movies" },
-    {
-      name: "Quản lý hợp đồng",
-      icon: <FaFileContract />,
-      path: "/admin/contracts",
-    },
-    { name: "Quản lý gói", icon: <FaBoxOpen />, path: "/admin/packages" },
-    { name: "Quản lý hỗ trợ", icon: <FaHeadset />, path: "/admin/support" },
+    { name: "Tổng quan", icon: LayoutDashboard, path: "/admin" },
+    { name: "Khách hàng", icon: Users, path: "/admin/customers" },
+    { name: "Phim truyện", icon: Film, path: "/admin/movies" },
+    { name: "Hợp đồng", icon: FileText, path: "/admin/contracts" },
+    { name: "Gói dịch vụ", icon: Package, path: "/admin/packages" },
+    { name: "Hỗ trợ", icon: Headphones, path: "/admin/support" },
   ];
 
   const avatarSrc = user?.avatar_url || avatarImg;
 
   return (
-    <aside className="w-64 h-screen bg-white border-r border-gray-200 flex flex-col justify-between fixed left-0 top-0 text-gray-700 shadow-lg z-50">
+    <aside className="w-72 h-screen bg-white border-r border-slate-100 flex flex-col justify-between fixed left-0 top-0 text-slate-700 shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-50">
       <div>
-        <div className="p-6 border-b border-gray-200">
-          <Link to="/"> <h2 className="text-2xl font-black tracking-tighter text-gray-800">
-            DEV<span className="font-light text-cyan-500">CHILL</span>
-          </h2></Link>
-
+        <div className="h-24 flex items-center px-8">
+          <Link to="/" className="group flex items-center gap-2">
+            <div className="w-9 h-9 bg-cyan-500 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-cyan-200">
+              D
+            </div>
+            <h2 className="text-xl font-bold tracking-tight text-slate-800">
+              DEV<span className="text-cyan-500">CHILL</span>
+            </h2>
+          </Link>
         </div>
-        <nav className="p-4 space-y-2 mt-4">
+        <nav className="px-4 space-y-1 mt-2">
+          <p className="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">
+            Main Navigation
+          </p>
           {menuItems.map((item) => {
             const isActive =
               location.pathname === item.path ||
               (item.path !== "/admin" &&
                 location.pathname.startsWith(item.path));
 
+            const Icon = item.icon;
+
             return (
               <Link
                 key={item.name}
                 to={item.path}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 font-medium ${isActive
-                  ? "bg-cyan-50 text-cyan-600 shadow-sm border-l-4 border-cyan-500"
-                  : "text-gray-600 hover:text-cyan-600 hover:bg-gray-100"
-                  }`}
+                className={`group flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 font-medium ${
+                  isActive
+                    ? "bg-cyan-50 text-cyan-600 shadow-sm shadow-cyan-100/50"
+                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
+                }`}
               >
-                <span className="text-lg">{item.icon}</span>
-                <span className="truncate">{item.name}</span>
+                <div className="flex items-center gap-3.5">
+                  <Icon
+                    size={20}
+                    strokeWidth={isActive ? 2.5 : 2}
+                    className={`${isActive ? "text-cyan-500" : "text-slate-400 group-hover:text-slate-600"}`}
+                  />
+                  <span className="text-[14.5px]">{item.name}</span>
+                </div>
+                {isActive && (
+                  <ChevronRight size={14} className="text-cyan-500" />
+                )}
               </Link>
             );
           })}
         </nav>
       </div>
-      <div className="p-4 border-t border-gray-200 flex flex-col gap-4">
+      <div className="p-4 bg-slate-50/50 border-t border-slate-100 mt-auto">
         {loading ? (
-          <p className="flex items-center gap-2 text-gray-400 text-sm">
-            <span className="w-4 h-4 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></span>
-            Đang tải thông tin...
-          </p>
-        ) : (
-          <div className="flex items-center gap-3">
-            <img
-              src={avatarSrc}
-              alt="admin avatar"
-              className="w-12 h-12 rounded-full object-cover shadow-md"
-            />
-            <div className="flex flex-col truncate">
-              <p className="text-sm font-semibold text-gray-800 truncate">
-                {user?.username || "Admin"}
-              </p>
-              <p className="text-xs text-gray-500 truncate">
-                {user?.email || "Quản lý hệ thống"}
-              </p>
+          <div className="flex items-center gap-3 px-2 py-4">
+            <div className="w-10 h-10 bg-slate-200 rounded-full animate-pulse" />
+            <div className="flex-1 space-y-2">
+              <div className="h-3 bg-slate-200 rounded w-20 animate-pulse" />
             </div>
           </div>
-        )}
-        {!loading && (
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-all font-medium"
-          >
-            <FaSignOutAlt size={16} />
-            Đăng xuất
-          </button>
+        ) : (
+          <>
+            <div className="flex items-center gap-3 p-2 rounded-2xl bg-white shadow-sm border border-slate-100 mb-4 transition-all hover:border-cyan-100">
+              <img
+                src={avatarSrc}
+                alt="admin avatar"
+                className="w-10 h-10 rounded-xl object-cover"
+              />
+              <div className="flex flex-col min-w-0">
+                <p className="text-sm font-bold text-slate-800 truncate">
+                  {user?.username || "Quản trị viên"}
+                </p>
+                <p className="text-[11px] text-slate-500 truncate lowercase">
+                  {user?.email || "admin@devchill.com"}
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200 text-sm font-bold border border-transparent hover:border-red-100"
+            >
+              <LogOut size={16} strokeWidth={2.5} />
+              Đăng xuất
+            </button>
+          </>
         )}
       </div>
     </aside>

@@ -1,17 +1,20 @@
 import { useState, useEffect, useMemo } from "react";
 import {
-  FaSearch,
-  FaRedo,
-  FaEye,
-  FaLock,
-  FaUnlock,
-  FaHistory,
-} from "react-icons/fa";
+  Search,
+  RefreshCw,
+  Eye,
+  Lock,
+  Unlock,
+  History,
+  Users,
+  Star,
+  ShieldAlert,
+  UserX,
+} from "lucide-react";
 import ExportCSV from "../../components/common/ExportCSV";
 import Pagination from "../../components/Admin/Pagination";
 import CustomerModal from "../../components/Admin/Users/CustomerModal";
 import LockModal from "../../components/Admin/Users/LockModal";
-import AuditLogModal from "../../components/Admin/Users/AuditLogModal";
 import {
   getUsers,
   updateUser,
@@ -19,9 +22,9 @@ import {
   unlockUser,
 } from "../../api/adUserApi";
 import { toast } from "react-toastify";
+
 export default function CustomerList() {
   const [users, setUsers] = useState([]);
-  const [auditLogs] = useState([]);
   const [loadingLock, setLoadingLock] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
@@ -29,12 +32,11 @@ export default function CustomerList() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [isCustomerModalOpen, setCustomerModalOpen] = useState(false);
   const [isLockModalOpen, setLockModalOpen] = useState(false);
-  const [isAuditLogOpen, setIsAuditLogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+
   const fetchUsers = async () => {
     try {
       setLoading(true);
-
       const res = await getUsers({
         page: 1,
         limit: 100,
@@ -56,6 +58,7 @@ export default function CustomerList() {
   useEffect(() => {
     fetchUsers();
   }, []);
+
   const filteredUsers = useMemo(() => {
     const keyword = searchTerm.toLowerCase();
 
@@ -89,6 +92,7 @@ export default function CustomerList() {
     const start = (currentPage - 1) * itemsPerPage;
     return filteredUsers.slice(start, start + itemsPerPage);
   }, [filteredUsers, currentPage]);
+
   const handleSaveCustomer = async (data) => {
     try {
       await updateUser(selectedUser.id, {
@@ -106,6 +110,7 @@ export default function CustomerList() {
       toast.error(err?.response?.data?.message || "Cập nhật thất bại");
     }
   };
+
   const handleLockConfirm = async (userId, data) => {
     try {
       setLoadingLock(true);
@@ -125,8 +130,10 @@ export default function CustomerList() {
       setLoadingLock(false);
     }
   };
+
+  // Thu nhỏ badge một chút (giảm padding & font-size)
   const badge = (style) =>
-    `px-3 py-1 text-xs font-semibold rounded-full ${style}`;
+    `inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide ${style}`;
 
   const getGenderText = (gender) => {
     if (gender === "male") return "Nam";
@@ -134,6 +141,7 @@ export default function CustomerList() {
     if (gender === "other") return "Khác";
     return "Không rõ";
   };
+
   const csvData = filteredUsers.map((u) => ({
     ID: u.id,
     Tên: u.username,
@@ -143,70 +151,110 @@ export default function CustomerList() {
     Trạng_thái: u.is_active ? "Active" : "Inactive",
     Khóa: u.is_locked ? "Locked" : "Normal",
   }));
+
   return (
-    <div className="flex min-h-screen bg-[#F4F6FA]">
+    <div className="flex min-h-screen bg-[#FCFDFE]">
       <div className="flex-1 ml-64 flex flex-col">
-        <div className="p-8 space-y-6 flex-1">
+        {/* Thu hẹp max-width và giảm padding của container */}
+        <div className="p-6 space-y-5 flex-1 max-w-325 mx-auto w-full">
+          {/* Header */}
           <div className="flex flex-col gap-1">
-            <h1 className="text-2xl font-bold text-gray-800">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-800">
               Quản lý khách hàng
             </h1>
-            <p className="text-sm text-gray-500">
-              Theo dõi, chỉnh sửa và quản lý tài khoản người dùng một cách dễ
-              dàng ✨
+            <p className="text-[14px] text-slate-500 font-medium">
+              Theo dõi và quản lý tài khoản người dùng một cách dễ dàng ✨
             </p>
           </div>
-          <div className="grid grid-cols-4 gap-4 mb-4">
-            <div className="bg-white p-4 rounded-xl shadow text-center">
-              <div className="text-2xl font-bold text-blue-600">
-                {users.length}
+
+          {/* Stat Cards - Thu nhỏ padding, icon và font size */}
+          <div className="grid grid-cols-4 gap-4 mb-2">
+            <div className="bg-white p-4 rounded-2xl shadow-[0_4px_40px_rgba(0,0,0,0.02)] flex items-center gap-4">
+              <div className="w-11 h-11 rounded-xl bg-blue-50/70 flex items-center justify-center text-blue-500">
+                <Users size={20} strokeWidth={2} />
               </div>
-              <div className="text-gray-500 text-sm">Tổng users</div>
+              <div>
+                <div className="text-slate-400 text-[11px] font-semibold mb-0.5 uppercase tracking-wider">
+                  Tổng users
+                </div>
+                <div className="text-2xl font-black text-slate-800">
+                  {users.length}
+                </div>
+              </div>
             </div>
-            <div className="bg-white p-4 rounded-xl shadow text-center">
-              <div className="text-2xl font-bold text-yellow-600">
-                {users.filter((u) => u.is_premium).length}
+
+            <div className="bg-white p-4 rounded-2xl shadow-[0_4px_40px_rgba(0,0,0,0.02)] flex items-center gap-4">
+              <div className="w-11 h-11 rounded-xl bg-amber-50/70 flex items-center justify-center text-amber-500">
+                <Star size={20} strokeWidth={2} />
               </div>
-              <div className="text-gray-500 text-sm">Premium</div>
+              <div>
+                <div className="text-slate-400 text-[11px] font-semibold mb-0.5 uppercase tracking-wider">
+                  Premium
+                </div>
+                <div className="text-2xl font-black text-slate-800">
+                  {users.filter((u) => u.is_premium).length}
+                </div>
+              </div>
             </div>
-            <div className="bg-white p-4 rounded-xl shadow text-center">
-              <div className="text-2xl font-bold text-red-600">
-                {users.filter((u) => !u.is_active).length}
+
+            <div className="bg-white p-4 rounded-2xl shadow-[0_4px_40px_rgba(0,0,0,0.02)] flex items-center gap-4">
+              <div className="w-11 h-11 rounded-xl bg-slate-50 flex items-center justify-center text-slate-500">
+                <UserX size={20} strokeWidth={2} />
               </div>
-              <div className="text-gray-500 text-sm">Chưa kích hoạt</div>
+              <div>
+                <div className="text-slate-400 text-[11px] font-semibold mb-0.5 uppercase tracking-wider">
+                  Chưa kích hoạt
+                </div>
+                <div className="text-2xl font-black text-slate-800">
+                  {users.filter((u) => !u.is_active).length}
+                </div>
+              </div>
             </div>
-            <div className="bg-white p-4 rounded-xl shadow text-center">
-              <div className="text-2xl font-bold text-purple-600">
-                {users.filter((u) => u.is_locked).length}
+
+            <div className="bg-white p-4 rounded-2xl shadow-[0_4px_40px_rgba(0,0,0,0.02)] flex items-center gap-4">
+              <div className="w-11 h-11 rounded-xl bg-rose-50/70 flex items-center justify-center text-rose-500">
+                <ShieldAlert size={20} strokeWidth={2} />
               </div>
-              <div className="text-gray-500 text-sm">Bị khóa</div>
+              <div>
+                <div className="text-slate-400 text-[11px] font-semibold mb-0.5 uppercase tracking-wider">
+                  Bị khóa
+                </div>
+                <div className="text-2xl font-black text-slate-800">
+                  {users.filter((u) => u.is_locked).length}
+                </div>
+              </div>
             </div>
           </div>
-          <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-4 rounded-xl shadow-sm">
-            <div className="flex items-center gap-3 flex-wrap">
-              <div className="relative w-72">
-                <FaSearch className="absolute left-3 top-3 text-gray-400 text-sm" />
+
+          {/* Toolbar - Thu nhỏ ô input và nút bấm */}
+          <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3 rounded-2xl shadow-[0_4px_40px_rgba(0,0,0,0.02)]">
+            <div className="flex items-center gap-3 flex-wrap pl-1">
+              <div className="relative w-64">
+                <Search
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                  size={16}
+                />
                 <input
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Tìm kiếm..."
-                  className="w-full pl-9 pr-3 py-2.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+                  placeholder="Tìm kiếm khách hàng..."
+                  className="w-full pl-10 pr-3 py-2.5 text-[13px] bg-slate-50/50 rounded-xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-400 text-slate-700 font-medium"
                 />
               </div>
 
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-3 py-2 text-sm border rounded-lg bg-white focus:ring-2 focus:ring-blue-400"
+                className="px-4 py-2.5 text-[13px] bg-slate-50/50 rounded-xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 text-slate-600 font-medium outline-none cursor-pointer transition-all appearance-none min-w-35"
               >
-                <option value="all">Tất cả</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-                <option value="locked">Locked</option>
+                <option value="all">Tất cả trạng thái</option>
+                <option value="active">Đang hoạt động</option>
+                <option value="inactive">Chưa kích hoạt</option>
+                <option value="locked">Bị khóa</option>
               </select>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 pr-1">
               <ExportCSV
                 data={csvData}
                 fields={[
@@ -220,105 +268,138 @@ export default function CustomerList() {
                 ]}
                 fileName="DanhSachKhachHang"
               />
-
-              <button
-                onClick={() => setIsAuditLogOpen(true)}
-                className="flex items-center gap-2 px-4 py-2 text-sm bg-gray-100 rounded-lg hover:bg-gray-200"
-              >
-                <FaHistory />
-                Lịch sử
-              </button>
-
               <button
                 onClick={fetchUsers}
-                className="flex items-center gap-2 px-4 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                className="flex items-center gap-1.5 px-4 py-2.5 text-[13px] font-semibold text-white bg-slate-800 hover:bg-slate-700 shadow-sm shadow-slate-200 rounded-xl transition-all"
               >
-                <FaRedo />
-                Refresh
+                <RefreshCw size={15} />
+                Làm mới
               </button>
             </div>
           </div>
-          <div className="bg-white rounded-2xl shadow overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-100 text-gray-500 uppercase text-xs">
+          <div className="bg-white rounded-2xl shadow-[0_4px_40px_rgba(0,0,0,0.02)] overflow-hidden p-1.5">
+            <table className="w-full text-sm text-left border-collapse">
+              <thead>
                 <tr>
-                  <th className="p-4 text-left">ID</th>
-                  <th className="p-4 text-left">Tên</th>
-                  <th className="p-4 text-left">Email</th>
-                  <th className="p-4">Giới tính</th>
-                  <th className="p-4">Gói</th>
-                  <th className="p-4">Trạng thái</th>
-                  <th className="p-4">Khóa</th>
-                  <th className="p-4 text-center">Hành động</th>
+                  <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50">
+                    ID
+                  </th>
+                  <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50">
+                    Khách hàng
+                  </th>
+                  <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50">
+                    Giới tính
+                  </th>
+                  <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50">
+                    Gói
+                  </th>
+                  <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50">
+                    Trạng thái
+                  </th>
+                  <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50">
+                    Tình trạng
+                  </th>
+                  <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 text-right">
+                    Hành động
+                  </th>
                 </tr>
               </thead>
 
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan="8" className="text-center py-6">
-                      Đang tải...
+                    <td colSpan="7" className="text-center py-12">
+                      <div className="flex flex-col items-center gap-3 text-slate-400">
+                        <RefreshCw
+                          className="animate-spin text-blue-400"
+                          size={24}
+                        />
+                        <span className="text-[13px] font-medium">
+                          Đang tải dữ liệu nhẹ nhàng...
+                        </span>
+                      </div>
                     </td>
                   </tr>
                 ) : currentUsers.length === 0 ? (
                   <tr>
-                    <td colSpan="8" className="text-center py-6 text-gray-400">
-                      Không có dữ liệu
+                    <td colSpan="7" className="text-center py-12">
+                      <div className="flex flex-col items-center gap-2 text-slate-400">
+                        <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mb-1">
+                          <Users size={24} className="text-slate-300" />
+                        </div>
+                        <span className="text-[13px] font-medium">
+                          Chưa có khách hàng nào ở đây.
+                        </span>
+                      </div>
                     </td>
                   </tr>
                 ) : (
                   currentUsers.map((user) => (
-                    <tr key={user.id} className="border-t hover:bg-gray-50">
-                      <td className="p-4">{user.id}</td>
-                      <td className="p-4 font-medium">{user.username}</td>
-                      <td className="p-4 text-gray-600">{user.email}</td>
-
-                      <td className="p-4 text-center">
+                    <tr
+                      key={user.id}
+                      className="group hover:bg-[#F8FAFC] transition-colors duration-200 rounded-xl"
+                    >
+                      <td className="px-5 py-3.5 font-semibold text-slate-400 text-[13px] rounded-l-xl">
+                        #{user.id}
+                      </td>
+                      <td className="px-5 py-3.5">
+                        <div className="flex flex-col">
+                          <span className="font-bold text-slate-700 text-[13.5px]">
+                            {user.username}
+                          </span>
+                          <span className="text-[12px] text-slate-400 font-medium mt-0.5">
+                            {user.email}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-5 py-3.5 font-medium text-slate-500 text-[13px]">
                         {getGenderText(user.gender)}
                       </td>
-                      <td className="p-4 text-center">
+                      <td className="px-5 py-3.5">
                         <span
                           className={badge(
                             user.is_premium
-                              ? "bg-yellow-100 text-yellow-600"
-                              : "bg-gray-200 text-gray-600",
+                              ? "bg-amber-50 text-amber-600"
+                              : "bg-slate-50 text-slate-500",
                           )}
                         >
                           {user.is_premium ? "Premium" : "Free"}
                         </span>
                       </td>
-                      <td className="p-4 text-center">
+                      <td className="px-5 py-3.5">
                         <span
                           className={badge(
                             user.is_active
-                              ? "bg-green-100 text-green-600"
-                              : "bg-gray-200 text-gray-600",
+                              ? "bg-blue-50 text-blue-500"
+                              : "bg-slate-50 text-slate-500",
                           )}
                         >
                           {user.is_active ? "Active" : "Inactive"}
                         </span>
                       </td>
-                      <td className="p-4 text-center">
+                      <td className="px-5 py-3.5">
                         <span
                           className={badge(
                             user.is_locked
-                              ? "bg-red-100 text-red-600"
-                              : "bg-green-100 text-green-600",
+                              ? "bg-rose-50 text-rose-500"
+                              : "bg-emerald-50 text-emerald-500",
                           )}
                         >
                           {user.is_locked ? "Locked" : "Normal"}
                         </span>
                       </td>
-                      <td className="p-4">
-                        <div className="flex justify-center gap-2">
+                      <td className="px-5 py-3.5 rounded-r-xl">
+                        {/* Thu nhỏ các icon thao tác */}
+                        <div className="flex justify-end gap-1">
                           <button
                             onClick={() => {
                               setSelectedUser(user);
                               setCustomerModalOpen(true);
                             }}
-                            className="p-2 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200"
+                            className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all duration-200"
+                            title="Xem chi tiết"
                           >
-                            <FaEye />
+                            <Eye size={16} strokeWidth={2.5} />
                           </button>
 
                           <button
@@ -326,13 +407,20 @@ export default function CustomerList() {
                               setSelectedUser(user);
                               setLockModalOpen(true);
                             }}
-                            className={`p-2 rounded-lg ${
+                            className={`p-2 rounded-lg transition-all duration-200 ${
                               user.is_locked
-                                ? "bg-green-100 text-green-600 hover:bg-green-200"
-                                : "bg-red-100 text-red-600 hover:bg-red-200"
+                                ? "text-emerald-400 hover:text-emerald-600 hover:bg-emerald-50"
+                                : "text-slate-400 hover:text-rose-500 hover:bg-rose-50"
                             }`}
+                            title={
+                              user.is_locked ? "Mở khóa" : "Khóa tài khoản"
+                            }
                           >
-                            {user.is_locked ? <FaUnlock /> : <FaLock />}
+                            {user.is_locked ? (
+                              <Unlock size={16} strokeWidth={2.5} />
+                            ) : (
+                              <Lock size={16} strokeWidth={2.5} />
+                            )}
                           </button>
                         </div>
                       </td>
@@ -343,7 +431,9 @@ export default function CustomerList() {
             </table>
           </div>
         </div>
-        <div className="sticky bottom-0 bg-white border-t py-3 flex justify-center shadow-inner">
+
+        {/* Phân trang */}
+        <div className="sticky bottom-0 bg-white/70 backdrop-blur-xl border-t border-slate-100 py-3 flex justify-center z-10">
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
@@ -373,12 +463,6 @@ export default function CustomerList() {
         user={selectedUser}
         onConfirm={handleLockConfirm}
         loading={loadingLock}
-      />
-
-      <AuditLogModal
-        isOpen={isAuditLogOpen}
-        onClose={() => setIsAuditLogOpen(false)}
-        logs={auditLogs}
       />
     </div>
   );

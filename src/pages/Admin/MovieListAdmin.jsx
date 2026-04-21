@@ -1,6 +1,16 @@
 /* eslint-disable no-unused-vars */
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { FaSearch, FaRedo, FaEye, FaPlus } from "react-icons/fa";
+import {
+  Search,
+  RefreshCw,
+  Eye,
+  Plus,
+  Film,
+  CheckCircle,
+  AlertCircle,
+  FileEdit,
+  PlayCircle,
+} from "lucide-react";
 import { toast } from "react-toastify";
 
 import ExportCSV from "../../components/common/ExportCSV";
@@ -29,6 +39,7 @@ export default function MoviesListAdmin() {
   const [isModalOpen, setModalOpen] = useState(false);
   const [mode, setMode] = useState("edit");
 
+  // --- LOGIC GIỮ NGUYÊN ---
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedKeyword(keyword);
@@ -97,58 +108,124 @@ export default function MoviesListAdmin() {
     setSelectedMovieId(null);
   };
 
+  // Hàm hỗ trợ UI cho Badge (giống ContractList)
+  const getStatusBadge = (status) => {
+    const baseStyle =
+      "inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border";
+    switch (status?.toLowerCase()) {
+      case "published":
+      case "active":
+        return `${baseStyle} bg-emerald-50 text-emerald-600 border-emerald-100`;
+      case "draft":
+        return `${baseStyle} bg-slate-100 text-slate-500 border-slate-200`;
+      case "completed":
+        return `${baseStyle} bg-blue-50 text-blue-600 border-blue-100`;
+      case "hidden":
+      case "expired":
+        return `${baseStyle} bg-rose-50 text-rose-600 border-rose-100`;
+      default:
+        return `${baseStyle} bg-slate-50 text-slate-500 border-slate-100`;
+    }
+  };
+
   return (
-    <div className="flex min-h-screen bg-[#F4F6FA]">
+    <div className="flex min-h-screen bg-[#FCFDFE]">
       <div className="flex-1 ml-64 flex flex-col">
-        <div className="p-6 flex-1 flex flex-col gap-5">
-          <div>
-            <h1 className="text-xl font-bold text-gray-800">Quản lý phim</h1>
-            <p className="text-sm text-gray-500">Quản lý nội dung phim 🎬</p>
+        <div className="p-6 space-y-5 flex-1 max-w-325 mx-auto w-full">
+          {/* Header */}
+          <div className="flex flex-col gap-1">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-800">
+              Quản lý phim
+            </h1>
+            <p className="text-[14px] text-slate-500 font-medium">
+              Theo dõi, biên tập và điều phối nội dung phim ✨
+            </p>
           </div>
-
-          <div className="grid grid-cols-4 gap-3">
-            {[
-              ["Tổng", stats.total, "blue"],
-              ["Draft", stats.draft, "yellow"],
-              ["Published", stats.published, "green"],
-              ["Hidden", stats.hidden, "red"],
-            ].map(([label, value, color]) => (
-              <div
-                key={label}
-                className="bg-white p-3 rounded-lg shadow text-center"
-              >
-                <div className={`text-xl font-bold text-${color}-600`}>
-                  {value}
-                </div>
-                <div className="text-xs text-gray-500">{label}</div>
+          <div className="grid grid-cols-4 gap-4 mb-2">
+            <div className="bg-white p-4 rounded-2xl shadow-[0_4px_40px_rgba(0,0,0,0.02)] flex items-center gap-4">
+              <div className="w-11 h-11 rounded-xl bg-blue-50/70 flex items-center justify-center text-blue-500">
+                <Film size={20} strokeWidth={2} />
               </div>
-            ))}
+              <div>
+                <div className="text-slate-400 text-[11px] font-semibold mb-0.5 uppercase tracking-wider">
+                  Tổng phim
+                </div>
+                <div className="text-2xl font-black text-slate-800">
+                  {stats.total}
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white p-4 rounded-2xl shadow-[0_4px_40px_rgba(0,0,0,0.02)] flex items-center gap-4">
+              <div className="w-11 h-11 rounded-xl bg-slate-50 flex items-center justify-center text-slate-500">
+                <FileEdit size={20} strokeWidth={2} />
+              </div>
+              <div>
+                <div className="text-slate-400 text-[11px] font-semibold mb-0.5 uppercase tracking-wider">
+                  Bản nháp
+                </div>
+                <div className="text-2xl font-black text-slate-800">
+                  {stats.draft}
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white p-4 rounded-2xl shadow-[0_4px_40px_rgba(0,0,0,0.02)] flex items-center gap-4">
+              <div className="w-11 h-11 rounded-xl bg-emerald-50/70 flex items-center justify-center text-emerald-500">
+                <CheckCircle size={20} strokeWidth={2} />
+              </div>
+              <div>
+                <div className="text-slate-400 text-[11px] font-semibold mb-0.5 uppercase tracking-wider">
+                  Công khai
+                </div>
+                <div className="text-2xl font-black text-slate-800">
+                  {stats.published}
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white p-4 rounded-2xl shadow-[0_4px_40px_rgba(0,0,0,0.02)] flex items-center gap-4">
+              <div className="w-11 h-11 rounded-xl bg-rose-50/70 flex items-center justify-center text-rose-500">
+                <AlertCircle size={20} strokeWidth={2} />
+              </div>
+              <div>
+                <div className="text-slate-400 text-[11px] font-semibold mb-0.5 uppercase tracking-wider">
+                  Đang ẩn
+                </div>
+                <div className="text-2xl font-black text-slate-800">
+                  {stats.hidden}
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3 rounded-lg shadow-sm">
-            <div className="flex gap-2 flex-wrap">
+          {/* Bộ lọc và Công cụ */}
+          <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3 rounded-2xl shadow-[0_4px_40px_rgba(0,0,0,0.02)]">
+            <div className="flex items-center gap-3 flex-wrap pl-1">
               <div className="relative w-64">
-                <FaSearch className="absolute left-3 top-3 text-gray-400 text-sm" />
+                <Search
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                  size={16}
+                />
                 <input
                   value={keyword}
                   onChange={(e) => setKeyword(e.target.value)}
-                  placeholder="Tìm phim..."
-                  className="w-full pl-9 pr-3 py-2 text-sm border rounded-lg"
+                  placeholder="Tìm kiếm phim..."
+                  className="w-full pl-10 pr-3 py-2.5 text-[13px] bg-slate-50/50 rounded-xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-400 text-slate-700 font-medium"
                 />
               </div>
-
               <select
                 value={status}
                 onChange={(e) => {
                   setStatus(e.target.value);
                   setPage(1);
                 }}
-                className="px-3 py-2 text-sm border rounded-lg"
+                className="px-4 py-2.5 text-[13px] bg-slate-50/50 rounded-xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 text-slate-600 font-medium outline-none cursor-pointer transition-all min-w-35 appearance-none"
               >
                 <option value="">Tất cả trạng thái</option>
-                <option value="draft">Draft</option>
-                <option value="published">Published</option>
-                <option value="hidden">Hidden</option>
+                <option value="draft">Nháp (Draft)</option>
+                <option value="published">Công khai (Published)</option>
+                <option value="hidden">Ẩn (Hidden)</option>
               </select>
 
               <select
@@ -157,144 +234,171 @@ export default function MoviesListAdmin() {
                   setType(e.target.value);
                   setPage(1);
                 }}
-                className="px-3 py-2 text-sm border rounded-lg"
+                className="px-4 py-2.5 text-[13px] bg-slate-50/50 rounded-xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 text-slate-600 font-medium outline-none cursor-pointer transition-all min-w-35 appearance-none"
               >
                 <option value="">Tất cả loại</option>
-                <option value="movie">Movie</option>
-                <option value="series">Series</option>
+                <option value="movie">Phim lẻ</option>
+                <option value="series">Phim bộ</option>
               </select>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2 pr-1">
               <ExportCSV
                 data={csvData}
                 fields={["ID", "Ten", "Nam", "Loai", "Tap", "Trang_thai"]}
                 fileName="DanhSachPhim"
               />
-
               <button
                 onClick={fetchMovies}
-                className="flex items-center gap-2 px-4 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                className="flex items-center gap-1.5 px-4 py-2.5 text-[13px] font-semibold text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all"
               >
-                <FaRedo />
-                Refresh
+                <RefreshCw
+                  size={15}
+                  className={loading ? "animate-spin" : ""}
+                />
+                Làm mới
               </button>
-
               <button
                 onClick={handleOpenCreate}
-                className="px-3 py-2 text-sm bg-green-500 text-white rounded-lg flex items-center gap-2"
+                className="flex items-center gap-1.5 px-4 py-2.5 text-[13px] font-semibold text-white bg-blue-500 hover:bg-blue-600 shadow-sm shadow-blue-200 rounded-xl transition-all"
               >
-                <FaPlus />
-                Thêm
+                <Plus size={16} strokeWidth={2.5} />
+                Thêm mới
               </button>
             </div>
           </div>
-          <div className="bg-white rounded-xl shadow flex-1 overflow-hidden">
-            <div className="overflow-auto">
-              <table className="w-full text-xs table-fixed">
-                <thead className="bg-gray-100 text-gray-500 uppercase">
+
+          {/* Bảng Dữ Liệu */}
+          <div className="bg-white rounded-2xl shadow-[0_4px_40px_rgba(0,0,0,0.02)] overflow-hidden p-1.5">
+            <table className="w-full text-sm text-left border-collapse">
+              <thead>
+                <tr>
+                  <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 text-center">
+                    ID
+                  </th>
+                  <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50">
+                    Phim
+                  </th>
+                  <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 text-center">
+                    Năm
+                  </th>
+                  <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 text-center">
+                    Loại
+                  </th>
+                  <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 text-center">
+                    Số tập
+                  </th>
+                  <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 text-center">
+                    Gói
+                  </th>
+                  <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 text-center">
+                    Trạng thái
+                  </th>
+                  <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 text-right">
+                    Thao tác
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {loading ? (
                   <tr>
-                    <th className="p-2 w-15">ID</th>
-                    <th className="p-2 w-20">Poster</th>
-                    <th className="p-2 w-55 text-left">Tên</th>
-                    <th className="p-2 w-20">Năm</th>
-                    <th className="p-2 w-20">Loại</th>
-                    <th className="p-2 w-20">Tập</th>
-                    <th className="p-2 w-25">Premium</th>
-                    <th className="p-2 w-25">Status</th>
-                    <th className="p-2 w-20">Action</th>
+                    <td colSpan="8" className="text-center py-12">
+                      <div className="flex flex-col items-center gap-3 text-slate-400">
+                        <RefreshCw
+                          className="animate-spin text-blue-400"
+                          size={24}
+                        />
+                        <span className="text-[13px] font-medium">
+                          Đang tải dữ liệu...
+                        </span>
+                      </div>
+                    </td>
                   </tr>
-                </thead>
-
-                <tbody>
-                  {loading ? (
-                    <tr>
-                      <td colSpan="9" className="text-center py-4">
-                        Loading...
+                ) : movies.length === 0 ? (
+                  <tr>
+                    <td colSpan="8" className="text-center py-12">
+                      <div className="flex flex-col items-center gap-2 text-slate-400">
+                        <PlayCircle size={24} className="text-slate-200" />
+                        <span className="text-[13px] font-medium">
+                          Chưa có phim nào.
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  movies.map((m) => (
+                    <tr
+                      key={m.id}
+                      className="group hover:bg-[#F8FAFC] transition-colors duration-200 rounded-xl"
+                    >
+                      <td className="px-5 py-3 text-center font-semibold text-slate-400 text-[12px]">
+                        #{m.id}
                       </td>
-                    </tr>
-                  ) : movies.length === 0 ? (
-                    <tr>
-                      <td colSpan="9" className="text-center py-4">
-                        No data
-                      </td>
-                    </tr>
-                  ) : (
-                    movies.map((m) => (
-                      <tr key={m.id} className="border-t hover:bg-gray-50">
-                        <td className="p-2 text-center">{m.id}</td>
-
-                        <td className="p-2">
+                      <td className="px-5 py-3">
+                        <div className="flex items-center gap-3">
                           <img
                             src={m.poster_url}
-                            className="w-10 h-14 object-cover rounded mx-auto"
+                            className="w-8 h-11 object-cover rounded shadow-sm border border-slate-100"
                           />
-                        </td>
-
-                        <td className="p-2 text-left truncate">{m.name}</td>
-
-                        <td className="p-2 text-center">{m.year || "-"}</td>
-                        <td className="p-2 text-center">{m.type}</td>
-                        <td className="p-2 text-center">{m.episode_total}</td>
-
-                        <td className="p-2 text-center">
-                          {m.is_premium ? "VIP" : "Free"}
-                        </td>
-
-                        <td className="p-2 text-center">
-                          <span
-                            className={`px-2 py-1 rounded text-xs
-                              ${
-                                m.status === "active"
-                                  ? "bg-green-100 text-green-700"
-                                  : ""
-                              }
-                              ${
-                                m.status === "draft"
-                                  ? "bg-gray-100 text-gray-700"
-                                  : ""
-                              }
-                              ${
-                                m.status === "completed"
-                                  ? "bg-blue-100 text-blue-700"
-                                  : ""
-                              }
-                              ${
-                                m.status === "expired"
-                                  ? "bg-red-100 text-red-700"
-                                  : ""
-                              }
-                            `}
-                          >
-                            {m.status}
+                          <div className="font-bold text-slate-700 text-[13.5px] truncate max-w-50">
+                            {m.name}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-5 py-3 text-center font-medium text-slate-500 text-[13px]">
+                        {m.year || "-"}
+                      </td>
+                      <td className="px-5 py-3 text-center">
+                        <span
+                          className={`text-[11px] font-bold uppercase tracking-tight ${m.type === "movie" ? "text-orange-500" : "text-purple-500"}`}
+                        >
+                          {m.type}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3 text-center font-bold text-slate-600 text-[13px]">
+                        {m.episode_total}
+                      </td>
+                      <td className="px-5 py-3 text-center">
+                        {m.is_premium ? (
+                          <span className="text-[10px] font-black text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-100">
+                            VIP
                           </span>
-                        </td>
-
-                        <td className="p-2 text-center">
-                          <button
-                            onClick={() => handleOpenDetail(m)}
-                            className="p-1 bg-blue-100 rounded text-blue-600"
-                          >
-                            <FaEye />
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
+                        ) : (
+                          <span className="text-slate-300 text-[11px] font-medium italic">
+                            Free
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-5 py-3 text-center">
+                        <span className={getStatusBadge(m.status)}>
+                          {m.status}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3 text-right">
+                        <button
+                          onClick={() => handleOpenDetail(m)}
+                          className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
+                          title="Chi tiết"
+                        >
+                          <Eye size={16} strokeWidth={2.5} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
-
-          <div className="bg-white py-2 flex justify-center rounded-lg">
-            <Pagination
-              currentPage={page}
-              totalPages={Math.ceil(total / limit)}
-              onPageChange={setPage}
-              totalItems={total}
-              itemsPerPage={limit}
-            />
-          </div>
+        </div>
+        <div className="sticky bottom-0 bg-white/70 backdrop-blur-xl border-t border-slate-100 py-3 flex justify-center z-10">
+          <Pagination
+            currentPage={page}
+            totalPages={Math.ceil(total / limit)}
+            onPageChange={setPage}
+            totalItems={total}
+            itemsPerPage={limit}
+          />
         </div>
       </div>
 

@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useState, useEffect } from "react";
-import { FaTimes, FaPen } from "react-icons/fa";
+import { X, Pencil } from "lucide-react";
 
 export default function ContractModal({
   isOpen,
@@ -46,43 +46,59 @@ export default function ContractModal({
   };
 
   if (!isOpen) return null;
-
-  const inputStyle =
-    "w-full h-9 px-3 text-sm border rounded-md outline-none focus:ring-2 focus:ring-blue-400";
-  const disabledStyle = "bg-gray-100 cursor-not-allowed";
+  const baseInputStyle =
+    "w-full h-11 px-4 text-[13.5px] font-medium rounded-xl outline-none transition-all duration-200 border";
+  const activeInputStyle =
+    "bg-white border-slate-200 text-slate-700 focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10";
+  const disabledStyle =
+    "bg-slate-50 border-transparent text-slate-500 cursor-not-allowed";
+  const labelStyle = "text-[12px] font-bold text-slate-400 uppercase tracking-wider mb-2 block pl-1";
+  const fileInputStyle = `w-full text-[13.5px] font-medium text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-[13px] file:font-bold file:bg-blue-50 file:text-blue-600 hover:file:bg-blue-100 transition-all ${!isEditMode ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white w-full max-w-2xl rounded-xl shadow-lg flex flex-col">
-        <div className="flex items-center justify-between px-5 py-4 border-b">
-          <h2 className="text-base font-semibold">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+      <div 
+        className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm transition-opacity" 
+        onClick={onClose} 
+      />
+      <div className="relative w-full max-w-2xl bg-[#FCFDFE] rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.08)] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200 max-h-screen">
+        <div className="flex justify-between items-center px-8 py-5 border-b border-slate-100 bg-white">
+          <h2 className="text-lg font-bold text-slate-800 tracking-tight">
             {contract
               ? isEditMode
                 ? "Chỉnh sửa hợp đồng"
                 : "Chi tiết hợp đồng"
-              : "Tạo hợp đồng"}
+              : "Tạo hợp đồng mới"}
           </h2>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             {contract && !isEditMode && (
-              <FaPen
+              <button
                 onClick={() => setIsEditMode(true)}
-                className="cursor-pointer text-gray-500 hover:text-gray-700 text-sm"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-semibold text-slate-500 hover:bg-slate-50 hover:text-slate-700 transition-all"
                 title="Chỉnh sửa"
-              />
+              >
+                <Pencil size={14} strokeWidth={2.5} />
+                Chỉnh sửa
+              </button>
             )}
-            <FaTimes
+            {contract && !isEditMode && <div className="w-px h-5 bg-slate-200 mx-1"></div>}
+            
+            <button
               onClick={onClose}
-              className="cursor-pointer text-gray-500 hover:text-red-500 text-sm"
-            />
+              className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+            >
+              <X size={20} strokeWidth={2.5} />
+            </button>
           </div>
         </div>
         <form
           onSubmit={handleSubmit}
-          className="flex-1 overflow-auto px-5 py-4 space-y-5"
+          className="flex-1 overflow-y-auto px-8 py-6 space-y-6"
         >
-          <div className="grid grid-cols-2 gap-4">
-            <div className="col-span-2">
-              <label className="text-xs font-medium text-gray-600 mb-1 block">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <div className="md:col-span-2">
+              <label className={labelStyle}>
                 Tên hợp đồng
               </label>
               <input
@@ -91,11 +107,13 @@ export default function ContractModal({
                 onChange={(e) => setName(e.target.value)}
                 readOnly={!isEditMode}
                 required
-                className={`${inputStyle} ${!isEditMode ? disabledStyle : ""}`}
+                placeholder="Nhập tên hợp đồng..."
+                className={`${baseInputStyle} ${isEditMode ? activeInputStyle : disabledStyle}`}
               />
             </div>
+            
             <div>
-              <label className="text-xs font-medium text-gray-600 mb-1 block">
+              <label className={labelStyle}>
                 Ngày bắt đầu
               </label>
               <input
@@ -104,11 +122,12 @@ export default function ContractModal({
                 onChange={(e) => setStartDate(e.target.value)}
                 readOnly={!isEditMode}
                 required
-                className={`${inputStyle} ${!isEditMode ? disabledStyle : ""}`}
+                className={`${baseInputStyle} ${isEditMode ? activeInputStyle : disabledStyle} ${!startDate && !isEditMode ? "text-transparent" : ""}`}
               />
             </div>
+            
             <div>
-              <label className="text-xs font-medium text-gray-600 mb-1 block">
+              <label className={labelStyle}>
                 Ngày kết thúc
               </label>
               <input
@@ -116,67 +135,74 @@ export default function ContractModal({
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
                 readOnly={!isEditMode}
-                className={`${inputStyle} ${!isEditMode ? disabledStyle : ""}`}
+                className={`${baseInputStyle} ${isEditMode ? activeInputStyle : disabledStyle} ${!endDate && !isEditMode ? "text-transparent" : ""}`}
               />
             </div>
+            
             <div>
-              <label className="text-xs font-medium text-gray-600 mb-1 block">
+              <label className={labelStyle}>
                 Trạng thái
               </label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
                 disabled={!isEditMode}
-                className={`${inputStyle} ${!isEditMode ? disabledStyle : ""}`}
+                className={`${baseInputStyle} cursor-pointer appearance-none ${isEditMode ? activeInputStyle : disabledStyle}`}
               >
-                <option value="draft">Draft</option>
-                <option value="active">Active</option>
-                <option value="expired">Expired</option>
-                <option value="cancelled">Cancelled</option>
+                <option value="draft">Bản nháp (Draft)</option>
+                <option value="active">Đang hiệu lực (Active)</option>
+                <option value="expired">Đã hết hạn (Expired)</option>
+                <option value="cancelled">Đã hủy (Cancelled)</option>
               </select>
             </div>
+            
             <div>
-              <label className="text-xs font-medium text-gray-600 mb-1 block">
-                File PDF
+              <label className={labelStyle}>
+                Tập tin đính kèm (PDF)
               </label>
-              <input
-                type="file"
-                accept="application/pdf"
-                onChange={(e) => setFile(e.target.files[0])}
-                disabled={!isEditMode}
-                className={`text-sm w-full ${!isEditMode ? disabledStyle : ""}`}
-              />
-            </div>
-          </div>
-          {contract && (
-            <div className="flex gap-6 text-xs text-gray-500 pt-2 border-t">
-              <div>
-                <span className="font-medium text-gray-600">Ngày tạo:</span>{" "}
-                {createdAt || "-"}
+              <div className={`flex items-center h-11 px-1 rounded-xl ${isEditMode ? "border border-slate-200 bg-white" : "bg-slate-50 border border-transparent"}`}>
+                <input
+                  type="file"
+                  accept="application/pdf"
+                  onChange={(e) => setFile(e.target.files[0])}
+                  disabled={!isEditMode}
+                  className={fileInputStyle}
+                />
               </div>
-              <div>
-                <span className="font-medium text-gray-600">Cập nhật:</span>{" "}
-                {updatedAt || "-"}
+            </div>
+
+          </div>
+
+          {contract && (
+            <div className="flex justify-between items-center bg-slate-50 p-4 rounded-2xl border border-slate-100 mt-2">
+              <div className="flex flex-col">
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Ngày tạo</span>
+                <span className="text-[13px] font-semibold text-slate-600">{createdAt || "Chưa xác định"}</span>
+              </div>
+              <div className="w-px h-8 bg-slate-200"></div>
+              <div className="flex flex-col text-right">
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Cập nhật lần cuối</span>
+                <span className="text-[13px] font-semibold text-slate-600">{updatedAt || "Chưa cập nhật"}</span>
               </div>
             </div>
           )}
         </form>
         {isEditMode && (
-          <div className="flex justify-end gap-2 px-5 py-4 border-t">
+          <div className="flex justify-end gap-3 px-8 py-5 border-t border-slate-100 bg-white">
             <button
               type="button"
               onClick={() => setIsEditMode(false)}
-              className="px-4 h-9 text-sm border rounded-md hover:bg-gray-100"
+              className="px-5 h-10 text-[13.5px] font-bold text-slate-500 bg-slate-50 hover:bg-slate-100 hover:text-slate-700 rounded-xl transition-all"
             >
-              Hủy
+              Hủy bỏ
             </button>
 
             <button
-              type="submit"
+              type="button"
               onClick={handleSubmit}
-              className="px-4 h-9 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600"
+              className="px-6 h-10 text-[13.5px] font-bold text-white bg-slate-800 hover:bg-slate-700 shadow-md shadow-slate-200 rounded-xl transition-all"
             >
-              Lưu
+              Lưu thay đổi
             </button>
           </div>
         )}

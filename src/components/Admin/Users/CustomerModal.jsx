@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FaTimes, FaUser, FaEdit } from "react-icons/fa";
+import { X, User, Pencil } from "lucide-react"; // Đã chuyển sang Lucide React
 
 export default function CustomerModal({ isOpen, onClose, user, onSave }) {
   const [formData, setFormData] = useState({});
@@ -32,74 +32,115 @@ export default function CustomerModal({ isOpen, onClose, user, onSave }) {
     return date.toLocaleString("vi-VN");
   };
 
+  // Nâng cấp style input: Bo góc tròn, viền mềm, hiệu ứng focus mượt mà
   const inputStyle =
-    "w-full h-9 px-3 text-sm border rounded-md outline-none focus:ring-2 focus:ring-blue-400";
-  const disabledStyle = "bg-gray-100 cursor-not-allowed";
+    "w-full h-11 px-4 text-[13.5px] font-medium rounded-xl outline-none transition-all duration-200 border";
+  const activeInputStyle =
+    "bg-white border-slate-200 text-slate-700 focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10";
+  const disabledStyle =
+    "bg-slate-50 border-transparent text-slate-500 cursor-not-allowed";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative w-full max-w-5xl bg-white rounded-xl shadow-lg flex flex-col">
-        <div className="flex justify-between items-center px-5 py-4 border-b">
-          <h3 className="text-base font-semibold">Quản lý người dùng</h3>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+      <div
+        className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm transition-opacity"
+        onClick={onClose}
+      />
+      <div className="relative w-full max-w-4xl bg-[#FCFDFE] rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.08)] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div className="flex justify-between items-center px-8 py-5 border-b border-slate-100 bg-white">
+          <h3 className="text-lg font-bold text-slate-800 tracking-tight">
+            Hồ sơ khách hàng
+          </h3>
 
-          <div className="flex gap-3">
-            <FaEdit
+          <div className="flex items-center gap-2">
+            <button
               onClick={() => setIsEditing(!isEditing)}
-              className="cursor-pointer text-gray-500 hover:text-gray-700 text-sm"
-            />
-            <FaTimes
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-semibold transition-all ${
+                isEditing
+                  ? "bg-blue-50 text-blue-600"
+                  : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
+              }`}
+            >
+              <Pencil size={14} strokeWidth={2.5} />
+              {isEditing ? "Đang sửa" : "Chỉnh sửa"}
+            </button>
+            <div className="w-px h-5 bg-slate-200 mx-1"></div>
+            <button
               onClick={onClose}
-              className="cursor-pointer text-gray-500 hover:text-red-500 text-sm"
-            />
+              className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+            >
+              <X size={20} strokeWidth={2.5} />
+            </button>
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-5 p-5">
-          <div className="flex flex-col items-center justify-between text-center">
-            <div className="flex flex-col items-center gap-3">
-              <div className="w-20 h-20 rounded-full overflow-hidden border">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 p-8">
+          <div className="flex flex-col items-center text-center">
+            <div className="relative mb-4">
+              <div className="w-28 h-28 rounded-full overflow-hidden ring-4 ring-white shadow-sm bg-slate-100">
                 {formData.avatar_url ? (
                   <img
                     src={formData.avatar_url}
                     className="w-full h-full object-cover"
+                    alt="Avatar"
                   />
                 ) : (
-                  <div className="w-full h-full bg-gray-300 flex items-center justify-center text-white text-sm font-bold">
-                    {formData.username?.slice(0, 2).toUpperCase() || <FaUser />}
+                  <div className="w-full h-full flex items-center justify-center text-slate-400 text-2xl font-black bg-slate-100">
+                    {formData.username?.slice(0, 2).toUpperCase() || (
+                      <User size={40} />
+                    )}
                   </div>
                 )}
               </div>
-              <div>
-                <p className="text-sm font-medium">{formData.username}</p>
-                <p className="text-xs text-gray-400">ID: {formData.id}</p>
+              <div
+                className={`absolute bottom-0 right-2 w-4 h-4 rounded-full border-2 border-white ${
+                  formData.is_active ? "bg-emerald-400" : "bg-slate-300"
+                }`}
+              ></div>
+            </div>
+
+            <div>
+              <p className="text-lg font-bold text-slate-800">
+                {formData.username}
+              </p>
+              <p className="text-[13px] font-medium text-slate-400 mt-0.5">
+                ID: #{formData.id}
+              </p>
+            </div>
+
+            <div className="w-full bg-white border border-slate-100 rounded-2xl p-4 space-y-2.5 mt-8 shadow-sm">
+              <div className="flex justify-between items-center text-[13px]">
+                <span className="font-semibold text-slate-400">Ngày tạo</span>
+                <span className="font-bold text-slate-600">
+                  {formatDate(formData.created_at)}
+                </span>
+              </div>
+              <div className="w-full h-px bg-slate-50"></div>
+              <div className="flex justify-between items-center text-[13px]">
+                <span className="font-semibold text-slate-400">Cập nhật</span>
+                <span className="font-bold text-slate-600">
+                  {formatDate(formData.updated_at)}
+                </span>
               </div>
             </div>
-            <div className="w-full text-xs text-gray-500 bg-gray-50 rounded-md p-3 space-y-1 mt-4">
-              <p>
-                <span className="font-medium text-gray-600">Tạo:</span>{" "}
-                {formatDate(formData.created_at)}
-              </p>
-              <p>
-                <span className="font-medium text-gray-600">Cập nhật:</span>{" "}
-                {formatDate(formData.updated_at)}
-              </p>
-            </div>
           </div>
-          <div className="space-y-4">
+          <div className="space-y-5">
             <div>
-              <label className="text-xs text-gray-600 mb-1 block">Email</label>
+              <label className="text-[12px] font-bold text-slate-400 uppercase tracking-wider mb-2 block pl-1">
+                Địa chỉ Email
+              </label>
               <input
                 value={formData.email || ""}
                 disabled={!isEditing}
                 onChange={(e) =>
                   setFormData({ ...formData, email: e.target.value })
                 }
-                className={`${inputStyle} ${!isEditing ? disabledStyle : ""}`}
+                className={`${inputStyle} ${isEditing ? activeInputStyle : disabledStyle}`}
               />
             </div>
+
             <div>
-              <label className="text-xs text-gray-600 mb-1 block">
-                Password
+              <label className="text-[12px] font-bold text-slate-400 uppercase tracking-wider mb-2 block pl-1">
+                Mật khẩu
               </label>
               <input
                 type="password"
@@ -108,39 +149,49 @@ export default function CustomerModal({ isOpen, onClose, user, onSave }) {
                 onChange={(e) =>
                   setFormData({ ...formData, password: e.target.value })
                 }
-                placeholder="Để trống nếu không đổi"
-                className={`${inputStyle} ${!isEditing ? disabledStyle : ""}`}
+                placeholder={
+                  isEditing ? "Nhập mật khẩu mới..." : "Được bảo mật"
+                }
+                className={`${inputStyle} ${isEditing ? activeInputStyle : disabledStyle}`}
               />
             </div>
+
             <div>
-              <label className="text-xs text-gray-600 mb-1 block">Role</label>
+              <label className="text-[12px] font-bold text-slate-400 uppercase tracking-wider mb-2 block pl-1">
+                Phân quyền (Role)
+              </label>
               <select
                 value={formData.role}
                 disabled={!isEditing}
                 onChange={(e) =>
                   setFormData({ ...formData, role: e.target.value })
                 }
-                className={`${inputStyle} ${!isEditing ? disabledStyle : ""}`}
+                className={`${inputStyle} cursor-pointer appearance-none ${isEditing ? activeInputStyle : disabledStyle}`}
               >
-                <option value="user">User</option>
-                <option value="admin">Admin</option>
+                <option value="user">Người dùng (User)</option>
+                <option value="admin">Quản trị viên (Admin)</option>
               </select>
             </div>
           </div>
-          <div className="space-y-4">
-            <div className="p-3 border rounded-md flex justify-between items-center">
-              <span className="text-xs text-gray-600">Trạng thái</span>
+          <div className="space-y-5">
+            <div className="bg-white p-4 border border-slate-100 rounded-2xl shadow-sm flex justify-between items-center">
+              <span className="text-[13px] font-bold text-slate-500">
+                Trạng thái
+              </span>
               <span
-                className={`text-xs font-medium ${
-                  formData.is_active ? "text-green-600" : "text-gray-400"
+                className={`px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide ${
+                  formData.is_active
+                    ? "bg-blue-50 text-blue-600"
+                    : "bg-slate-100 text-slate-500"
                 }`}
               >
                 {formData.is_active ? "Hoạt động" : "Chưa kích hoạt"}
               </span>
             </div>
+
             <div>
-              <label className="text-xs text-gray-600 mb-1 block">
-                Premium
+              <label className="text-[12px] font-bold text-slate-400 uppercase tracking-wider mb-2 block pl-1">
+                Gói Premium
               </label>
               <select
                 disabled={!isEditing}
@@ -152,51 +203,65 @@ export default function CustomerModal({ isOpen, onClose, user, onSave }) {
                     premium_plan: Number(e.target.value),
                   })
                 }
-                className={`${inputStyle} ${!isEditing ? disabledStyle : ""}`}
+                className={`${inputStyle} cursor-pointer appearance-none ${isEditing ? activeInputStyle : disabledStyle}`}
               >
-                <option value={1}>1 tháng</option>
-                <option value={2}>2 tháng</option>
-                <option value={3}>3 tháng</option>
+                <option value={1}>Gói 1 tháng</option>
+                <option value={2}>Gói 2 tháng</option>
+                <option value={3}>Gói 3 tháng</option>
               </select>
             </div>
-            <div className="p-3 border rounded-md">
-              <div className="flex justify-between">
-                <span className="text-xs text-gray-600">Khóa</span>
+
+            <div
+              className={`p-4 border rounded-2xl transition-colors ${formData.is_locked ? "bg-rose-50/50 border-rose-100" : "bg-white border-slate-100 shadow-sm"}`}
+            >
+              <div className="flex justify-between items-center">
+                <span className="text-[13px] font-bold text-slate-500">
+                  Bảo mật
+                </span>
                 <span
-                  className={`text-xs font-medium ${
-                    formData.is_locked ? "text-red-500" : "text-green-500"
+                  className={`px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide ${
+                    formData.is_locked
+                      ? "bg-rose-100 text-rose-600"
+                      : "bg-emerald-50 text-emerald-600"
                   }`}
                 >
                   {formData.is_locked ? "Đã khóa" : "Bình thường"}
                 </span>
               </div>
+
               {formData.is_locked && (
-                <div className="text-xs text-red-400 mt-1 space-y-1">
-                  <p>{formData.block_reason}</p>
-                  <p>{formatDate(formData.lock_until)}</p>
+                <div className="mt-4 pt-3 border-t border-rose-100/50 space-y-1.5">
+                  <p className="text-[12px] text-rose-600/80 font-medium">
+                    <span className="font-bold">Lý do:</span>{" "}
+                    {formData.block_reason || "Không rõ lý do"}
+                  </p>
+                  <p className="text-[12px] text-rose-600/80 font-medium">
+                    <span className="font-bold">Thời hạn:</span>{" "}
+                    {formatDate(formData.lock_until)}
+                  </p>
                 </div>
               )}
             </div>
           </div>
         </div>
-        <div className="flex justify-end gap-2 px-5 py-4 border-t">
+        <div className="flex justify-end gap-3 px-8 py-5 border-t border-slate-100 bg-white">
           <button
             onClick={onClose}
-            className="px-4 h-9 text-sm border rounded-md hover:bg-gray-100"
+            className="px-5 h-10 text-[13.5px] font-bold text-slate-500 bg-slate-50 hover:bg-slate-100 hover:text-slate-700 rounded-xl transition-all"
           >
-            Hủy
+            Hủy bỏ
           </button>
 
           <button
             onClick={handleSave}
             disabled={!isEditing}
-            className={`px-4 h-9 text-sm rounded-md ${
+            className={`px-6 h-10 text-[13.5px] font-bold rounded-xl transition-all ${
               isEditing
-                ? "bg-blue-500 text-white hover:bg-blue-600"
-                : "bg-gray-200 text-gray-400"
+                ? "bg-slate-800 text-white hover:bg-slate-700 shadow-md shadow-slate-200"
+                : "bg-slate-100 text-slate-400 cursor-not-allowed"
             }`}
           >
-            Lưu
+            Lưu thay đổi
           </button>
         </div>
       </div>

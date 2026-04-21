@@ -229,7 +229,7 @@ export default function MoviesList() {
             </div>
           )}
         </div>
-        {!loading && totalPages >= 1 && (
+        {!loading && totalPages > 12 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
