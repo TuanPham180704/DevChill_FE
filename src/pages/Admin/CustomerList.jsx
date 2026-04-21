@@ -81,7 +81,7 @@ export default function CustomerList() {
     setCurrentPage(1);
   }, [searchTerm, statusFilter]);
 
-  const itemsPerPage = 6;
+  const itemsPerPage = 5;
 
   const totalPages = Math.max(
     1,

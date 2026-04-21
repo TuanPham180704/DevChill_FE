@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { Link } from "react-router-dom"; // Thêm import Link để dẫn sang trang Premium
 import Sidebar from "../../../components/Client/SideBar";
 import Changepassword from "../../../components/Client/Users/Changepassword";
 import { toast } from "react-toastify";
@@ -7,6 +8,7 @@ import {
   updateProfile,
   changePassword,
 } from "../../../api/userApi";
+import { planApi } from "../../../api/planApi"; // Thêm import planApi
 import { removeToken } from "../../../utils/auth";
 import {
   Camera,
@@ -16,10 +18,13 @@ import {
   User,
   Calendar,
   Lock,
+  Clock,
+  Zap,
 } from "lucide-react";
 
 export default function Profile() {
   const [user, setUser] = useState(null);
+  const [mySub, setMySub] = useState(null); // State lưu dữ liệu gói Premium
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -34,17 +39,24 @@ export default function Profile() {
   const fileInputRef = useRef(null);
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchData = async () => {
       try {
-        const data = await getProfile();
-        setUser(data);
+        // Dùng Promise.all để gọi song song 2 API giúp load nhanh hơn
+        const [profileData, subData] = await Promise.all([
+          getProfile(),
+          planApi.getMySubscription().catch(() => null), // Lỗi (chưa có gói) thì trả về null, không sập app
+        ]);
+
+        setUser(profileData);
+        setMySub(subData); // Lưu dữ liệu gói
+
         setFormData({
-          username: data.username || "",
-          gender: data.gender || "unknown",
-          birth_date: data.birth_date || "",
-          avatar_url: data.avatar_url || "",
+          username: profileData.username || "",
+          gender: profileData.gender || "unknown",
+          birth_date: profileData.birth_date || "",
+          avatar_url: profileData.avatar_url || "",
         });
-        setAvatarPreview(data.avatar_url || null);
+        setAvatarPreview(profileData.avatar_url || null);
       } catch (err) {
         console.error(err);
         toast.error(
@@ -55,7 +67,7 @@ export default function Profile() {
       }
     };
 
-    fetchProfile();
+    fetchData();
   }, []);
 
   const handleChange = (e) => {
@@ -116,7 +128,6 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-800 font-sans antialiased selection:bg-blue-500 selection:text-white pb-24 pt-10">
-      {/* WRAPPER ĐỒNG BỘ VỚI TRANG HOME */}
       <div className="max-w-7xl mx-auto px-6 lg:px-16">
         {/* Header Tiêu đề */}
         <div className="mb-8">
@@ -127,6 +138,70 @@ export default function Profile() {
             Quản lý thông tin cá nhân, cập nhật avatar và bảo mật.
           </p>
         </div>
+
+        {/* THẺ TRẠNG THÁI PREMIUM TẠI ĐÂY */}
+        {!loading && (
+          <div className="mb-8">
+            {mySub && (mySub.current_plan || mySub.total_days_left > 0) ? (
+              // Thẻ Dành Cho VIP
+              <div className="p-[1.5px] bg-linear-to-r from-sky-400 to-blue-500 rounded-2xl shadow-md">
+                <div className="bg-white/95 backdrop-blur-xl rounded-[15px] px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 bg-sky-50 rounded-full flex items-center justify-center border border-sky-100 shadow-inner">
+                      <Crown className="text-sky-500" size={26} />
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-0.5">
+                        Trạng thái gói
+                      </p>
+                      <h3 className="text-xl font-black text-slate-800 tracking-tight">
+                        Thành viên VIP
+                      </h3>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 bg-slate-50/80 px-5 py-3 rounded-xl border border-slate-100">
+                    <Clock className="text-sky-500 animate-pulse" size={22} />
+                    <div className="text-right">
+                      <p className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">
+                        Thời gian còn lại
+                      </p>
+                      <p className="text-xl font-black text-slate-900 leading-none mt-1">
+                        {mySub.total_days_left}{" "}
+                        <span className="text-sm font-semibold text-slate-500">
+                          ngày
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              // Thẻ Dành Cho Tài Khoản Free
+              <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-5 transition-all hover:shadow-md hover:border-sky-200">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center border border-slate-200">
+                    <Shield className="text-slate-400" size={26} />
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-0.5">
+                      Trạng thái gói
+                    </p>
+                    <h3 className="text-xl font-black text-slate-800 tracking-tight">
+                      Tài khoản Free
+                    </h3>
+                  </div>
+                </div>
+                <Link
+                  to="/premium"
+                  className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-sky-50 text-sky-600 hover:bg-sky-500 hover:text-white font-bold text-sm transition-all active:scale-95 border border-sky-100 hover:shadow-lg hover:shadow-sky-500/30"
+                >
+                  <Zap size={18} className="fill-current" />
+                  Nâng cấp Premium
+                </Link>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* LAYOUT CHIA CỘT */}
         <div className="flex flex-col md:flex-row gap-8 items-stretch relative">
@@ -236,7 +311,7 @@ export default function Profile() {
                       </div>
                     </div>
 
-                    {/* Ngày sinh (Đã Fix Icon Xanh Cuối Ô Trực Quan) */}
+                    {/* Ngày sinh */}
                     <div>
                       <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
                         Ngày sinh
@@ -247,10 +322,8 @@ export default function Profile() {
                           name="birth_date"
                           value={formData.birth_date}
                           onChange={handleChange}
-                          /* Ẩn icon mặc định (opacity-0) nhưng cho nó tràn kích thước lên đè icon thật để user bấm được */
                           className="w-full pl-4 pr-12 py-3 rounded-xl bg-white border border-slate-200 text-slate-900 text-sm font-semibold focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 outline-none transition-all cursor-pointer [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-12 [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:z-10"
                         />
-                        {/* Custom Icon Lịch Màu Xanh nằm bên dưới vùng click trong suốt */}
                         <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none z-0">
                           <Calendar
                             size={18}

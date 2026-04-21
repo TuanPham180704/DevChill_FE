@@ -245,10 +245,17 @@ export default function Register() {
                   type="checkbox"
                   {...register("verify")}
                   disabled={isLoading}
-                  className="w-4 h-4 accent-blue-500"
+                  className="w-4 h-4 accent-blue-500 cursor-pointer"
                 />
                 <label className="text-sm text-gray-600">
-                  Tôi đồng ý với điều khoản
+                  Tôi đồng ý với{" "}
+                  <Link
+                    to="/terms"
+                    target="_blank"
+                    className="text-blue-600 font-semibold hover:underline"
+                  >
+                    điều khoản dịch vụ
+                  </Link>
                 </label>
               </div>
 
