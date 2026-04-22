@@ -1,21 +1,39 @@
 import { useState, useEffect } from "react";
-import { X, User, Pencil } from "lucide-react"; // Đã chuyển sang Lucide React
+import { X, User, Pencil } from "lucide-react";
+import { getAllPlansAdmin } from "../../../api/planAdminApi";
 
 export default function CustomerModal({ isOpen, onClose, user, onSave }) {
   const [formData, setFormData] = useState({});
   const [isEditing, setIsEditing] = useState(false);
-
+  const [plans, setPlans] = useState([]); 
   useEffect(() => {
     if (user) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({
         ...user,
         password: "",
-        premium_plan: user.premium_plan || 1,
+        premium_plan: user.premium_plan || "", // Mặc định rỗng hoặc theo data user
       });
     }
     setIsEditing(false);
   }, [user, isOpen]);
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        const res = await getAllPlansAdmin({ status: "active" });
+        let data = res?.data || res || [];
+        data = data.filter((plan) => plan.status === "active");
+
+        setPlans(data);
+      } catch (error) {
+        console.error("Lỗi khi tải danh sách gói:", error);
+      }
+    };
+
+    if (isOpen) {
+      fetchPlans();
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -32,7 +50,6 @@ export default function CustomerModal({ isOpen, onClose, user, onSave }) {
     return date.toLocaleString("vi-VN");
   };
 
-  // Nâng cấp style input: Bo góc tròn, viền mềm, hiệu ứng focus mượt mà
   const inputStyle =
     "w-full h-11 px-4 text-[13.5px] font-medium rounded-xl outline-none transition-all duration-200 border";
   const activeInputStyle =
@@ -134,7 +151,9 @@ export default function CustomerModal({ isOpen, onClose, user, onSave }) {
                 onChange={(e) =>
                   setFormData({ ...formData, email: e.target.value })
                 }
-                className={`${inputStyle} ${isEditing ? activeInputStyle : disabledStyle}`}
+                className={`${inputStyle} ${
+                  isEditing ? activeInputStyle : disabledStyle
+                }`}
               />
             </div>
 
@@ -152,7 +171,9 @@ export default function CustomerModal({ isOpen, onClose, user, onSave }) {
                 placeholder={
                   isEditing ? "Nhập mật khẩu mới..." : "Được bảo mật"
                 }
-                className={`${inputStyle} ${isEditing ? activeInputStyle : disabledStyle}`}
+                className={`${inputStyle} ${
+                  isEditing ? activeInputStyle : disabledStyle
+                }`}
               />
             </div>
 
@@ -166,7 +187,9 @@ export default function CustomerModal({ isOpen, onClose, user, onSave }) {
                 onChange={(e) =>
                   setFormData({ ...formData, role: e.target.value })
                 }
-                className={`${inputStyle} cursor-pointer appearance-none ${isEditing ? activeInputStyle : disabledStyle}`}
+                className={`${inputStyle} cursor-pointer appearance-none ${
+                  isEditing ? activeInputStyle : disabledStyle
+                }`}
               >
                 <option value="user">Người dùng (User)</option>
                 <option value="admin">Quản trị viên (Admin)</option>
@@ -195,7 +218,7 @@ export default function CustomerModal({ isOpen, onClose, user, onSave }) {
               </label>
               <select
                 disabled={!isEditing}
-                value={formData.premium_plan || 1}
+                value={formData.premium_plan || ""}
                 onChange={(e) =>
                   setFormData({
                     ...formData,
@@ -203,16 +226,27 @@ export default function CustomerModal({ isOpen, onClose, user, onSave }) {
                     premium_plan: Number(e.target.value),
                   })
                 }
-                className={`${inputStyle} cursor-pointer appearance-none ${isEditing ? activeInputStyle : disabledStyle}`}
+                className={`${inputStyle} cursor-pointer appearance-none ${
+                  isEditing ? activeInputStyle : disabledStyle
+                }`}
               >
-                <option value={1}>Gói 1 tháng</option>
-                <option value={2}>Gói 2 tháng</option>
-                <option value={3}>Gói 3 tháng</option>
+                <option value="" disabled>
+                  -- Chọn gói --
+                </option>
+                {plans.map((plan) => (
+                  <option key={plan.id} value={plan.id}>
+                    {plan.name}
+                  </option>
+                ))}
               </select>
             </div>
 
             <div
-              className={`p-4 border rounded-2xl transition-colors ${formData.is_locked ? "bg-rose-50/50 border-rose-100" : "bg-white border-slate-100 shadow-sm"}`}
+              className={`p-4 border rounded-2xl transition-colors ${
+                formData.is_locked
+                  ? "bg-rose-50/50 border-rose-100"
+                  : "bg-white border-slate-100 shadow-sm"
+              }`}
             >
               <div className="flex justify-between items-center">
                 <span className="text-[13px] font-bold text-slate-500">
