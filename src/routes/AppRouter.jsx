@@ -29,6 +29,7 @@ import PaymentSuccess from "../pages/Client/Premium/PaymentSucces";
 import TermsOfService from "../pages/TermsOfService";
 import MySubscription from "../pages/Client/Profile/MySubscription";
 import AccountLayout from "../pages/Client/Profile/AccountLayout";
+import PaymentListAdmin from "../pages/Admin/PaymentListAdmin";
 export default function AppRouter() {
   return (
     <>
@@ -67,6 +68,7 @@ export default function AppRouter() {
               <Route path="/admin/contracts" element={<ContractList />} />
               <Route path="/admin/movies" element={<MoviesListAdmin />} />
               <Route path="/admin/plans" element={<PlanListAdmin />} />
+              <Route path="/admin/payment" element={<PaymentListAdmin />} />
             </Route>
           </Route>
 

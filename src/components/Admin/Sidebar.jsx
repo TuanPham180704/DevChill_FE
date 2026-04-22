@@ -52,6 +52,7 @@ export default function Sidebar() {
     { name: "Phim truyện", icon: Film, path: "/admin/movies" },
     { name: "Hợp đồng", icon: FileText, path: "/admin/contracts" },
     { name: "Gói dịch vụ", icon: Package, path: "/admin/plans" },
+    { name: "Thanh Toán", icon: Package, path: "/admin/payment" },
     { name: "Hỗ trợ", icon: Headphones, path: "/admin/support" },
   ];
 
