@@ -1,15 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom"; // Thêm import Link để dẫn sang trang Premium
-import Sidebar from "../../../components/Client/SideBar";
-import Changepassword from "../../../components/Client/Users/Changepassword";
-import { toast } from "react-toastify";
-import {
-  getProfile,
-  updateProfile,
-  changePassword,
-} from "../../../api/userApi";
-import { planApi } from "../../../api/planApi"; // Thêm import planApi
-import { removeToken } from "../../../utils/auth";
+import { useOutletContext } from "react-router-dom";
 import {
   Camera,
   Mail,
@@ -18,16 +8,15 @@ import {
   User,
   Calendar,
   Lock,
-  Clock,
-  Zap,
 } from "lucide-react";
+import { toast } from "react-toastify";
+import Changepassword from "../../../components/Client/Users/Changepassword";
+import { updateProfile, changePassword } from "../../../api/userApi";
 
 export default function Profile() {
-  const [user, setUser] = useState(null);
-  const [mySub, setMySub] = useState(null); // State lưu dữ liệu gói Premium
-  const [avatarPreview, setAvatarPreview] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { user, setUser, loading } = useOutletContext();
 
+  const [avatarPreview, setAvatarPreview] = useState(null);
   const [formData, setFormData] = useState({
     username: "",
     gender: "unknown",
@@ -39,36 +28,26 @@ export default function Profile() {
   const fileInputRef = useRef(null);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Dùng Promise.all để gọi song song 2 API giúp load nhanh hơn
-        const [profileData, subData] = await Promise.all([
-          getProfile(),
-          planApi.getMySubscription().catch(() => null), // Lỗi (chưa có gói) thì trả về null, không sập app
-        ]);
-
-        setUser(profileData);
-        setMySub(subData); // Lưu dữ liệu gói
-
-        setFormData({
-          username: profileData.username || "",
-          gender: profileData.gender || "unknown",
-          birth_date: profileData.birth_date || "",
-          avatar_url: profileData.avatar_url || "",
-        });
-        setAvatarPreview(profileData.avatar_url || null);
-      } catch (err) {
-        console.error(err);
-        toast.error(
-          err?.response?.data?.message || "Không thể tải thông tin tài khoản!",
-        );
-      } finally {
-        setLoading(false);
+    if (user) {
+      let formattedDate = "";
+      if (user.birth_date) {
+        const dateObj = new Date(user.birth_date);
+        const year = dateObj.getFullYear();
+        const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+        const day = String(dateObj.getDate()).padStart(2, "0");
+        formattedDate = `${year}-${month}-${day}`;
       }
-    };
 
-    fetchData();
-  }, []);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setFormData({
+        username: user.username || "",
+        gender: user.gender || "unknown",
+        birth_date: formattedDate,
+        avatar_url: user.avatar_url || "",
+      });
+      setAvatarPreview(user.avatar_url || null);
+    }
+  }, [user]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -117,284 +96,177 @@ export default function Profile() {
     return await changePassword(data);
   };
 
-  const handleLogout = () => {
-    removeToken();
-    window.location.href = "/login";
-  };
-
   const menuSkeleton = (
     <div className="h-12 w-full bg-slate-100 rounded-xl animate-pulse" />
   );
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-800 font-sans antialiased selection:bg-blue-500 selection:text-white pb-24 pt-10">
-      <div className="max-w-7xl mx-auto px-6 lg:px-16">
-        {/* Header Tiêu đề */}
-        <div className="mb-8">
-          <h1 className="text-2xl lg:text-3xl font-extrabold tracking-tight text-slate-900">
-            Cài đặt tài khoản
-          </h1>
-          <p className="text-slate-500 text-sm mt-1.5 font-medium">
-            Quản lý thông tin cá nhân, cập nhật avatar và bảo mật.
-          </p>
-        </div>
+    <>
+      <main className="flex-1 w-full bg-white rounded-[2rem] shadow-sm border border-slate-100 p-8 lg:p-10 flex flex-col justify-between h-full">
+        <div className="flex flex-col lg:flex-row-reverse gap-10 lg:gap-14">
+          <div className="flex flex-col items-center shrink-0 lg:w-48">
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept="image/*"
+              className="hidden"
+            />
 
-        {/* THẺ TRẠNG THÁI PREMIUM TẠI ĐÂY */}
-        {!loading && (
-          <div className="mb-8">
-            {mySub && (mySub.current_plan || mySub.total_days_left > 0) ? (
-              // Thẻ Dành Cho VIP
-              <div className="p-[1.5px] bg-linear-to-r from-sky-400 to-blue-500 rounded-2xl shadow-md">
-                <div className="bg-white/95 backdrop-blur-xl rounded-[15px] px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 bg-sky-50 rounded-full flex items-center justify-center border border-sky-100 shadow-inner">
-                      <Crown className="text-sky-500" size={26} />
-                    </div>
-                    <div>
-                      <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-0.5">
-                        Trạng thái gói
-                      </p>
-                      <h3 className="text-xl font-black text-slate-800 tracking-tight">
-                        Thành viên VIP
-                      </h3>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 bg-slate-50/80 px-5 py-3 rounded-xl border border-slate-100">
-                    <Clock className="text-sky-500 animate-pulse" size={22} />
-                    <div className="text-right">
-                      <p className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">
-                        Thời gian còn lại
-                      </p>
-                      <p className="text-xl font-black text-slate-900 leading-none mt-1">
-                        {mySub.total_days_left}{" "}
-                        <span className="text-sm font-semibold text-slate-500">
-                          ngày
-                        </span>
-                      </p>
-                    </div>
-                  </div>
-                </div>
+            <div
+              onClick={handleTriggerClick}
+              className="relative w-32 h-32 lg:w-40 lg:h-40 rounded-full ring-4 ring-slate-50 overflow-hidden cursor-pointer bg-slate-100 group shadow-md"
+            >
+              <img
+                src={avatarPreview || user?.avatar_url || "/default-avatar.png"}
+                alt="Avatar"
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center text-white backdrop-blur-sm">
+                <Camera size={26} className="mb-1.5 drop-shadow-md" />
+                <span className="text-[10px] font-bold uppercase tracking-widest drop-shadow-md">
+                  Đổi ảnh
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-5 text-center w-full">
+              {user?.is_premium ? (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-linear-to-r from-yellow-400 to-yellow-500 text-white text-[11px] font-bold uppercase tracking-wider shadow-sm shadow-yellow-500/20">
+                  <Crown size={12} fill="currentColor" /> Thành viên Premium
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 text-slate-500 text-[11px] font-bold uppercase tracking-wider border border-slate-200">
+                  <Shield size={12} /> Tài khoản Free
+                </span>
+              )}
+            </div>
+          </div>
+          <div className="flex-1">
+            <h3 className="text-lg font-extrabold text-slate-900 mb-6 tracking-tight">
+              Thông tin cá nhân
+            </h3>
+
+            {loading ? (
+              <div className="space-y-5">
+                {menuSkeleton}
+                {menuSkeleton}
+                {menuSkeleton}
+                {menuSkeleton}
               </div>
             ) : (
-              // Thẻ Dành Cho Tài Khoản Free
-              <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-5 transition-all hover:shadow-md hover:border-sky-200">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center border border-slate-200">
-                    <Shield className="text-slate-400" size={26} />
-                  </div>
-                  <div>
-                    <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-0.5">
-                      Trạng thái gói
-                    </p>
-                    <h3 className="text-xl font-black text-slate-800 tracking-tight">
-                      Tài khoản Free
-                    </h3>
+              <div className="space-y-5">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
+                    Địa chỉ Email
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                      <Mail size={16} className="text-slate-900" />
+                    </div>
+                    <input
+                      type="email"
+                      value={user?.email || ""}
+                      readOnly
+                      className="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-200/60 text-slate-500 text-sm font-medium cursor-not-allowed outline-none"
+                    />
                   </div>
                 </div>
-                <Link
-                  to="/premium"
-                  className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-sky-50 text-sky-600 hover:bg-sky-500 hover:text-white font-bold text-sm transition-all active:scale-95 border border-sky-100 hover:shadow-lg hover:shadow-sky-500/30"
-                >
-                  <Zap size={18} className="fill-current" />
-                  Nâng cấp Premium
-                </Link>
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
+                    Tên hiển thị
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                      <User size={16} className="text-slate-900" />
+                    </div>
+                    <input
+                      type="text"
+                      name="username"
+                      value={formData.username}
+                      onChange={handleChange}
+                      placeholder="Nhập tên của bạn"
+                      className="w-full pl-10 pr-4 py-3 rounded-xl bg-white border border-slate-200 text-slate-900 text-sm font-semibold focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 outline-none transition-all"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
+                    Ngày sinh
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="date"
+                      name="birth_date"
+                      value={formData.birth_date}
+                      onChange={handleChange}
+                      className="w-full pl-4 pr-12 py-3 rounded-xl bg-white border border-slate-200 text-slate-900 text-sm font-semibold focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 outline-none transition-all cursor-pointer [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-12 [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:z-10"
+                    />
+                    <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none z-0">
+                      <Calendar
+                        size={18}
+                        className="text-blue-500 drop-shadow-sm"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+                    Giới tính
+                  </label>
+                  <div className="flex flex-wrap gap-2.5">
+                    {[
+                      { id: "male", label: "Nam" },
+                      { id: "female", label: "Nữ" },
+                      { id: "other", label: "Khác" },
+                    ].map((g) => (
+                      <label
+                        key={g.id}
+                        className={`relative flex items-center justify-center px-5 py-2.5 rounded-xl border font-semibold text-xs cursor-pointer transition-all ${
+                          formData.gender === g.id
+                            ? "bg-blue-500 border-blue-500 text-white shadow-md shadow-blue-500/20"
+                            : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-700"
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="gender"
+                          value={g.id}
+                          checked={formData.gender === g.id}
+                          onChange={handleChange}
+                          className="hidden"
+                        />
+                        {g.label}
+                      </label>
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
           </div>
-        )}
-
-        {/* LAYOUT CHIA CỘT */}
-        <div className="flex flex-col md:flex-row gap-8 items-stretch relative">
-          {/* SIDEBAR TÁCH RỜI */}
-          <Sidebar
-            active="profile"
-            customAvatar={avatarPreview || user?.avatar_url}
-            user={user}
-            onLogout={handleLogout}
-          />
-
-          {/* MAIN FORM CARD */}
-          <main className="flex-1 w-full bg-white rounded-[2rem] shadow-sm border border-slate-100 p-8 lg:p-10 flex flex-col justify-between">
-            <div className="flex flex-col lg:flex-row-reverse gap-10 lg:gap-14">
-              {/* AVATAR UPLOAD */}
-              <div className="flex flex-col items-center shrink-0 lg:w-48">
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileChange}
-                  accept="image/*"
-                  className="hidden"
-                />
-
-                <div
-                  onClick={handleTriggerClick}
-                  className="relative w-32 h-32 lg:w-40 lg:h-40 rounded-full ring-4 ring-slate-50 overflow-hidden cursor-pointer bg-slate-100 group shadow-md"
-                >
-                  <img
-                    src={
-                      avatarPreview || user?.avatar_url || "/default-avatar.png"
-                    }
-                    alt="Avatar"
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center text-white backdrop-blur-sm">
-                    <Camera size={26} className="mb-1.5 drop-shadow-md" />
-                    <span className="text-[10px] font-bold uppercase tracking-widest drop-shadow-md">
-                      Đổi ảnh
-                    </span>
-                  </div>
-                </div>
-
-                <div className="mt-5 text-center w-full">
-                  {user?.is_premium ? (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-linear-to-r from-yellow-400 to-yellow-500 text-white text-[11px] font-bold uppercase tracking-wider shadow-sm shadow-yellow-500/20">
-                      <Crown size={12} fill="currentColor" /> Thành viên Premium
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 text-slate-500 text-[11px] font-bold uppercase tracking-wider border border-slate-200">
-                      <Shield size={12} /> Tài khoản Free
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* FORM FIELDS */}
-              <div className="flex-1">
-                <h3 className="text-lg font-extrabold text-slate-900 mb-6 tracking-tight">
-                  Thông tin cá nhân
-                </h3>
-
-                {loading ? (
-                  <div className="space-y-5">
-                    {menuSkeleton}
-                    {menuSkeleton}
-                    {menuSkeleton}
-                    {menuSkeleton}
-                  </div>
-                ) : (
-                  <div className="space-y-5">
-                    {/* Email (Read Only) */}
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
-                        Địa chỉ Email
-                      </label>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                          <Mail size={16} className="text-slate-900" />
-                        </div>
-                        <input
-                          type="email"
-                          value={user?.email || ""}
-                          readOnly
-                          className="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-200/60 text-slate-500 text-sm font-medium cursor-not-allowed outline-none"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Username */}
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
-                        Tên hiển thị
-                      </label>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                          <User size={16} className="text-slate-900" />
-                        </div>
-                        <input
-                          type="text"
-                          name="username"
-                          value={formData.username}
-                          onChange={handleChange}
-                          placeholder="Nhập tên của bạn"
-                          className="w-full pl-10 pr-4 py-3 rounded-xl bg-white border border-slate-200 text-slate-900 text-sm font-semibold focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 outline-none transition-all"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Ngày sinh */}
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
-                        Ngày sinh
-                      </label>
-                      <div className="relative">
-                        <input
-                          type="date"
-                          name="birth_date"
-                          value={formData.birth_date}
-                          onChange={handleChange}
-                          className="w-full pl-4 pr-12 py-3 rounded-xl bg-white border border-slate-200 text-slate-900 text-sm font-semibold focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 outline-none transition-all cursor-pointer [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-12 [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:z-10"
-                        />
-                        <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none z-0">
-                          <Calendar
-                            size={18}
-                            className="text-blue-500 drop-shadow-sm"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Giới tính */}
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">
-                        Giới tính
-                      </label>
-                      <div className="flex flex-wrap gap-2.5">
-                        {[
-                          { id: "male", label: "Nam" },
-                          { id: "female", label: "Nữ" },
-                          { id: "other", label: "Khác" },
-                        ].map((g) => (
-                          <label
-                            key={g.id}
-                            className={`relative flex items-center justify-center px-5 py-2.5 rounded-xl border font-semibold text-xs cursor-pointer transition-all ${
-                              formData.gender === g.id
-                                ? "bg-blue-500 border-blue-500 text-white shadow-md shadow-blue-500/20"
-                                : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-700"
-                            }`}
-                          >
-                            <input
-                              type="radio"
-                              name="gender"
-                              value={g.id}
-                              checked={formData.gender === g.id}
-                              onChange={handleChange}
-                              className="hidden"
-                            />
-                            {g.label}
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Nút hành động */}
-            <div className="pt-8 mt-8 border-t border-slate-100 flex flex-col sm:flex-row items-center gap-3">
-              <button
-                onClick={handleUpdateProfile}
-                className="w-full sm:w-auto px-7 py-3 rounded-xl bg-slate-900 text-white text-sm font-bold tracking-wide shadow-md shadow-slate-900/10 hover:bg-slate-800 hover:-translate-y-0.5 transition-all active:scale-95"
-              >
-                Lưu Thay Đổi
-              </button>
-
-              <button
-                onClick={() => setShowPasswordModal(true)}
-                className="w-full sm:w-auto flex items-center justify-center gap-2 px-7 py-3 rounded-xl bg-white border border-slate-200 text-slate-600 text-sm font-semibold hover:bg-slate-50 hover:border-slate-300 hover:text-slate-900 transition-all active:scale-95"
-              >
-                <Lock size={16} /> Đổi Mật Khẩu
-              </button>
-            </div>
-          </main>
         </div>
-      </div>
+        <div className="pt-8 mt-8 border-t border-slate-100 flex flex-col sm:flex-row items-center gap-3">
+          <button
+            onClick={handleUpdateProfile}
+            className="w-full sm:w-auto px-7 py-3 rounded-xl bg-slate-900 text-white text-sm font-bold tracking-wide shadow-md shadow-slate-900/10 hover:bg-slate-800 hover:-translate-y-0.5 transition-all active:scale-95"
+          >
+            Lưu Thay Đổi
+          </button>
+
+          <button
+            onClick={() => setShowPasswordModal(true)}
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-7 py-3 rounded-xl bg-white border border-slate-200 text-slate-600 text-sm font-semibold hover:bg-slate-50 hover:border-slate-300 hover:text-slate-900 transition-all active:scale-95"
+          >
+            <Lock size={16} /> Đổi Mật Khẩu
+          </button>
+        </div>
+      </main>
 
       <Changepassword
         isOpen={showPasswordModal}
         onClose={() => setShowPasswordModal(false)}
         onSubmit={handleChangePassword}
       />
-    </div>
+    </>
   );
 }

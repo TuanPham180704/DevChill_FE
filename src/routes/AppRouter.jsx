@@ -11,7 +11,6 @@ import ForgotPassword from "../components/Forgotpassword";
 import ResetPassword from "../components/Resetpassword";
 import Profile from "../pages/Client/Profile/Profile";
 import HistoryView from "../pages/Client/Profile/HistoryView";
-import PremiumHistory from "../pages/Client/Profile/PremiumHistory";
 import MovieList from "@/pages/MovieList";
 import MovieDetail from "@/pages/MovieDetail";
 import Support from "../pages/Client/Profile/Support";
@@ -28,6 +27,8 @@ import PlanListAdmin from "../pages/Admin/PlanListAdmin";
 import PremiumDetail from "../pages/Client/Premium/PremiumDetail";
 import PaymentSuccess from "../pages/Client/Premium/PaymentSucces";
 import TermsOfService from "../pages/TermsOfService";
+import MySubscription from "../pages/Client/Profile/MySubscription";
+import AccountLayout from "../pages/Client/Profile/AccountLayout";
 export default function AppRouter() {
   return (
     <>
@@ -52,10 +53,10 @@ export default function AppRouter() {
 
           <Route element={<ProtectedRoute roles={["user"]} />}>
             <Route element={<AppLayout />}>
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/my-premium" element={<PremiumHistory />} />
-              <Route path="/history" element={<HistoryView />} />
-              <Route path="/support" element={<Support />} />
+              <Route path="/profile" element={<AccountLayout />}>
+                <Route index element={<Profile />} />
+                <Route path="my-premium" element={<MySubscription />} />
+              </Route>
             </Route>
           </Route>
 

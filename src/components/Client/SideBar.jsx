@@ -1,37 +1,14 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { User, Ticket, Crown, LifeBuoy, LogOut } from "lucide-react";
 import { toast } from "react-toastify";
-import { getProfile } from "../../api/userApi";
-import avatarImg from "../../assets/devchill-logo.png";
+import avatarImg from "../../assets/devchill-logo.png"; // Nhớ check lại đúng đường dẫn file ảnh của bạn
 
 export default function Sidebar({
-  user: propUser,
+  user,
   onLogout,
   active = "profile",
   customAvatar,
 }) {
-  const [user, setUser] = useState(propUser || null);
-  const [loading, setLoading] = useState(!propUser);
-
-  useEffect(() => {
-    if (!propUser) {
-      const fetchUser = async () => {
-        setLoading(true);
-        try {
-          const data = await getProfile();
-          setUser(data);
-        } catch (err) {
-          console.error(err);
-          toast.error("Không thể tải thông tin user!");
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchUser();
-    }
-  }, [propUser]);
-
   const menuItems = [
     {
       id: "profile",
@@ -43,13 +20,13 @@ export default function Sidebar({
       id: "tickets",
       icon: <Ticket size={20} />,
       label: "Lịch sử xem phim",
-      path: "/history",
+      path: "/history", 
     },
     {
-      id: "my-premium",
+      id: "subscription", 
       icon: <Crown size={20} />,
       label: "Gói đã mua",
-      path: "/my-premium",
+      path: "/profile/my-premium", 
     },
     {
       id: "support",
@@ -67,7 +44,6 @@ export default function Sidebar({
   };
 
   return (
-    // Đã bỏ h-fit, sticky, max-h. Khi ở flex items-stretch, thẻ aside sẽ tự động cao bằng thẻ kế bên.
     <aside className="w-full md:w-72 lg:w-80 shrink-0 bg-white rounded-[2rem] shadow-sm border border-slate-100 flex flex-col justify-between p-6 z-10">
       <div>
         <h2 className="text-slate-900 text-xl font-extrabold mb-6 tracking-tight pl-2">
@@ -92,8 +68,9 @@ export default function Sidebar({
           ))}
         </ul>
       </div>
+
       <div className="border-t border-slate-100 pt-6 mt-8">
-        {loading ? (
+        {!user ? (
           <div className="flex items-center gap-3 px-2 animate-pulse">
             <div className="w-12 h-12 bg-slate-200 rounded-full" />
             <div className="flex-1 space-y-2">

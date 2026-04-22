@@ -2,9 +2,28 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState, useRef } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
-import { CheckCircle2, XCircle, Loader2, Home, RotateCcw } from "lucide-react";
+import {
+  CheckCircle2,
+  XCircle,
+  Loader2,
+  Home,
+  RotateCcw,
+  ReceiptText,
+} from "lucide-react";
 import { toast } from "react-toastify";
 import { planApi } from "../../../api/planApi";
+
+// Hàm hỗ trợ format thời gian trả về từ VNPay (YYYYMMDDHHmmss -> HH:mm:ss DD/MM/YYYY)
+const formatVnpDate = (dateString) => {
+  if (!dateString || dateString.length !== 14) return "";
+  const year = dateString.substring(0, 4);
+  const month = dateString.substring(4, 6);
+  const day = dateString.substring(6, 8);
+  const hour = dateString.substring(8, 10);
+  const minute = dateString.substring(10, 12);
+  const second = dateString.substring(12, 14);
+  return `${hour}:${minute}:${second} - ${day}/${month}/${year}`;
+};
 
 export default function PaymentSuccess() {
   const [searchParams] = useSearchParams();
@@ -14,16 +33,19 @@ export default function PaymentSuccess() {
   // Cờ chặn React StrictMode gọi API 2 lần liên tiếp
   const hasVerified = useRef(false);
 
+  // Trích xuất các tham số quan trọng từ URL VNPay trả về
   const responseCode = searchParams.get("vnp_ResponseCode");
   const txnRef = searchParams.get("vnp_TxnRef");
   const amount = searchParams.get("vnp_Amount");
+  const transactionNo = searchParams.get("vnp_TransactionNo");
+  const bankCode = searchParams.get("vnp_BankCode");
+  const payDate = searchParams.get("vnp_PayDate");
+  const orderInfo = searchParams.get("vnp_OrderInfo");
 
   useEffect(() => {
-    // Nếu cờ đã bật (hàm đã chạy qua 1 lần) thì return luôn, không làm gì cả
     if (hasVerified.current) return;
 
     const verifyPayment = async () => {
-      // Đánh dấu là đã bắt đầu xử lý để chặn các lần gọi tiếp theo
       hasVerified.current = true;
 
       if (responseCode !== "00") {
@@ -80,27 +102,77 @@ export default function PaymentSuccess() {
         {/* State: Thành công */}
         {status === "success" && (
           <div className="animate-in zoom-in duration-300">
-            <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-5">
+            <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-5 relative">
               <CheckCircle2 size={40} className="text-green-500" />
             </div>
             <h2 className="text-2xl font-bold text-slate-900 mb-2">
-              Hoàn tất!
+              Thanh toán thành công!
             </h2>
             <p className="text-sm text-slate-500 mb-6 leading-relaxed">
-              Cảm ơn bạn. Đặc quyền VIP của bạn đã được hệ thống kích hoạt tự
-              động.
+              Đặc quyền VIP của bạn đã được kích hoạt. Dưới đây là biên lai giao
+              dịch.
             </p>
 
-            {amount && (
-              <div className="bg-slate-50/50 p-4 rounded-xl mb-6 border border-slate-100 flex justify-between items-center">
-                <span className="text-sm text-slate-500 font-medium">
-                  Đã thanh toán
-                </span>
-                <span className="text-xl font-black text-slate-900">
-                  {(Number(amount) / 100).toLocaleString("vi-VN")}đ
+            {/* Khối hiển thị Biên lai (Receipt) */}
+            <div className="bg-slate-50/70 rounded-xl mb-6 border border-slate-200 text-left overflow-hidden">
+              <div className="bg-slate-100/50 px-4 py-3 border-b border-slate-200 flex items-center gap-2">
+                <ReceiptText size={16} className="text-slate-500" />
+                <span className="text-sm font-semibold text-slate-700">
+                  Chi tiết giao dịch
                 </span>
               </div>
-            )}
+
+              <div className="p-4 space-y-3 text-sm">
+                {amount && (
+                  <div className="flex justify-between items-center pb-3 border-b border-slate-200 border-dashed">
+                    <span className="text-slate-500">Số tiền:</span>
+                    <span className="text-lg font-black text-slate-900">
+                      {(Number(amount) / 100).toLocaleString("vi-VN")}đ
+                    </span>
+                  </div>
+                )}
+
+                {transactionNo && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-500">Mã giao dịch:</span>
+                    <span className="font-medium text-slate-900">
+                      {transactionNo}
+                    </span>
+                  </div>
+                )}
+
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-500">Mã đơn hàng:</span>
+                  <span className="font-medium text-slate-900">{txnRef}</span>
+                </div>
+
+                {bankCode && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-500">Ngân hàng:</span>
+                    <span className="font-medium text-slate-900">
+                      {bankCode}
+                    </span>
+                  </div>
+                )}
+
+                {payDate && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-500">Thời gian:</span>
+                    <span className="font-medium text-slate-900">
+                      {formatVnpDate(payDate)}
+                    </span>
+                  </div>
+                )}
+
+                {/* Tùy chọn: Hiển thị thêm thông tin nội dung thanh toán nếu muốn */}
+                {/* {orderInfo && (
+                  <div className="flex justify-between items-start gap-4 pt-3 border-t border-slate-200 border-dashed">
+                    <span className="text-slate-500 whitespace-nowrap">Nội dung:</span>
+                    <span className="font-medium text-slate-900 text-right">{decodeURIComponent(orderInfo.replace(/\+/g, ' '))}</span>
+                  </div>
+                )} */}
+              </div>
+            </div>
 
             <Link
               to="/"
@@ -117,11 +189,23 @@ export default function PaymentSuccess() {
             <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-5">
               <XCircle size={40} className="text-red-500" />
             </div>
-            <h2 className="text-2xl font-bold text-slate-900 mb-2">Thất bại</h2>
-            <p className="text-sm text-slate-500 mb-8 leading-relaxed">
+            <h2 className="text-2xl font-bold text-slate-900 mb-2">
+              Giao dịch thất bại
+            </h2>
+            <p className="text-sm text-slate-500 mb-6 leading-relaxed">
               Giao dịch đã bị hủy hoặc có lỗi xảy ra. Tài khoản của bạn không bị
               trừ tiền.
             </p>
+
+            {/* Vẫn có thể show mã đơn hàng bị lỗi để user dễ báo cáo hỗ trợ */}
+            {txnRef && (
+              <div className="bg-slate-50 p-3 rounded-lg mb-6 border border-slate-100 flex justify-between items-center text-sm">
+                <span className="text-slate-500">Mã tham chiếu:</span>
+                <span className="font-mono font-medium text-slate-800">
+                  {txnRef}
+                </span>
+              </div>
+            )}
 
             <button
               onClick={() => navigate("/premium")}

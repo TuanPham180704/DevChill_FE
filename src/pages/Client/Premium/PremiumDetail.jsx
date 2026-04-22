@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { CheckCircle2, ArrowLeft, CreditCard, ShieldCheck } from "lucide-react";
 import { toast } from "react-toastify";
 import { planApi } from "../../../api/planApi";
