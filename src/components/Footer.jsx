@@ -11,8 +11,8 @@ import anhlogoweb from "../assets/devchill-logo.png";
 
 export default function Footer() {
   return (
-    <footer className="relative bg-white text-gray-700 border-t border-gray-200">
-      <div className="absolute inset-0 bg-linear-to-t from-gray-50 to-transparent pointer-events-none" />
+    <footer className="relative bg-blue-50/90 backdrop-blur-md text-gray-800 border-t border-blue-100/50">
+      <div className="absolute inset-0 bg-linear-to-t from-blue-100/40 to-transparent pointer-events-none" />
 
       <div className="w-full flex justify-center py-2 relative z-10">
         <div className="flex items-center gap-2 bg-red-500 text-white px-3 py-1 rounded-md text-xs font-medium shadow-sm">
@@ -26,11 +26,12 @@ export default function Footer() {
           <span>Hoàng Sa & Trường Sa là của Việt Nam</span>
         </div>
       </div>
+
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-3">
-              <div className="bg-linear-to-tr from-blue-500 to-indigo-500 rounded-full p-0.5">
+              <div className="bg-linear-to-tr from-blue-500 to-indigo-500 rounded-full p-0.5 shadow-sm">
                 <img
                   src={anhlogoweb}
                   className="w-12 h-12 rounded-full bg-white object-cover"
@@ -38,16 +39,20 @@ export default function Footer() {
               </div>
 
               <div>
-                <h2 className=" font-semibold text-blue-600">🎬 DevChill</h2>
-                <p className="text-xs text-gray-500">Phim hay cả rổ</p>
+                <h2 className="font-bold text-blue-700 text-lg tracking-tight">
+                  🎬 DevChill
+                </h2>
+                <p className="text-xs text-blue-600/80 font-medium">
+                  Phim hay cả rổ
+                </p>
               </div>
             </div>
 
-            <p className=" text-sm text-gray-500 leading-relaxed">
+            <p className="text-sm text-gray-600 leading-relaxed font-medium">
               🎬 DevChill — xem phim online miễn phí, Vietsub & thuyết minh.
             </p>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 mt-1">
               {[
                 FaTelegramPlane,
                 FaDiscord,
@@ -60,7 +65,7 @@ export default function Footer() {
                 <a
                   key={i}
                   href="#"
-                  className="bg-gray-100 hover:bg-blue-50 p-2 rounded-full transition"
+                  className="bg-white/60 hover:bg-blue-100 border border-blue-100/50 p-2 rounded-full transition-colors shadow-sm"
                 >
                   <Icon className="w-4 h-4 text-gray-600 hover:text-blue-600" />
                 </a>
@@ -69,13 +74,17 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="text-sm font-medium text-gray-600 mb-3">Trang</h3>
-
-            <ul className="space-y-2 text-sm">
+            <h3 className="text-sm font-bold text-gray-900 mb-4 tracking-tight">
+              Trang
+            </h3>
+            <ul className="space-y-2.5 text-sm font-medium">
               {["Hỏi-Đáp", "Chính sách bảo mật", "Điều khoản sử dụng"].map(
                 (t, i) => (
                   <li key={i}>
-                    <a href="#" className="hover:text-blue-600 transition">
+                    <a
+                      href="#"
+                      className="text-gray-600 hover:text-blue-600 transition-colors"
+                    >
                       {t}
                     </a>
                   </li>
@@ -85,12 +94,16 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="text-sm font-medium text-gray-600 mb-3">Danh mục</h3>
-
-            <ul className="space-y-2 text-sm">
+            <h3 className="text-sm font-bold text-gray-900 mb-4 tracking-tight">
+              Danh mục
+            </h3>
+            <ul className="space-y-2.5 text-sm font-medium">
               {["Dongphim", "Ghienphim", "Motphim", "Subnhanh"].map((t, i) => (
                 <li key={i}>
-                  <a href="#" className="hover:text-blue-600 transition">
+                  <a
+                    href="#"
+                    className="text-gray-600 hover:text-blue-600 transition-colors"
+                  >
                     {t}
                   </a>
                 </li>
@@ -99,13 +112,17 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="text-sm font-medium text-gray-600 mb-3">Liên hệ</h3>
-
-            <ul className="space-y-2 text-sm text-gray-600">
+            <h3 className="text-sm font-bold text-gray-900 mb-4 tracking-tight">
+              Liên hệ
+            </h3>
+            <ul className="space-y-2.5 text-sm font-medium text-gray-600">
               {["Liên hệ quảng cáo", "Gửi link phim", "Báo lỗi nội dung"].map(
                 (t, i) => (
                   <li key={i}>
-                    <a href="#" className="hover:text-blue-600 transition">
+                    <a
+                      href="#"
+                      className="text-gray-600 hover:text-blue-600 transition-colors"
+                    >
                       {t}
                     </a>
                   </li>
@@ -116,7 +133,7 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="border-t border-gray-200 text-center py-3 text-xs text-gray-400">
+      <div className="relative z-10 border-t border-blue-100/50 text-center py-4 text-xs font-medium text-gray-500 bg-white/20">
         © {new Date().getFullYear()} 🎬 DevChill — Bản Quyền Thuộc Về KaiJun
       </div>
     </footer>

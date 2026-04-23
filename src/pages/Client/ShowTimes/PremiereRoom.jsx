@@ -1,16 +1,18 @@
+/* eslint-disable no-unused-vars */
 import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import VideoPlayer from "../../../components/VideoPlayer";
 import { showtimesApi } from "../../../api/showtimeApi";
-
+import { getProfile } from "../../../api/userApi";
+import { getToken } from "../../../utils/auth";
 import {
   Send,
   Users,
   ShieldAlert,
   Clock,
   ChevronLeft,
-  Smile,
   Radio,
+  Crown,
 } from "lucide-react";
 
 const EMOJI_LIST = ["❤️", "😂", "😮", "😢", "🔥", "✨"];
@@ -21,6 +23,7 @@ export default function PremiereRoom() {
   const [roomData, setRoomData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [errorObj, setErrorObj] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
 
   const [messages, setMessages] = useState([
     {
@@ -34,25 +37,62 @@ export default function PremiereRoom() {
   const [floatingEmojis, setFloatingEmojis] = useState([]);
   const chatEndRef = useRef(null);
   useEffect(() => {
-    const joinRoom = async () => {
+    const initRoom = async () => {
       try {
         setLoading(true);
+        const token = getToken() || localStorage.getItem("token");
+        if (!token) {
+          setErrorObj({
+            title: "Yêu cầu đăng nhập",
+            message: "Bạn cần đăng nhập để tham gia phòng công chiếu.",
+            type: "auth",
+          });
+          setLoading(false);
+          return;
+        }
+        let userProfile;
+        try {
+          userProfile = await getProfile();
+          setCurrentUser(userProfile);
+        } catch (err) {
+          setErrorObj({
+            title: "Phiên đăng nhập hết hạn",
+            message: "Không thể xác thực tài khoản. Vui lòng đăng nhập lại.",
+            type: "auth",
+          });
+          setLoading(false);
+          return;
+        }
         const res = await showtimesApi.watchPremiere(id);
+
         if (res.success && res.status === "live") {
-          setRoomData(res.data);
+          const roomInfo = res.data;
+          const isPremiereMovie =
+            roomInfo.is_premiere || roomInfo.movie_is_premium;
+
+          if (isPremiereMovie && !userProfile.is_premium) {
+            setErrorObj({
+              title: "Nội dung Đặc quyền VIP",
+              message:
+                "Suất chiếu Công chiếu (Premiere) chỉ dành cho thành viên Premium. Vui lòng nâng cấp tài khoản để tiếp tục trải nghiệm.",
+              type: "premium",
+            });
+            return; 
+          }
+          setRoomData(roomInfo);
         } else if (res.status === "scheduled") {
           setErrorObj({
             title: "Chưa tới giờ chiếu",
-            message: res.message,
+            message: res.message || "Phim chưa bắt đầu, vui lòng quay lại sau.",
             type: "wait",
           });
         }
       } catch (err) {
         const errorMsg =
           err.response?.data?.message ||
-          "Vui lòng nâng cấp Premium để trải nghiệm.";
+          "Lỗi truy cập hệ thống. Vui lòng thử lại sau.";
         setErrorObj({
-          title: "Nội dung Đặc quyền",
+          title: "Không thể truy cập",
           message: errorMsg,
           type: "error",
         });
@@ -60,11 +100,13 @@ export default function PremiereRoom() {
         setLoading(false);
       }
     };
-    joinRoom();
+    initRoom();
   }, [id]);
+
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, floatingEmojis]);
+
   useEffect(() => {
     if (!roomData) return;
     const interval = setInterval(() => {
@@ -79,9 +121,10 @@ export default function PremiereRoom() {
   const handleSendMessage = (e) => {
     e.preventDefault();
     if (!chatInput.trim()) return;
+    const userName = currentUser?.username || "Bạn";
     setMessages((prev) => [
       ...prev,
-      { id: Date.now(), user: "Bạn", text: chatInput, isSystem: false },
+      { id: Date.now(), user: userName, text: chatInput, isSystem: false },
     ]);
     setChatInput("");
   };
@@ -98,41 +141,63 @@ export default function PremiereRoom() {
       2500,
     );
   };
-
   if (loading)
     return (
       <div className="h-screen bg-[#FAFAFA] flex items-center justify-center">
-        <div className="w-8 h-8 border-[3px] border-gray-200 border-t-slate-900 rounded-full animate-spin"></div>
+        <div className="w-10 h-10 border-[3px] border-slate-200 border-t-slate-900 rounded-full animate-spin"></div>
       </div>
     );
+
   if (errorObj) {
     return (
       <div className="h-screen flex flex-col items-center justify-center bg-[#FAFAFA] px-4 font-sans">
-        <div className="w-20 h-20 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 rounded-[24px] flex items-center justify-center mb-6">
-          {errorObj.type === "wait" ? (
+        <div className="w-20 h-20 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 rounded-[24px] flex items-center justify-center mb-6">
+          {errorObj.type === "wait" && (
             <Clock size={36} className="text-slate-400" />
-          ) : (
-            <ShieldAlert size={36} className="text-amber-500" />
+          )}
+          {errorObj.type === "premium" && (
+            <Crown size={36} className="text-amber-500" />
+          )}
+          {(errorObj.type === "error" || errorObj.type === "auth") && (
+            <ShieldAlert size={36} className="text-rose-500" />
           )}
         </div>
         <h1 className="text-2xl font-bold text-slate-900 mb-2 tracking-tight">
           {errorObj.title}
         </h1>
-        <p className="text-slate-500 text-sm mb-8 text-center max-w-sm leading-relaxed">
+        <p className="text-slate-500 text-[15px] mb-8 text-center max-w-sm leading-relaxed">
           {errorObj.message}
         </p>
-        <button
-          onClick={() => navigate(-1)}
-          className="px-8 py-3 bg-slate-900 hover:bg-black text-white rounded-xl text-sm font-semibold transition-all shadow-md active:scale-95"
-        >
-          Quay lại lịch chiếu
-        </button>
+
+        <div className="flex gap-3">
+          <button
+            onClick={() => navigate("/showtimes")}
+            className="px-6 py-3 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-semibold transition-all shadow-sm active:scale-95"
+          >
+            Xem lịch chiếu
+          </button>
+
+          {errorObj.type === "premium" ? (
+            <button
+              onClick={() => navigate("/premium")}
+              className="px-6 py-3 bg-linear-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-white rounded-xl text-sm font-bold transition-all shadow-md active:scale-95 flex items-center gap-2"
+            >
+              <Crown size={16} /> Nâng cấp Premium
+            </button>
+          ) : errorObj.type === "auth" ? (
+            <button
+              onClick={() => navigate("/login")}
+              className="px-6 py-3 bg-slate-900 hover:bg-black text-white rounded-xl text-sm font-bold transition-all shadow-md active:scale-95"
+            >
+              Đăng nhập ngay
+            </button>
+          ) : null}
+        </div>
       </div>
     );
   }
 
   const defaultStream = roomData.streams[0];
-
   return (
     <div className="h-screen bg-[#FAFAFA] flex flex-col font-sans overflow-hidden">
       <style
@@ -211,10 +276,9 @@ export default function PremiereRoom() {
             </div>
           </div>
 
-          {/* Messages Area */}
           <div className="flex-1 overflow-y-auto p-6 space-y-5 custom-scrollbar relative z-0 bg-[#FCFCFD]">
             {messages.map((msg) => {
-              const isMe = msg.user === "Bạn";
+              const isMe = msg.user === (currentUser?.username || "Bạn");
               return (
                 <div
                   key={msg.id}
@@ -229,7 +293,7 @@ export default function PremiereRoom() {
                       className={`flex flex-col gap-1 max-w-[85%] ${isMe ? "items-end" : "items-start"}`}
                     >
                       <span className="text-[11px] font-bold text-slate-400 px-1">
-                        {msg.user}
+                        {isMe ? "Bạn" : msg.user}
                       </span>
                       <div
                         className={`text-[14px] px-4 py-3 leading-relaxed shadow-sm ${
@@ -246,6 +310,7 @@ export default function PremiereRoom() {
               );
             })}
             <div ref={chatEndRef} />
+
             {floatingEmojis.map((item) => (
               <div
                 key={item.id}
@@ -256,6 +321,7 @@ export default function PremiereRoom() {
               </div>
             ))}
           </div>
+
           <div className="bg-white shrink-0 z-10 pb-2">
             <div className="flex items-center px-4 py-2 bg-transparent">
               {EMOJI_LIST.map((emoji) => (

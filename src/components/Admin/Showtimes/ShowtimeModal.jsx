@@ -298,7 +298,7 @@ export default function ShowtimeModal({
                   className={`${inputStyle} h-11 cursor-pointer appearance-none ${isEditing ? activeInputStyle : disabledStyle}`}
                 >
                   <option value={true}>🔥 Công chiếu (Live Premiere)</option>
-                  <option value={false}>Chiếu bình thường (VOD)</option>
+                  <option value={false}>Chờ Process</option>
                 </select>
               </div>
             </div>
