@@ -8,6 +8,7 @@ import {
   LogOut,
   ChevronRight,
   CreditCard,
+  Clapperboard,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -51,6 +52,7 @@ export default function Sidebar() {
     { name: "Tổng quan", icon: LayoutDashboard, path: "/admin" },
     { name: "Khách hàng", icon: Users, path: "/admin/customers" },
     { name: "Phim truyện", icon: Film, path: "/admin/movies" },
+    { name: "Công Chiếu", icon: Clapperboard, path: "/admin/showtimes" },
     { name: "Hợp đồng", icon: FileText, path: "/admin/contracts" },
     { name: "Gói dịch vụ", icon: Package, path: "/admin/plans" },
     { name: "Thanh Toán", icon: CreditCard, path: "/admin/payment" },

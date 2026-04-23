@@ -6,6 +6,8 @@ import Home from "../pages/Home";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import NotFound from "../pages/NotFound";
+import ShowtimesSchedule from "../pages/Client/ShowTimes/ShowtimesSchedule";
+import PremiereRoom from "../pages/Client/ShowTimes/PremiereRoom";
 import VerifyOtp from "../components/VerifyOtp";
 import ForgotPassword from "../components/Forgotpassword";
 import ResetPassword from "../components/Resetpassword";
@@ -30,6 +32,7 @@ import TermsOfService from "../pages/TermsOfService";
 import MySubscription from "../pages/Client/Profile/MySubscription";
 import AccountLayout from "../pages/Client/Profile/AccountLayout";
 import PaymentListAdmin from "../pages/Admin/PaymentListAdmin";
+import ShowtimeListAdmin from "../pages/Admin/ShowtimeListAdmin";
 export default function AppRouter() {
   return (
     <>
@@ -44,6 +47,7 @@ export default function AppRouter() {
             <Route path="/premium" element={<PremiumPage />} />
             <Route path="/premium/:id" element={<PremiumDetail />} />
             <Route path="/payment-result" element={<PaymentSuccess />} />
+            <Route path="/showtimes" element={<ShowtimesSchedule />} />
           </Route>
           <Route path="/login" element={<Login />} />
           <Route path="/terms" element={<TermsOfService />} />
@@ -54,6 +58,7 @@ export default function AppRouter() {
 
           <Route element={<ProtectedRoute roles={["user"]} />}>
             <Route element={<AppLayout />}>
+              <Route path="/showtimes/:id" element={<PremiereRoom />} />
               <Route path="/profile" element={<AccountLayout />}>
                 <Route index element={<Profile />} />
                 <Route path="my-premium" element={<MySubscription />} />
@@ -69,6 +74,7 @@ export default function AppRouter() {
               <Route path="/admin/movies" element={<MoviesListAdmin />} />
               <Route path="/admin/plans" element={<PlanListAdmin />} />
               <Route path="/admin/payment" element={<PaymentListAdmin />} />
+              <Route path="/admin/showtimes" element={<ShowtimeListAdmin />} />
             </Route>
           </Route>
 
