@@ -1,13 +1,52 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { showtimesApi } from "../../../api/showtimeApi";
-import { CalendarDays, Crown, Clock, Film } from "lucide-react";
+import { CalendarDays, Crown, Clock, Film, Timer } from "lucide-react";
 
 const getLocalDateString = (dateObj) => {
   const year = dateObj.getFullYear();
   const month = String(dateObj.getMonth() + 1).padStart(2, "0");
   const day = String(dateObj.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
+};
+
+// Component Đếm ngược tích hợp thẳng vào Tag Sắp chiếu (Chạy từng giây)
+const CountdownTag = ({ targetDate }) => {
+  const [timeLeft, setTimeLeft] = useState("");
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const diff = new Date(targetDate) - new Date();
+      if (diff <= 0) {
+        setTimeLeft("Đang bắt đầu");
+        clearInterval(timer);
+        return;
+      }
+      const h = Math.floor(diff / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000)
+        .toString()
+        .padStart(2, "0");
+      const s = Math.floor((diff % 60000) / 1000)
+        .toString()
+        .padStart(2, "0");
+
+      if (h > 0) {
+        setTimeLeft(`Sắp chiếu: ${h}h ${m}p ${s}s`);
+      } else {
+        setTimeLeft(`Sắp chiếu: ${m}p ${s}s`);
+      }
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [targetDate]);
+
+  return (
+    <div className="flex items-center gap-1.5 bg-blue-50 border border-blue-100 px-2.5 py-1.5 rounded-md text-blue-600 w-max shadow-sm">
+      <Timer size={13} className="animate-pulse" />
+      <span className="text-[11px] font-bold uppercase tracking-widest tabular-nums">
+        {timeLeft}
+      </span>
+    </div>
+  );
 };
 
 export default function ShowtimesSchedule() {
@@ -17,6 +56,7 @@ export default function ShowtimesSchedule() {
   const [selectedDate, setSelectedDate] = useState(
     getLocalDateString(new Date()),
   );
+
   const getWeekDays = () => {
     const curr = new Date();
     const first =
@@ -53,158 +93,145 @@ export default function ShowtimesSchedule() {
     const interval = setInterval(() => fetchShowtimes(true), 60000);
     return () => clearInterval(interval);
   }, []);
-  const filteredShowtimes = showtimes.filter((item) => {
-    return getLocalDateString(new Date(item.start_time)) === selectedDate;
-  });
+
+  const filteredShowtimes = showtimes.filter(
+    (item) => getLocalDateString(new Date(item.start_time)) === selectedDate,
+  );
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans pb-32 relative overflow-hidden">
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-200 h-100 bg-linear-to-b from-blue-100/60 via-indigo-50/30 to-transparent blur-3xl pointer-events-none -z-10 rounded-full"></div>
-
       <div className="max-w-5xl mx-auto px-5 pt-16 relative z-10">
         <div className="flex flex-col items-center text-center mb-14">
-          <div className="w-14 h-14 bg-white rounded-2xl shadow-sm border border-gray-100 flex items-center justify-center mb-5 text-gray-800">
+          <div className="w-14 h-14 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center mb-5 text-blue-600">
             <CalendarDays size={26} strokeWidth={1.5} />
           </div>
-          <h1 className="text-4xl font-extrabold text-[#0B1221] tracking-tight mb-3">
+          <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight mb-3">
             Lịch Phát Sóng
           </h1>
-          <p className="text-gray-500 font-medium text-[15px] max-w-md">
+          <p className="text-slate-500 font-medium text-[15px] max-w-md">
             Khám phá các khung giờ công chiếu nội dung độc quyền và phim bộ mới
-            nhất trên hệ thống.
+            nhất.
           </p>
         </div>
-        <div className="flex overflow-x-auto gap-4 pb-6 mb-10 custom-scrollbar justify-start md:justify-center px-2">
+
+        <div className="flex overflow-x-auto gap-3 pb-6 mb-10 custom-scrollbar justify-start md:justify-center px-2">
           {weekDays.map((day) => {
             const isActive = selectedDate === day.dateStr;
             return (
               <button
                 key={day.dateStr}
                 onClick={() => setSelectedDate(day.dateStr)}
-                className={`relative shrink-0 flex flex-col items-center justify-center w-25 h-25 rounded-3xl transition-all duration-300 border ${
+                className={`relative flex flex-col items-center justify-center min-w-21.25 h-22.5 rounded-[24px] transition-all duration-300 border ${
                   isActive
-                    ? "bg-[#0B1221] border-[#0B1221] text-white shadow-[0_10px_20px_rgba(11,18,33,0.2)] -translate-y-1"
-                    : "bg-white border-gray-100 text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm"
+                    ? "bg-blue-50 border-blue-200 shadow-sm transform -translate-y-1"
+                    : "bg-white border-transparent hover:border-slate-200 hover:bg-slate-50 text-slate-500"
                 }`}
               >
                 {day.isToday && !isActive && (
-                  <div className="absolute -top-2 bg-blue-500 text-white text-[9px] font-bold px-2.5 py-0.5 rounded-full shadow-sm">
+                  <div className="absolute -top-2.5 bg-blue-100 text-blue-600 text-[10px] font-bold px-2 py-0.5 rounded-full border border-blue-200">
                     Hôm nay
                   </div>
                 )}
-
                 <span
-                  className={`text-[11px] font-bold uppercase tracking-widest mb-1.5 ${isActive ? "text-gray-400" : "text-gray-400"}`}
+                  className={`text-[12px] font-semibold mb-1 ${isActive ? "text-blue-500" : "text-slate-400"}`}
                 >
                   {day.dayName}
                 </span>
                 <span
-                  className={`text-2xl font-black tracking-tight ${isActive ? "text-white" : "text-gray-900"}`}
+                  className={`text-xl font-bold tracking-tight ${isActive ? "text-blue-700" : "text-slate-700"}`}
                 >
                   {day.shortDate}
                 </span>
-
                 {isActive && day.isToday && (
-                  <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-2 shadow-[0_0_8px_rgba(96,165,250,0.8)]"></div>
+                  <div className="absolute bottom-2 w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
                 )}
               </button>
             );
           })}
         </div>
+
         {loading ? (
           <div className="flex justify-center py-20">
-            <div className="w-10 h-10 border-[3px] border-gray-200 border-t-[#0B1221] rounded-full animate-spin"></div>
+            <div className="w-10 h-10 border-[3px] border-slate-200 border-t-blue-600 rounded-full animate-spin"></div>
           </div>
         ) : filteredShowtimes.length === 0 ? (
-          <div className="text-center py-24 bg-white rounded-3xl border border-dashed border-gray-200 shadow-sm flex flex-col items-center">
-            <Film size={48} className="text-gray-300 mb-4" strokeWidth={1.5} />
-            <p className="text-gray-800 font-bold text-lg">
+          <div className="text-center py-24 bg-white rounded-[32px] border border-dashed border-slate-200 shadow-sm flex flex-col items-center">
+            <Film size={48} className="text-slate-300 mb-4" strokeWidth={1.5} />
+            <p className="text-slate-800 font-bold text-lg">
               Không có lịch chiếu
             </p>
-            <p className="text-gray-500 text-sm mt-1">
+            <p className="text-slate-500 text-sm mt-1">
               Hôm nay không có nội dung nào được lên lịch.
             </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
-            {filteredShowtimes.map((movie) => (
-              <div
-                key={movie.id}
-                onClick={() => navigate(`/showtimes/${movie.id}`)}
-                className="group bg-white rounded-[28px] p-4 border border-gray-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_12px_30px_rgb(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 cursor-pointer flex gap-5"
-              >
-                {/* Poster Card */}
-                <div className="w-30 h-42.5 rounded-2xl overflow-hidden shrink-0 relative bg-gray-100 shadow-inner">
-                  <img
-                    src={movie.poster_url}
-                    alt={movie.movie_name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                  />
-                  <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-
-                  {movie.movie_is_premium && (
-                    <div className="absolute top-2 left-2 bg-linear-to-r from-yellow-400 to-amber-500 px-2 py-1 rounded-lg shadow-md flex items-center gap-1 border border-yellow-300/50">
-                      <Crown size={12} className="text-white drop-shadow-sm" />
-                      <span className="text-[10px] font-black text-white drop-shadow-sm tracking-wide">
-                        VIP
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Info Text */}
-                <div className="flex flex-col py-2 pr-2 justify-between flex-1">
-                  <div>
-                    {movie.status === "live" ? (
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="relative flex h-2 w-2">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                          <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                        </span>
-                        <span className="text-[10px] font-extrabold text-red-500 uppercase tracking-widest">
-                          Đang phát
-                        </span>
-                      </div>
-                    ) : (
-                      <div className="mb-3">
-                        <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest border border-gray-100 bg-gray-50 px-2.5 py-1 rounded-md">
-                          Sắp chiếu
+            {filteredShowtimes.map((movie) => {
+              const isLive = movie.status === "live";
+              return (
+                <div
+                  key={movie.id}
+                  onClick={() => navigate(`/showtimes/${movie.id}`)}
+                  className="group bg-white rounded-[28px] p-4 border border-slate-100 shadow-sm hover:shadow-xl hover:border-blue-100 hover:-translate-y-1 transition-all duration-300 cursor-pointer flex gap-5"
+                >
+                  <div className="w-32 h-44 rounded-[20px] overflow-hidden shrink-0 relative bg-slate-100">
+                    <img
+                      src={movie.poster_url}
+                      alt={movie.movie_name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                    />
+                    <div className="absolute inset-0 bg-linear-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    {movie.movie_is_premium && (
+                      <div className="absolute top-2 left-2 bg-linear-to-r from-amber-400 to-orange-500 px-2 py-1 rounded-lg flex items-center gap-1 shadow-md border border-white/20">
+                        <Crown size={12} className="text-white" />
+                        <span className="text-[10px] font-black text-white tracking-wide">
+                          VIP
                         </span>
                       </div>
                     )}
-
-                    <h3 className="text-lg font-bold text-[#0B1221] leading-tight mb-1.5 line-clamp-2 group-hover:text-blue-600 transition-colors">
-                      {movie.movie_name}
-                    </h3>
-                    <p className="text-[13px] text-gray-500 font-medium">
-                      {movie.episode_name}
-                    </p>
                   </div>
 
-                  <div className="flex items-center gap-2 mt-4 bg-gray-50 w-max px-3 py-1.5 rounded-xl border border-gray-100/50">
-                    <Clock size={14} className="text-gray-400" />
-                    <span className="text-[14px] font-bold text-gray-700 tracking-tight">
-                      {new Date(movie.start_time).toLocaleTimeString("vi-VN", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </span>
+                  <div className="flex flex-col py-2 pr-2 justify-between flex-1">
+                    <div>
+                      <div className="mb-3">
+                        {isLive ? (
+                          <div className="flex items-center gap-2">
+                            <span className="relative flex h-2.5 w-2.5">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+                            </span>
+                            <span className="text-[11px] font-bold text-red-500 uppercase tracking-widest">
+                              Đang phát
+                            </span>
+                          </div>
+                        ) : (
+                          <CountdownTag targetDate={movie.start_time} />
+                        )}
+                      </div>
+                      <h3 className="text-lg font-bold text-slate-900 leading-tight mb-1.5 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                        {movie.movie_name}
+                      </h3>
+                      <p className="text-[13px] text-slate-500 font-medium">
+                        {movie.episode_name}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2 mt-3 bg-slate-50 w-max px-3 py-1.5 rounded-xl border border-slate-100">
+                      <Clock size={14} className="text-slate-400" />
+                      <span className="text-[13px] font-bold text-slate-700">
+                        {new Date(movie.start_time).toLocaleTimeString(
+                          "vi-VN",
+                          { hour: "2-digit", minute: "2-digit" },
+                        )}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
-      <style
-        dangerouslySetInnerHTML={{
-          __html: `
-        .custom-scrollbar::-webkit-scrollbar { height: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
-      `,
-        }}
-      />
     </div>
   );
 }

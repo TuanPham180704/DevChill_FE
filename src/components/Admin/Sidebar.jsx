@@ -50,8 +50,8 @@ export default function Sidebar() {
   };
   const menuItems = [
     { name: "Tổng quan", icon: LayoutDashboard, path: "/admin" },
-    { name: "Khách hàng", icon: Users, path: "/admin/customers" },
-    { name: "Phim truyện", icon: Film, path: "/admin/movies" },
+    { name: "Người Dùng", icon: Users, path: "/admin/customers" },
+    { name: "Phim ", icon: Film, path: "/admin/movies" },
     { name: "Công Chiếu", icon: Clapperboard, path: "/admin/showtimes" },
     { name: "Hợp đồng", icon: FileText, path: "/admin/contracts" },
     { name: "Gói dịch vụ", icon: Package, path: "/admin/plans" },
