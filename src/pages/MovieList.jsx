@@ -30,6 +30,8 @@ export default function MoviesList() {
       country: get("country"),
       year: get("year"),
       lifecycle_status: get("lifecycle_status"),
+      is_premium: get("is_premium") === "true",
+      type: get("type"),
     };
   }, [searchParams]);
 
@@ -38,6 +40,9 @@ export default function MoviesList() {
     if (filters.country) return `Điện ảnh ${filters.country.replace("-", " ")}`;
     if (filters.category)
       return `Thể loại ${filters.category.replace("-", " ")}`;
+    if (filters.is_premium) return "Phim Độc Quyền VIP";
+    if (filters.type === "movie") return "Phim Lẻ";
+    if (filters.type === "series") return "Phim Bộ";
     return filters.lifecycle_status === "upcoming"
       ? "Siêu phẩm sắp ra mắt"
       : "Thư viện điện ảnh";

@@ -53,20 +53,28 @@ export default function Home() {
           getPublicMovies({ lifecycle_status: "upcoming", page: 1, limit: 10 }),
           getPublicMovies({ category: "hoat-hinh", page: 1, limit: 12 }),
           getPublicMovies({ page: 1, limit: 20 }),
-          getPublicMovies({ is_premium: true, page: 1, limit: 5 }),
+          getPublicMovies({ is_premium: true, page: 1, limit: 20 }),
         ]);
 
         setNewestMovies(unwrap(movieRes) || []);
         setCategories(unwrap(cateRes) || []);
         setUpcomingMovies(unwrap(upcomingRes) || []);
         setCartoonMovies(unwrap(cartoonRes) || []);
-        setPremiumMovies(unwrap(premiumRes) || []);
 
+        // Xử lý lọc Top 10
         const rawTop10 = unwrap(top10Res) || [];
         const validTop10 = rawTop10
           .filter((m) => m.lifecycle_status !== "upcoming")
           .slice(0, 10);
         setTop10Weekly(validTop10);
+
+        // --- CẬP NHẬT Ở ĐÂY: Xử lý lọc chắc chắn phim Premium ---
+        const rawPremium = unwrap(premiumRes) || [];
+        const validPremium = rawPremium
+          .filter((m) => m.is_premium === true)
+          .slice(0, 5);
+        setPremiumMovies(validPremium);
+        // --------------------------------------------------------
 
         const results = await Promise.all(
           countrySlugs.map((slug) =>
@@ -195,7 +203,7 @@ export default function Home() {
                   onClick={handleWatchClick}
                   className={`relative flex items-center gap-3 px-8 py-3.5 rounded-full text-sm md:text-base font-bold overflow-hidden shadow-xl transition-all duration-300 ${
                     isPremiumMovie && !isPremiumUser
-                      ? "bg-slate-300 text-slate-600 cursor-not-allowed" 
+                      ? "bg-slate-300 text-slate-600 cursor-not-allowed"
                       : "bg-white text-slate-900 hover:scale-105"
                   }`}
                 >

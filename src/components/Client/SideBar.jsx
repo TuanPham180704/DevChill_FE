@@ -20,13 +20,13 @@ export default function Sidebar({
       id: "tickets",
       icon: <Ticket size={20} />,
       label: "Lịch sử xem phim",
-      path: "/history", 
+      path: "/history",
     },
     {
-      id: "subscription", 
+      id: "subscription",
       icon: <Crown size={20} />,
       label: "Gói đã mua",
-      path: "/profile/my-premium", 
+      path: "/profile/my-premium",
     },
     {
       id: "support",

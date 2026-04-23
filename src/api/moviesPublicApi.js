@@ -27,6 +27,7 @@ export const buildMovieQuery = (filters = {}) => {
     country: filters.country,
     status: filters.status,
     lifecycle_status: filters.lifecycle_status,
+    is_premium: filters.is_premium,
   });
 };
 

@@ -27,6 +27,7 @@ export default function MoviesListAdmin() {
   const [keyword, setKeyword] = useState("");
   const [debouncedKeyword, setDebouncedKeyword] = useState("");
   const [status, setStatus] = useState("");
+  const [isPremium, setIsPremium] = useState("");
   const [stats, setStats] = useState({
     total: 0,
     draft: 0,
@@ -38,8 +39,6 @@ export default function MoviesListAdmin() {
   const [selectedMovieId, setSelectedMovieId] = useState(null);
   const [isModalOpen, setModalOpen] = useState(false);
   const [mode, setMode] = useState("edit");
-
-  // --- LOGIC GIỮ NGUYÊN ---
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedKeyword(keyword);
@@ -59,6 +58,7 @@ export default function MoviesListAdmin() {
         keyword: debouncedKeyword,
         status,
         type,
+        is_premium: isPremium,
       });
 
       setMovies(res?.data || []);
@@ -76,7 +76,7 @@ export default function MoviesListAdmin() {
     } finally {
       setLoading(false);
     }
-  }, [page, debouncedKeyword, status, type]);
+  }, [page, debouncedKeyword, status, type, isPremium]);
 
   useEffect(() => {
     fetchMovies();
@@ -107,8 +107,6 @@ export default function MoviesListAdmin() {
     setModalOpen(false);
     setSelectedMovieId(null);
   };
-
-  // Hàm hỗ trợ UI cho Badge (giống ContractList)
   const getStatusBadge = (status) => {
     const baseStyle =
       "inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border";
@@ -239,6 +237,18 @@ export default function MoviesListAdmin() {
                 <option value="">Tất cả loại</option>
                 <option value="movie">Phim lẻ</option>
                 <option value="series">Phim bộ</option>
+              </select>
+              <select
+                value={isPremium}
+                onChange={(e) => {
+                  setIsPremium(e.target.value);
+                  setPage(1);
+                }}
+                className="px-4 py-2.5 text-[13px] bg-slate-50/50 rounded-xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 text-slate-600 font-medium outline-none cursor-pointer transition-all min-w-35 appearance-none"
+              >
+                <option value="">Tất cả phim</option>
+                <option value="true">Premium (VIP)</option>
+                <option value="false">Miễn phí (Free)</option>
               </select>
             </div>
 

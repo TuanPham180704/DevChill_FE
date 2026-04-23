@@ -82,7 +82,6 @@ export default function Header() {
     <>
       <header className="bg-blue-50/90 backdrop-blur-md border-b border-blue-100/50 shadow-sm sticky top-0 z-50 text-gray-900">
         <div className="max-w-7xl mx-auto flex justify-between items-center px-4 py-3">
-          {/* Box Logo & Search */}
           <div className="flex items-center gap-3">
             <button
               className="lg:hidden text-2xl text-gray-700 hover:text-blue-600 transition-colors"
@@ -104,8 +103,6 @@ export default function Header() {
               <SearchBox />
             </div>
           </div>
-
-          {/* Navigation - Căn chỉnh padding đều đặn cho tất cả các nút */}
           <nav className="hidden lg:flex items-center gap-1 xl:gap-2 text-sm font-semibold">
             <button
               onClick={() => navigate(buildLink("type", "movie"))}
@@ -156,8 +153,6 @@ export default function Header() {
               Premium
             </button>
           </nav>
-
-          {/* Box User/Login */}
           <div className="flex items-center gap-3">
             {token ? (
               <div className="relative" ref={userMenuRef}>
@@ -206,7 +201,7 @@ export default function Header() {
                   </Link>
 
                   <Link
-                    to="/my-premium"
+                    to="/premium"
                     className="block px-4 py-2.5 font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
                   >
                     Premium
