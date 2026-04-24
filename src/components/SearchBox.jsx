@@ -12,11 +12,8 @@ export default function SearchBox() {
   const navigate = useNavigate();
   const location = useLocation();
   const timerRef = useRef(null);
-
-  // ✅ FIX: tránh re-set input sau khi clear/search
   const skipSyncRef = useRef(false);
 
-  /* ================= INIT FROM URL ================= */
   useEffect(() => {
     if (skipSyncRef.current) {
       skipSyncRef.current = false;
@@ -27,7 +24,6 @@ export default function SearchBox() {
     setSearch(params.get("keyword") || "");
   }, [location.search]);
 
-  /* ================= DEBOUNCE SEARCH ================= */
   useEffect(() => {
     const q = search.trim();
 
@@ -43,7 +39,7 @@ export default function SearchBox() {
       try {
         setLoading(true);
 
-        const res = await searchMovies(q);
+        const res = await searchMovies({ keyword: q, limit: 20 });
 
         const data = res?.data?.data ?? res?.data ?? [];
 
@@ -64,7 +60,6 @@ export default function SearchBox() {
     return () => clearTimeout(timerRef.current);
   }, [search]);
 
-  /* ================= SEARCH SUBMIT ================= */
   const handleSearch = (e) => {
     e.preventDefault();
 
@@ -84,7 +79,6 @@ export default function SearchBox() {
     setShowSuggest(false);
   };
 
-  /* ================= CLEAR ================= */
   const clearSearch = () => {
     skipSyncRef.current = true;
 
@@ -99,7 +93,6 @@ export default function SearchBox() {
     navigate(`/movies?${params.toString()}`);
   };
 
-  /* ================= SELECT MOVIE ================= */
   const handleSelectMovie = (movie) => {
     skipSyncRef.current = true;
 
@@ -112,7 +105,6 @@ export default function SearchBox() {
 
   return (
     <div className="relative w-72">
-      {/* ================= INPUT ================= */}
       <form
         onSubmit={handleSearch}
         className="flex items-center h-10 px-3 rounded-full bg-white border border-gray-200 shadow-sm hover:shadow-md transition focus-within:ring-2 focus-within:ring-blue-400/40"
@@ -138,8 +130,6 @@ export default function SearchBox() {
           </button>
         )}
       </form>
-
-      {/* ================= SUGGEST ================= */}
       {showSuggest && search.trim() && (
         <div className="absolute top-12 left-0 w-full bg-white shadow-lg rounded-md overflow-hidden z-50">
           {loading && (
@@ -155,9 +145,20 @@ export default function SearchBox() {
               <div
                 key={movie.id}
                 onClick={() => handleSelectMovie(movie)}
-                className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                className="flex items-center gap-3 px-3 py-2 hover:bg-gray-100 cursor-pointer transition-colors"
               >
-                {movie.name}
+                <img
+                  src={
+                    movie.thumb_url ||
+                    movie.poster_url ||
+                    "https://via.placeholder.com/40x60"
+                  }
+                  alt={movie.name}
+                  className="w-10 h-14 object-cover rounded bg-gray-200 shrink-0"
+                />
+                <div className="flex-1 text-sm text-gray-700 font-medium line-clamp-2">
+                  {movie.name}
+                </div>
               </div>
             ))}
         </div>
