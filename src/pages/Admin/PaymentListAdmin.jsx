@@ -21,12 +21,12 @@ import { getAllPaymentsAdmin } from "../../api/paymentAdminApi";
 
 export default function PaymentListAdmin() {
   const [allPayments, setAllPayments] = useState([]);
-  const [filteredPayments, setFilteredPayments] = useState([]); 
+  const [filteredPayments, setFilteredPayments] = useState([]);
   const [payments, setPayments] = useState([]);
 
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
-  const limit = 5; 
+  const limit = 5;
   const [keyword, setKeyword] = useState("");
   const [debouncedKeyword, setDebouncedKeyword] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -46,7 +46,7 @@ export default function PaymentListAdmin() {
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedKeyword(keyword);
-      setPage(1); 
+      setPage(1);
     }, 400);
     return () => clearTimeout(handler);
   }, [keyword]);
@@ -95,7 +95,7 @@ export default function PaymentListAdmin() {
       result = result.filter((p) => p.status === statusFilter);
     }
     setFilteredPayments(result);
-    setTotal(result.length); 
+    setTotal(result.length);
     const startIndex = (page - 1) * limit;
     const slicedData = result.slice(startIndex, startIndex + limit);
     setPayments(slicedData);
@@ -126,13 +126,35 @@ export default function PaymentListAdmin() {
       "inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border";
     switch (statusState?.toLowerCase()) {
       case "success":
-        return `${baseStyle} bg-emerald-50 text-emerald-600 border-emerald-100`;
+        return {
+          class: `${baseStyle} bg-emerald-50 text-emerald-600 border-emerald-100`,
+          text: "Thành công",
+        };
       case "failed":
-        return `${baseStyle} bg-rose-50 text-rose-600 border-rose-100`;
+        return {
+          class: `${baseStyle} bg-rose-50 text-rose-600 border-rose-100`,
+          text: "Thất bại",
+        };
       case "pending":
-        return `${baseStyle} bg-amber-50 text-amber-600 border-amber-100`;
+        return {
+          class: `${baseStyle} bg-amber-50 text-amber-600 border-amber-100`,
+          text: "Đang xử lý",
+        };
+      case "cancelled":
+        return {
+          class: `${baseStyle} bg-slate-100 text-slate-500 border-slate-200`,
+          text: "Đã huỷ",
+        };
+      case "expired":
+        return {
+          class: `${baseStyle} bg-orange-50 text-orange-600 border-orange-100`,
+          text: "Hết hạn",
+        };
       default:
-        return `${baseStyle} bg-slate-50 text-slate-500 border-slate-100`;
+        return {
+          class: `${baseStyle} bg-slate-50 text-slate-500 border-slate-100`,
+          text: statusState,
+        };
     }
   };
 
@@ -246,6 +268,8 @@ export default function PaymentListAdmin() {
                 <option value="success">Thành công</option>
                 <option value="pending">Đang xử lý</option>
                 <option value="failed">Thất bại</option>
+                <option value="cancelled">Đã huỷ</option>
+                <option value="expired">Hết hạn</option>
               </select>
             </div>
 
@@ -284,7 +308,7 @@ export default function PaymentListAdmin() {
                     ID
                   </th>
                   <th className="px-4 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50">
-                    Khách hàng
+                    Username
                   </th>
                   <th className="px-4 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50">
                     Gói
@@ -293,7 +317,7 @@ export default function PaymentListAdmin() {
                     Số tiền
                   </th>
                   <th className="px-4 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 text-center">
-                    Mã VNPAY
+                    Mã Giao Dịch
                   </th>
                   <th className="px-4 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 text-center">
                     Ngày tạo
@@ -357,9 +381,17 @@ export default function PaymentListAdmin() {
                         {formatDate(p.created_at)}
                       </td>
                       <td className="px-4 py-3.5 text-center">
-                        <span className={getStatusBadge(p.status)}>
-                          {p.status}
+                        <span className={getStatusBadge(p.status).class}>
+                          {getStatusBadge(p.status).text}
                         </span>
+                        {p.status !== "success" && p.failure_reason && (
+                          <div
+                            className="text-[10px] text-rose-500 mt-1 max-w-30 truncate mx-auto"
+                            title={p.failure_reason}
+                          >
+                            {p.failure_reason}
+                          </div>
+                        )}
                       </td>
                       <td className="px-4 py-3.5 text-right rounded-r-xl">
                         <div className="flex items-center justify-end gap-1">

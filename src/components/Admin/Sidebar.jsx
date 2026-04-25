@@ -9,6 +9,7 @@ import {
   ChevronRight,
   CreditCard,
   Clapperboard,
+  BarChart3
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -57,6 +58,7 @@ export default function Sidebar() {
     { name: "Gói dịch vụ", icon: Package, path: "/admin/plans" },
     { name: "Thanh Toán", icon: CreditCard, path: "/admin/payment" },
     { name: "Hỗ trợ", icon: Headphones, path: "/admin/support" },
+    { name: "Thống Kê & Báo Cáo", icon: BarChart3, path: "/admin/support" },
   ];
 
   const avatarSrc = user?.avatar_url || avatarImg;

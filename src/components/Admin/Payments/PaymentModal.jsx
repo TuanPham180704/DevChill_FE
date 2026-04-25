@@ -41,6 +41,43 @@ export default function PaymentModal({ isOpen, paymentId, onClose }) {
     return new Date(dateStr).toLocaleString("vi-VN");
   };
 
+  const getStatusInfo = (statusState) => {
+    const baseStyle =
+      "inline-flex items-center px-2.5 py-0.5 rounded text-[11px] font-bold uppercase tracking-wide border";
+    switch (statusState?.toLowerCase()) {
+      case "success":
+        return {
+          class: `${baseStyle} bg-emerald-50 text-emerald-600 border-emerald-100`,
+          text: "Thành công",
+        };
+      case "failed":
+        return {
+          class: `${baseStyle} bg-rose-50 text-rose-600 border-rose-100`,
+          text: "Thất bại",
+        };
+      case "pending":
+        return {
+          class: `${baseStyle} bg-amber-50 text-amber-600 border-amber-100`,
+          text: "Đang xử lý",
+        };
+      case "cancelled":
+        return {
+          class: `${baseStyle} bg-slate-100 text-slate-500 border-slate-200`,
+          text: "Đã huỷ",
+        };
+      case "expired":
+        return {
+          class: `${baseStyle} bg-orange-50 text-orange-600 border-orange-100`,
+          text: "Hết hạn",
+        };
+      default:
+        return {
+          class: `${baseStyle} bg-slate-50 text-slate-500 border-slate-100`,
+          text: statusState,
+        };
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
       <div
@@ -48,7 +85,6 @@ export default function PaymentModal({ isOpen, paymentId, onClose }) {
         onClick={onClose}
       />
       <div className="relative w-full max-w-3xl bg-[#FCFDFE] rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.08)] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200 max-h-[90vh]">
-        {/* Header */}
         <div className="flex justify-between items-center px-8 py-5 border-b border-slate-100 bg-white">
           <h3 className="text-lg font-bold text-slate-800 tracking-tight flex items-center gap-2">
             <Receipt size={20} className="text-blue-500" />
@@ -61,15 +97,12 @@ export default function PaymentModal({ isOpen, paymentId, onClose }) {
             <X size={20} strokeWidth={2.5} />
           </button>
         </div>
-
-        {/* Content */}
         {loading || !data ? (
           <div className="p-12 text-center text-slate-400 font-medium">
             Đang tải dữ liệu...
           </div>
         ) : (
           <div className="flex-1 overflow-y-auto p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Cột trái: Hệ thống */}
             <div className="space-y-6">
               <div>
                 <h4 className="text-[12px] font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-1.5">
@@ -91,17 +124,18 @@ export default function PaymentModal({ isOpen, paymentId, onClose }) {
                   <DetailRow
                     label="Trạng thái"
                     value={
-                      <span
-                        className={`px-2 py-0.5 rounded text-[11px] font-bold uppercase ${
-                          data.status === "success"
-                            ? "bg-emerald-50 text-emerald-600"
-                            : "bg-rose-50 text-rose-600"
-                        }`}
-                      >
-                        {data.status}
+                      <span className={getStatusInfo(data.status).class}>
+                        {getStatusInfo(data.status).text}
                       </span>
                     }
                   />
+                  {data.failure_reason && data.status !== "success" && (
+                    <DetailRow
+                      label="Lý do hệ thống"
+                      value={data.failure_reason}
+                      textClass="text-rose-600 italic text-[12px]"
+                    />
+                  )}
                   <DetailRow
                     label="Ngày tạo"
                     value={formatDate(data.created_at)}
@@ -128,7 +162,6 @@ export default function PaymentModal({ isOpen, paymentId, onClose }) {
                 </div>
               </div>
             </div>
-
             <div className="space-y-6">
               <div>
                 <h4 className="text-[12px] font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-1.5">
@@ -167,8 +200,6 @@ export default function PaymentModal({ isOpen, paymentId, onClose }) {
             </div>
           </div>
         )}
-
-        {/* Footer */}
         <div className="flex justify-end px-8 py-5 border-t border-slate-100 bg-white">
           <button
             onClick={onClose}
@@ -191,7 +222,9 @@ const DetailRow = ({
   <div className="flex justify-between items-start text-[13px]">
     <span className="font-medium text-slate-500 w-1/3">{label}</span>
     <span
-      className={`text-right flex-1 ${highlight ? "font-bold text-slate-800" : "font-semibold"} ${textClass} wrap-break-word`}
+      className={`text-right flex-1 ${
+        highlight ? "font-bold text-slate-800" : "font-semibold"
+      } ${textClass} wrap-break-word`}
     >
       {value}
     </span>
