@@ -374,7 +374,7 @@ export default function CustomerList() {
                               : "bg-slate-50 text-slate-500",
                           )}
                         >
-                          {user.is_active ? "Active" : "Inactive"}
+                          {user.is_active ? "Hoạt động" : "Chưa kích hoạt"}
                         </span>
                       </td>
                       <td className="px-5 py-3.5">
@@ -385,11 +385,10 @@ export default function CustomerList() {
                               : "bg-emerald-50 text-emerald-500",
                           )}
                         >
-                          {user.is_locked ? "Locked" : "Normal"}
+                          {user.is_locked ? "Bị khóa" : "Bình thường"}
                         </span>
                       </td>
                       <td className="px-5 py-3.5 rounded-r-xl">
-                        {/* Thu nhỏ các icon thao tác */}
                         <div className="flex justify-end gap-1">
                           <button
                             onClick={() => {

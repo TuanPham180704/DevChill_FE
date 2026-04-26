@@ -72,8 +72,6 @@ export default function MediaTab({
           toast.error("File Excel trống hoặc không hợp lệ");
           return;
         }
-
-        // Group rows by Season and Episode
         const episodeMap = {};
 
         const normalizeRow = (r) => {
@@ -86,10 +84,16 @@ export default function MediaTab({
 
         jsonData.forEach((rawRow) => {
           const row = normalizeRow(rawRow);
-          
+
           const season = row["season"] || row["phần"] || row["phan"] || 1;
-          const epNum = row["episode"] || row["episodenumber"] || row["tập số"] || row["tập"] || row["tap so"] || row["tap"];
-          
+          const epNum =
+            row["episode"] ||
+            row["episodenumber"] ||
+            row["tập số"] ||
+            row["tập"] ||
+            row["tap so"] ||
+            row["tap"];
+
           if (epNum === undefined || epNum === null || epNum === "") {
             return; // Skip rows without episode number
           }
@@ -97,23 +101,60 @@ export default function MediaTab({
           const key = `${season}_${epNum}`;
 
           if (!episodeMap[key]) {
+            // Lấy cột publish / hiển thị từ excel (nếu có)
+            const rawPublish =
+              row["publish"] || row["hiển thị"] || row["hien thi"];
+            const isPub =
+              rawPublish === "true" ||
+              rawPublish === true ||
+              rawPublish === 1 ||
+              rawPublish === "1";
+
             episodeMap[key] = {
               season: Number(season) || 1,
               episode_number: Number(epNum),
-              name: row["name"] || row["episodename"] || row["tên tập"] || row["ten tap"] || row["title"] || "",
+              name:
+                row["name"] ||
+                row["episodename"] ||
+                row["tên tập"] ||
+                row["ten tap"] ||
+                row["title"] ||
+                "",
+              is_published: isPub, // Thêm dòng này để nhận dữ liệu từ file
               streams: [],
             };
           }
 
-          const rawLang = row["language"] || row["ngôn ngữ"] || row["ngon ngu"] || row["lang"];
-          const parsedLang = rawLang ? String(rawLang).toLowerCase() : "vietsub";
+          const rawLang =
+            row["language"] ||
+            row["ngôn ngữ"] ||
+            row["ngon ngu"] ||
+            row["lang"];
+          const parsedLang = rawLang
+            ? String(rawLang).toLowerCase()
+            : "vietsub";
 
           const stream = {
-            server_name: row["server"] || row["máy chủ"] || row["may chu"] || "",
-            quality: row["quality"] || row["chất lượng"] || row["chat luong"] || "1080p",
+            server_name:
+              row["server"] || row["máy chủ"] || row["may chu"] || "",
+            quality:
+              row["quality"] ||
+              row["chất lượng"] ||
+              row["chat luong"] ||
+              "1080p",
             lang: parsedLang,
-            link_embed: row["embed url"] || row["embedurl"] || row["embed"] || row["link embed"] || "",
-            link_m3u8: row["m3u8 url"] || row["m3u8url"] || row["m3u8"] || row["link m3u8"] || "",
+            link_embed:
+              row["embed url"] ||
+              row["embedurl"] ||
+              row["embed"] ||
+              row["link embed"] ||
+              "",
+            link_m3u8:
+              row["m3u8 url"] ||
+              row["m3u8url"] ||
+              row["m3u8"] ||
+              row["link m3u8"] ||
+              "",
           };
 
           if (stream.link_embed || stream.link_m3u8) {
@@ -251,17 +292,29 @@ export default function MediaTab({
         </div>
 
         <div className="p-6 space-y-6 bg-slate-50/30">
-          {edit.episodes?.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-12 border-2 border-dashed border-slate-200 rounded-2xl bg-white">
-              <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 mb-3">
-                <FaListUl size={20} />
-              </div>
-              <p className="text-slate-500 text-sm font-medium">
-                Chưa có tập phim nào.
-              </p>
-              <p className="text-slate-400 text-xs mt-1">
-                Hãy nhấn "Thêm tập mới" để bắt đầu.
-              </p>
+          {edit.episodes?.length > 1 && (
+            <div className="flex justify-end mb-2 pr-2">
+              <label className="relative inline-flex items-center cursor-pointer group">
+                <input
+                  type="checkbox"
+                  className="sr-only peer"
+                  checked={edit.episodes.every((ep) => ep.is_published)}
+                  onChange={(e) => {
+                    const isChecked = e.target.checked;
+                    const updatedEpisodes = edit.episodes.map((ep) => ({
+                      ...ep,
+                      is_published: isChecked,
+                    }));
+                    handleChange("episodes", updatedEpisodes);
+                  }}
+                />
+                <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 shadow-sm group-hover:shadow-md"></div>
+                <span className="ml-3 text-sm font-bold text-slate-700">
+                  {edit.episodes.every((ep) => ep.is_published)
+                    ? "Đã hiển thị tất cả"
+                    : "Hiển thị TẤT CẢ tập phim"}
+                </span>
+              </label>
             </div>
           )}
 
@@ -279,6 +332,21 @@ export default function MediaTab({
                     Thông tin tập phim
                   </span>
                 </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="sr-only peer"
+                    checked={ep.is_published || false}
+                    onChange={(e) =>
+                      updateEpisode(i, "is_published", e.target.checked)
+                    }
+                  />
+                  <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                  <span className="ml-3 text-sm font-bold text-slate-600">
+                    Hiển thị
+                  </span>
+                </label>
+                {/* --------------------------------------------- */}
               </div>
               <div className="p-5 space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-5">

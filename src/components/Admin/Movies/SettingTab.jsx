@@ -1,30 +1,24 @@
-
-import {
-  FaCog,
-  FaSlidersH,
-  FaDatabase,
-  FaCheckCircle,
-} from "react-icons/fa";
+import { FaCog, FaSlidersH, FaDatabase, FaCheckCircle } from "react-icons/fa";
 
 import Select from "../../Select";
 import Checkbox from "../../Checkbox";
 
 const STATUS = [
-  { label: "Draft", value: "draft" },
-  { label: "Published", value: "published" },
-  { label: "Hidden", value: "hidden" },
+  { label: "Bản nháp", value: "draft" },
+  { label: "Đã xuất bản", value: "published" },
+  { label: "Đã ẩn", value: "hidden" },
 ];
 
 const LIFECYCLE = [
-  { label: "Upcoming", value: "upcoming" },
-  { label: "Ongoing", value: "ongoing" },
-  { label: "Completed", value: "completed" },
+  { label: "Sắp chiếu", value: "upcoming" },
+  { label: "Đang chiếu", value: "ongoing" },
+  { label: "Trọn bộ", value: "completed" },
 ];
 
 const PRODUCTION = [
-  { label: "Planning", value: "planning" },
-  { label: "Filming", value: "filming" },
-  { label: "Post Production", value: "post-production" },
+  { label: "Lên kế hoạch", value: "planning" },
+  { label: "Đang quay", value: "filming" },
+  { label: "Sản Xuất", value: "post-production" },
 ];
 
 const SOURCE = [
@@ -36,7 +30,6 @@ export default function SettingTab({ edit, onChange }) {
   return (
     <div className="space-y-8 animate-fade-in text-slate-800">
       <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden hover:shadow-md transition-all">
-      
         <div className="flex items-center gap-2.5 px-6 py-4 border-b border-slate-100 bg-linear-to-r from-slate-50 to-white">
           <div className="p-2 rounded-lg bg-emerald-100/50 text-emerald-600">
             <FaCog size={14} />
@@ -109,10 +102,8 @@ export default function SettingTab({ edit, onChange }) {
               />
             </div>
           </section>
-
         </div>
       </div>
     </div>
   );
 }
-

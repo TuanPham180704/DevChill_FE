@@ -23,6 +23,14 @@ import {
   downloadContractFile,
 } from "../../api/contractApi";
 
+// Từ điển dịch Label UI (Không ảnh hưởng value hay logic)
+const STATUS_LABELS = {
+  active: "Đang hiệu lực",
+  draft: "Bản nháp",
+  expired: "Hết hạn",
+  cancelled: "Đã hủy",
+};
+
 export default function ContractList() {
   const [contracts, setContracts] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -141,9 +149,10 @@ export default function ContractList() {
     Tên: c.name,
     "Ngày bắt đầu": c.start_date,
     "Ngày kết thúc": c.end_date,
-    Trạng_thái: c.status,
+    "Trạng thái": STATUS_LABELS[c.status?.toLowerCase()] || c.status,
     File: c.file_url ? "Có" : "Không",
   }));
+
   const getStatusBadge = (status) => {
     const baseStyle =
       "inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide";
@@ -197,7 +206,7 @@ export default function ContractList() {
               </div>
               <div>
                 <div className="text-slate-400 text-[11px] font-semibold mb-0.5 uppercase tracking-wider">
-                  Nháp (Draft)
+                  Bản nháp
                 </div>
                 <div className="text-2xl font-black text-slate-800">
                   {stats.draft}
@@ -233,8 +242,6 @@ export default function ContractList() {
               </div>
             </div>
           </div>
-
-          {/* Bộ lọc và Công cụ */}
           <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3 rounded-2xl shadow-[0_4px_40px_rgba(0,0,0,0.02)]">
             <div className="flex items-center gap-3 flex-wrap pl-1">
               <div className="relative w-64">
@@ -255,10 +262,10 @@ export default function ContractList() {
                 className="px-4 py-2.5 text-[13px] bg-slate-50/50 rounded-xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 text-slate-600 font-medium outline-none cursor-pointer transition-all appearance-none min-w-35"
               >
                 <option value="all">Tất cả trạng thái</option>
-                <option value="draft">Nháp (Draft)</option>
-                <option value="active">Đang hiệu lực (Active)</option>
-                <option value="expired">Hết hạn (Expired)</option>
-                <option value="cancelled">Đã hủy (Cancelled)</option>
+                <option value="draft">Bản nháp</option>
+                <option value="active">Đang hiệu lực</option>
+                <option value="expired">Hết hạn</option>
+                <option value="cancelled">Đã hủy</option>
               </select>
             </div>
 
@@ -270,7 +277,7 @@ export default function ContractList() {
                   "Tên",
                   "Ngày bắt đầu",
                   "Ngày kết thúc",
-                  "Trạng_thái",
+                  "Trạng thái",
                   "File",
                 ]}
                 fileName="DanhSachHopDong"
@@ -372,7 +379,7 @@ export default function ContractList() {
                       </td>
                       <td className="px-5 py-3.5 text-center">
                         <span className={getStatusBadge(c.status)}>
-                          {c.status}
+                          {STATUS_LABELS[c.status?.toLowerCase()] || c.status}
                         </span>
                       </td>
 
@@ -413,8 +420,6 @@ export default function ContractList() {
             </table>
           </div>
         </div>
-
-        {/* Thanh phân trang */}
         <div className="sticky bottom-0 bg-white/70 backdrop-blur-xl border-t border-slate-100 py-3 flex justify-center z-10">
           <Pagination
             currentPage={currentPage}

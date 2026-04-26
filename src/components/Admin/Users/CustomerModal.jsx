@@ -12,7 +12,7 @@ export default function CustomerModal({ isOpen, onClose, user, onSave }) {
       setFormData({
         ...user,
         password: "",
-        premium_plan: user.premium_plan || "", // Mặc định rỗng hoặc theo data user
+        premium_plan: user.premium_plan || "",
       });
     }
     setIsEditing(false);

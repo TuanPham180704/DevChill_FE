@@ -18,6 +18,13 @@ import ShowtimeModal from "../../components/Admin/Showtimes/ShowtimeModal";
 
 import { getAllShowtimesAdmin } from "../../api/showtimeAdminApi";
 
+const STATUS_LABELS = {
+  scheduled: "Sắp chiếu",
+  live: "Đang chiếu",
+  ended: "Đã kết thúc",
+  cancelled: "Đã hủy",
+};
+
 export default function ShowtimeListAdmin() {
   const [allShowtimes, setAllShowtimes] = useState([]);
   const [filteredShowtimes, setFilteredShowtimes] = useState([]);
@@ -140,10 +147,10 @@ export default function ShowtimeListAdmin() {
   const csvData = filteredShowtimes.map((s) => ({
     ID: s.id,
     Phim: s.movie_name,
-    Tap: s.episode_name,
-    Bat_Dau: new Date(s.start_time).toLocaleString("vi-VN"),
-    Ket_Thuc: new Date(s.end_time).toLocaleString("vi-VN"),
-    Trang_thai: s.status,
+    Tập: s.episode_name || `Tập ${s.episode_number}`,
+    "Thời gian bắt đầu": new Date(s.start_time).toLocaleString("vi-VN"),
+    "Thời gian kết thúc": new Date(s.end_time).toLocaleString("vi-VN"),
+    "Trạng thái": STATUS_LABELS[s.status?.toLowerCase()] || s.status,
   }));
 
   return (
@@ -156,7 +163,7 @@ export default function ShowtimeListAdmin() {
                 Quản lý Công Chiếu
               </h1>
               <p className="text-[14px] text-slate-500 font-medium">
-                Sắp xếp lịch Premiere, đồng bộ thời gian xem cho toàn hệ thống
+                Sắp xếp lịch Công chiếu, đồng bộ thời gian xem cho toàn hệ thống
                 🎬
               </p>
             </div>
@@ -256,10 +263,10 @@ export default function ShowtimeListAdmin() {
                 fields={[
                   "ID",
                   "Phim",
-                  "Tap",
-                  "Bat_Dau",
-                  "Ket_Thuc",
-                  "Trang_thai",
+                  "Tập",
+                  "Thời gian bắt đầu",
+                  "Thời gian kết thúc",
+                  "Trạng thái",
                 ]}
                 fileName="DanhSachCongChieu"
               />
@@ -345,7 +352,7 @@ export default function ShowtimeListAdmin() {
                         {s.movie_name}
                         {s.is_premiere && (
                           <span className="ml-2 text-[10px] bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded font-bold uppercase">
-                            Premiere
+                            Công chiếu
                           </span>
                         )}
                       </td>
@@ -360,7 +367,7 @@ export default function ShowtimeListAdmin() {
                       </td>
                       <td className="px-4 py-3.5 text-center">
                         <span className={getStatusBadge(s.status)}>
-                          {s.status}
+                          {STATUS_LABELS[s.status?.toLowerCase()] || s.status}
                         </span>
                       </td>
                       <td className="px-4 py-3.5 text-right rounded-r-xl">

@@ -38,15 +38,17 @@ export default function ShowtimeModal({
   const [moviesList, setMoviesList] = useState([]);
   const [episodesList, setEpisodesList] = useState([]);
   const [loadingEpisodes, setLoadingEpisodes] = useState(false);
+
   const formatDateTimeForInput = (dateStr) => {
     if (!dateStr) return "";
     const d = new Date(dateStr);
     d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
     return d.toISOString().slice(0, 16);
   };
+
   useEffect(() => {
     if (isOpen) {
-      fetchMovies(); 
+      fetchMovies();
 
       if (mode === "create") {
         setFormData({
@@ -57,7 +59,7 @@ export default function ShowtimeModal({
           is_premiere: true,
         });
         setEpisodesList([]);
-        setIsEditing(true); 
+        setIsEditing(true);
       } else if (mode === "edit" && showtimeId) {
         fetchShowtimeDetails();
         setIsEditing(false);
@@ -74,6 +76,7 @@ export default function ShowtimeModal({
       toast.error("Không tải được danh sách phim");
     }
   };
+
   const fetchShowtimeDetails = async () => {
     try {
       setLoading(true);
@@ -90,6 +93,7 @@ export default function ShowtimeModal({
       setLoading(false);
     }
   };
+
   useEffect(() => {
     const fetchEpisodes = async () => {
       if (!formData.movie_id) {
@@ -116,6 +120,7 @@ export default function ShowtimeModal({
 
     fetchEpisodes();
   }, [formData.movie_id]);
+
   const handleSave = async () => {
     if (!formData.movie_id || !formData.episode_id || !formData.start_time) {
       toast.error("Vui lòng điền đầy đủ Phim, Tập và Giờ chiếu!");
@@ -126,7 +131,7 @@ export default function ShowtimeModal({
       const payload = {
         movie_id: Number(formData.movie_id),
         episode_id: Number(formData.episode_id),
-        start_time: new Date(formData.start_time).toISOString(), 
+        start_time: new Date(formData.start_time).toISOString(),
         status: formData.status,
         is_premiere:
           formData.is_premiere === true ||
@@ -142,20 +147,23 @@ export default function ShowtimeModal({
       }
 
       onReload();
-      onClose(); 
+      onClose();
     } catch (err) {
       toast.error(
         err?.response?.data?.message || err?.message || "Lưu thất bại",
       );
     }
   };
+
   if (!isOpen) return null;
+
   const inputStyle =
     "w-full px-4 py-2.5 text-[13.5px] font-medium rounded-xl outline-none transition-all duration-200 border";
   const activeInputStyle =
-    "bg-white border-slate-200 text-slate-700 focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10";
+    "bg-white border-slate-200 text-slate-700 focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 cursor-pointer";
   const disabledStyle =
     "bg-slate-50 border-transparent text-slate-500 cursor-not-allowed opacity-80";
+  const isLive = formData.status === "live";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
@@ -222,7 +230,7 @@ export default function ShowtimeModal({
                 </label>
                 <select
                   value={formData.movie_id || ""}
-                  disabled={!isEditing}
+                  disabled={!isEditing || isLive}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
@@ -230,7 +238,7 @@ export default function ShowtimeModal({
                       episode_id: "",
                     })
                   }
-                  className={`${inputStyle} h-11 cursor-pointer appearance-none ${isEditing ? activeInputStyle : disabledStyle}`}
+                  className={`${inputStyle} h-11 appearance-none ${isEditing && !isLive ? activeInputStyle : disabledStyle}`}
                 >
                   <option value="" disabled>
                     -- Vui lòng chọn phim --
@@ -248,11 +256,16 @@ export default function ShowtimeModal({
                 </label>
                 <select
                   value={formData.episode_id || ""}
-                  disabled={!isEditing || !formData.movie_id || loadingEpisodes}
+                  disabled={
+                    !isEditing ||
+                    !formData.movie_id ||
+                    loadingEpisodes ||
+                    isLive
+                  }
                   onChange={(e) =>
                     setFormData({ ...formData, episode_id: e.target.value })
                   }
-                  className={`${inputStyle} h-11 cursor-pointer appearance-none ${isEditing && formData.movie_id ? activeInputStyle : disabledStyle}`}
+                  className={`${inputStyle} h-11 appearance-none ${isEditing && formData.movie_id && !isLive ? activeInputStyle : disabledStyle}`}
                 >
                   <option value="" disabled>
                     {!formData.movie_id
@@ -263,7 +276,7 @@ export default function ShowtimeModal({
                   </option>
                   {episodesList.map((ep) => (
                     <option key={ep.id} value={ep.id}>
-                      Tập {ep.episode_number} {ep.name ? `- ${ep.name}` : ""}
+                      {ep.name ? `${ep.name}` : ""}
                     </option>
                   ))}
                 </select>
@@ -278,11 +291,11 @@ export default function ShowtimeModal({
                 <input
                   type="datetime-local"
                   value={formData.start_time || ""}
-                  disabled={!isEditing}
+                  disabled={!isEditing || isLive}
                   onChange={(e) =>
                     setFormData({ ...formData, start_time: e.target.value })
                   }
-                  className={`${inputStyle} h-11 ${isEditing ? activeInputStyle : disabledStyle}`}
+                  className={`${inputStyle} h-11 ${isEditing && !isLive ? activeInputStyle : disabledStyle}`}
                 />
               </div>
               <div>
@@ -291,11 +304,11 @@ export default function ShowtimeModal({
                 </label>
                 <select
                   value={formData.is_premiere}
-                  disabled={!isEditing}
+                  disabled={!isEditing || isLive}
                   onChange={(e) =>
                     setFormData({ ...formData, is_premiere: e.target.value })
                   }
-                  className={`${inputStyle} h-11 cursor-pointer appearance-none ${isEditing ? activeInputStyle : disabledStyle}`}
+                  className={`${inputStyle} h-11 appearance-none ${isEditing && !isLive ? activeInputStyle : disabledStyle}`}
                 >
                   <option value={true}>🔥 Công chiếu (Live Premiere)</option>
                   <option value={false}>Chờ Process</option>
@@ -313,7 +326,7 @@ export default function ShowtimeModal({
                   onChange={(e) =>
                     setFormData({ ...formData, status: e.target.value })
                   }
-                  className={`${inputStyle} h-11 cursor-pointer appearance-none ${isEditing ? activeInputStyle : disabledStyle}`}
+                  className={`${inputStyle} h-11 appearance-none ${isEditing ? activeInputStyle : disabledStyle}`}
                 >
                   <option value="scheduled">Sắp chiếu (Scheduled)</option>
                   <option value="live">Đang Live (Live)</option>

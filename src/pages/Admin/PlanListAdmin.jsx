@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import {
   Search,
@@ -20,6 +19,12 @@ import PlanModal from "../../components/Admin/Plans/PlanModal";
 import ConfirmToggleModal from "../../components/Admin/Plans/ConfirmToggleModal";
 
 import { getAllPlansAdmin, togglePlanStatus } from "../../api/planAdminApi";
+
+// Từ điển dịch Label UI (Không ảnh hưởng value hay logic)
+const STATUS_LABELS = {
+  active: "Đang bán",
+  inactive: "Ngừng bán",
+};
 
 export default function PlanListAdmin() {
   const [plans, setPlans] = useState([]);
@@ -44,6 +49,7 @@ export default function PlanListAdmin() {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [planToToggle, setPlanToToggle] = useState(null);
   const [toggling, setToggling] = useState(false);
+
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedKeyword(keyword);
@@ -85,11 +91,11 @@ export default function PlanListAdmin() {
 
   const csvData = plans.map((p) => ({
     ID: p.id,
-    Ten: p.name,
-    Gia: p.price,
-    ThoiHan: p.duration_days,
-    PhoBien: p.is_popular ? "Có" : "Không",
-    Trang_thai: p.status,
+    "Tên gói": p.name,
+    "Giá (VNĐ)": p.price,
+    "Thời hạn (ngày)": p.duration_days,
+    "Phổ biến": p.is_popular ? "Có" : "Không",
+    "Trạng thái": STATUS_LABELS[p.status?.toLowerCase()] || p.status,
   }));
 
   const handleOpenCreate = () => {
@@ -108,10 +114,12 @@ export default function PlanListAdmin() {
     setModalOpen(false);
     setSelectedPlanId(null);
   };
+
   const handleToggleClick = (plan) => {
     setPlanToToggle(plan);
     setIsConfirmOpen(true);
   };
+
   const confirmToggleStatus = async () => {
     if (!planToToggle) return;
     try {
@@ -128,6 +136,7 @@ export default function PlanListAdmin() {
       setToggling(false);
     }
   };
+
   const getStatusBadge = (statusState) => {
     const baseStyle =
       "inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border";
@@ -241,8 +250,8 @@ export default function PlanListAdmin() {
                 className="px-4 py-2.5 text-[13px] bg-slate-50/50 rounded-xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 text-slate-600 font-medium outline-none cursor-pointer transition-all min-w-35 appearance-none"
               >
                 <option value="">Tất cả trạng thái</option>
-                <option value="active">Đang bán (Active)</option>
-                <option value="inactive">Ngừng bán (Inactive)</option>
+                <option value="active">Đang bán</option>
+                <option value="inactive">Ngừng bán</option>
               </select>
             </div>
 
@@ -251,11 +260,11 @@ export default function PlanListAdmin() {
                 data={csvData}
                 fields={[
                   "ID",
-                  "Ten",
-                  "Gia",
-                  "ThoiHan",
-                  "PhoBien",
-                  "Trang_thai",
+                  "Tên gói",
+                  "Giá (VNĐ)",
+                  "Thời hạn (ngày)",
+                  "Phổ biến",
+                  "Trạng thái",
                 ]}
                 fileName="DanhSachGoiVIP"
               />
@@ -358,7 +367,7 @@ export default function PlanListAdmin() {
                       </td>
                       <td className="px-5 py-3.5 text-center">
                         <span className={getStatusBadge(p.status)}>
-                          {p.status === "active" ? "Active" : "Inactive"}
+                          {STATUS_LABELS[p.status?.toLowerCase()] || p.status}
                         </span>
                       </td>
                       <td className="px-5 py-3.5 text-right rounded-r-xl">

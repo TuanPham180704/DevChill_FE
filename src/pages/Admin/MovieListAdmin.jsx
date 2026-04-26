@@ -19,6 +19,21 @@ import MoviesModal from "../../components/Admin/Movies/MoviesModal";
 
 import { getAllMovies } from "../../api/moviesAdminApi";
 
+// Từ điển dịch Label UI (Không ảnh hưởng value hay logic)
+const STATUS_LABELS = {
+  draft: "Bản nháp",
+  published: "Đã xuất bản",
+  hidden: "Đã ẩn",
+  active: "Hoạt động",
+  completed: "Hoàn thành",
+  expired: "Hết hạn",
+};
+
+const TYPE_LABELS = {
+  movie: "Phim lẻ",
+  series: "Phim bộ",
+};
+
 export default function MoviesListAdmin() {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -39,6 +54,7 @@ export default function MoviesListAdmin() {
   const [selectedMovieId, setSelectedMovieId] = useState(null);
   const [isModalOpen, setModalOpen] = useState(false);
   const [mode, setMode] = useState("edit");
+
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedKeyword(keyword);
@@ -84,11 +100,11 @@ export default function MoviesListAdmin() {
 
   const csvData = movies.map((m) => ({
     ID: m.id,
-    Ten: m.name,
-    Nam: m.year,
-    Loai: m.type,
-    Tap: m.episode_total,
-    Trang_thai: m.status,
+    Tên: m.name,
+    Năm: m.year || "-",
+    Loại: TYPE_LABELS[m.type?.toLowerCase()] || m.type,
+    Tập: m.episode_total,
+    "Trạng thái": STATUS_LABELS[m.status?.toLowerCase()] || m.status,
   }));
 
   const handleOpenCreate = () => {
@@ -107,6 +123,7 @@ export default function MoviesListAdmin() {
     setModalOpen(false);
     setSelectedMovieId(null);
   };
+
   const getStatusBadge = (status) => {
     const baseStyle =
       "inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border";
@@ -174,7 +191,7 @@ export default function MoviesListAdmin() {
               </div>
               <div>
                 <div className="text-slate-400 text-[11px] font-semibold mb-0.5 uppercase tracking-wider">
-                  Công khai
+                  Đã xuất bản
                 </div>
                 <div className="text-2xl font-black text-slate-800">
                   {stats.published}
@@ -221,9 +238,9 @@ export default function MoviesListAdmin() {
                 className="px-4 py-2.5 text-[13px] bg-slate-50/50 rounded-xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 text-slate-600 font-medium outline-none cursor-pointer transition-all min-w-35 appearance-none"
               >
                 <option value="">Tất cả trạng thái</option>
-                <option value="draft">Nháp (Draft)</option>
-                <option value="published">Công khai (Published)</option>
-                <option value="hidden">Ẩn (Hidden)</option>
+                <option value="draft">Bản nháp</option>
+                <option value="published">Đã xuất bản</option>
+                <option value="hidden">Đã ẩn</option>
               </select>
 
               <select
@@ -246,7 +263,7 @@ export default function MoviesListAdmin() {
                 }}
                 className="px-4 py-2.5 text-[13px] bg-slate-50/50 rounded-xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 text-slate-600 font-medium outline-none cursor-pointer transition-all min-w-35 appearance-none"
               >
-                <option value="">Tất cả phim</option>
+                <option value="">Tất cả gói</option>
                 <option value="true">Premium (VIP)</option>
                 <option value="false">Miễn phí (Free)</option>
               </select>
@@ -255,7 +272,7 @@ export default function MoviesListAdmin() {
             <div className="flex items-center gap-2 pr-1">
               <ExportCSV
                 data={csvData}
-                fields={["ID", "Ten", "Nam", "Loai", "Tap", "Trang_thai"]}
+                fields={["ID", "Tên", "Năm", "Loại", "Tập", "Trạng thái"]}
                 fileName="DanhSachPhim"
               />
               <button
@@ -363,7 +380,7 @@ export default function MoviesListAdmin() {
                         <span
                           className={`text-[11px] font-bold uppercase tracking-tight ${m.type === "movie" ? "text-orange-500" : "text-purple-500"}`}
                         >
-                          {m.type}
+                          {TYPE_LABELS[m.type?.toLowerCase()] || m.type}
                         </span>
                       </td>
                       <td className="px-5 py-3 text-center font-bold text-slate-600 text-[13px]">
@@ -382,7 +399,7 @@ export default function MoviesListAdmin() {
                       </td>
                       <td className="px-5 py-3 text-center">
                         <span className={getStatusBadge(m.status)}>
-                          {m.status}
+                          {STATUS_LABELS[m.status?.toLowerCase()] || m.status}
                         </span>
                       </td>
                       <td className="px-5 py-3 text-right">

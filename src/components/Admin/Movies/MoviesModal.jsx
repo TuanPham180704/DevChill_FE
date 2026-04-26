@@ -120,7 +120,13 @@ export default function MoviesModal({
           }))
           .filter((s) => s.link_embed || s.link_m3u8);
 
-        return { season, episode_number, name: ep.name, streams };
+        return {
+          season,
+          episode_number,
+          name: ep.name,
+          is_published: ep.is_published, // Bắn trường cờ này xuống cho DB
+          streams,
+        };
       })
       .filter(Boolean);
 
@@ -146,6 +152,7 @@ export default function MoviesModal({
           season: 1,
           episode_number: 1,
           name: "",
+          is_published: false, // Mặc định tập mới thêm vào sẽ là ẨN
           streams: [],
         },
       ],
@@ -325,7 +332,6 @@ export default function MoviesModal({
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="w-275 max-h-[90vh] bg-white rounded-2xl shadow-xl flex flex-col overflow-hidden">
-        {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-linear-to-r from-slate-50 to-white">
           <h2 className="text-lg font-bold text-slate-700">
             {mode === "create" ? "Create Movie" : "Movie Detail"}
@@ -338,8 +344,6 @@ export default function MoviesModal({
             <FaTimes className="text-slate-500" />
           </button>
         </div>
-
-        {/* Tabs */}
         <div className="flex border-b border-slate-100 bg-slate-50/60">
           {Object.values(TAB).map((t) => (
             <button
@@ -356,8 +360,6 @@ export default function MoviesModal({
             </button>
           ))}
         </div>
-
-        {/* Content */}
         <div className="flex-1 overflow-y-auto p-6 bg-slate-50/40">
           {activeTab === TAB.INFO && (
             <InfoTab

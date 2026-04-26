@@ -40,8 +40,10 @@ export const getPublicMovies = async (filters = {}) => {
 
 export const getPublicMovieBySlug = async (id) => {
   if (!id) throw new Error("Movie ID is required");
+  const res = await api.get(`/movies/${id}`, {
+    params: { is_public: true },
+  });
 
-  const res = await api.get(`/movies/${id}`);
   return res.data;
 };
 
@@ -78,6 +80,7 @@ export const watchMovie = async (slug, params = {}) => {
     params: {
       ep: params.ep,
       server: params.server,
+      is_public: true,
     },
   });
 

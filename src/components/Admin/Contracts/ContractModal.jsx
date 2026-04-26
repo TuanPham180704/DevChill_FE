@@ -1,6 +1,9 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useState, useEffect } from "react";
-import { X, Pencil } from "lucide-react";
+import { X, Pencil, FileText, Download } from "lucide-react";
+import { toast } from "react-toastify";
+import { downloadContractFile } from "../../../api/contractApi"; // Import hàm tải file
 
 export default function ContractModal({
   isOpen,
@@ -24,7 +27,7 @@ export default function ContractModal({
       setStartDate(contract.start_date ? contract.start_date.slice(0, 10) : "");
       setEndDate(contract.end_date ? contract.end_date.slice(0, 10) : "");
       setStatus(contract.status || "draft");
-      setFile(null);
+      setFile(null); 
       setCreatedAt(contract.created_at ? contract.created_at.slice(0, 10) : "");
       setUpdatedAt(contract.updated_at ? contract.updated_at.slice(0, 10) : "");
     } else {
@@ -44,22 +47,42 @@ export default function ContractModal({
     onSave({ name, start_date: startDate, end_date: endDate, status, file });
     setIsEditMode(false);
   };
+  const handleDownloadFile = async () => {
+    if (!contract?.id) return;
+    try {
+      const blob = await downloadContractFile(contract.id);
+      const url = window.URL.createObjectURL(new Blob([blob]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute(
+        "download",
+        contract.name?.replace(/\s/g, "_") + ".pdf",
+      );
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      toast.error("Tải file thất bại");
+    }
+  };
 
   if (!isOpen) return null;
+
   const baseInputStyle =
     "w-full h-11 px-4 text-[13.5px] font-medium rounded-xl outline-none transition-all duration-200 border";
   const activeInputStyle =
     "bg-white border-slate-200 text-slate-700 focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10";
   const disabledStyle =
     "bg-slate-50 border-transparent text-slate-500 cursor-not-allowed";
-  const labelStyle = "text-[12px] font-bold text-slate-400 uppercase tracking-wider mb-2 block pl-1";
-  const fileInputStyle = `w-full text-[13.5px] font-medium text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-[13px] file:font-bold file:bg-blue-50 file:text-blue-600 hover:file:bg-blue-100 transition-all ${!isEditMode ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`;
+  const labelStyle =
+    "text-[12px] font-bold text-slate-400 uppercase tracking-wider mb-2 block pl-1";
+  const fileInputStyle = `w-full text-[13.5px] font-medium text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-[13px] file:font-bold file:bg-blue-50 file:text-blue-600 hover:file:bg-blue-100 transition-all cursor-pointer`;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-      <div 
-        className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm transition-opacity" 
-        onClick={onClose} 
+      <div
+        className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm transition-opacity"
+        onClick={onClose}
       />
       <div className="relative w-full max-w-2xl bg-[#FCFDFE] rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.08)] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200 max-h-screen">
         <div className="flex justify-between items-center px-8 py-5 border-b border-slate-100 bg-white">
@@ -81,8 +104,10 @@ export default function ContractModal({
                 Chỉnh sửa
               </button>
             )}
-            {contract && !isEditMode && <div className="w-px h-5 bg-slate-200 mx-1"></div>}
-            
+            {contract && !isEditMode && (
+              <div className="w-px h-5 bg-slate-200 mx-1"></div>
+            )}
+
             <button
               onClick={onClose}
               className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
@@ -96,11 +121,8 @@ export default function ContractModal({
           className="flex-1 overflow-y-auto px-8 py-6 space-y-6"
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
             <div className="md:col-span-2">
-              <label className={labelStyle}>
-                Tên hợp đồng
-              </label>
+              <label className={labelStyle}>Tên hợp đồng</label>
               <input
                 type="text"
                 value={name}
@@ -111,11 +133,9 @@ export default function ContractModal({
                 className={`${baseInputStyle} ${isEditMode ? activeInputStyle : disabledStyle}`}
               />
             </div>
-            
+
             <div>
-              <label className={labelStyle}>
-                Ngày bắt đầu
-              </label>
+              <label className={labelStyle}>Ngày bắt đầu</label>
               <input
                 type="date"
                 value={startDate}
@@ -125,11 +145,9 @@ export default function ContractModal({
                 className={`${baseInputStyle} ${isEditMode ? activeInputStyle : disabledStyle} ${!startDate && !isEditMode ? "text-transparent" : ""}`}
               />
             </div>
-            
+
             <div>
-              <label className={labelStyle}>
-                Ngày kết thúc
-              </label>
+              <label className={labelStyle}>Ngày kết thúc</label>
               <input
                 type="date"
                 value={endDate}
@@ -138,11 +156,9 @@ export default function ContractModal({
                 className={`${baseInputStyle} ${isEditMode ? activeInputStyle : disabledStyle} ${!endDate && !isEditMode ? "text-transparent" : ""}`}
               />
             </div>
-            
+
             <div>
-              <label className={labelStyle}>
-                Trạng thái
-              </label>
+              <label className={labelStyle}>Trạng thái</label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
@@ -155,34 +171,68 @@ export default function ContractModal({
                 <option value="cancelled">Đã hủy (Cancelled)</option>
               </select>
             </div>
-            
+
             <div>
-              <label className={labelStyle}>
-                Tập tin đính kèm (PDF)
-              </label>
-              <div className={`flex items-center h-11 px-1 rounded-xl ${isEditMode ? "border border-slate-200 bg-white" : "bg-slate-50 border border-transparent"}`}>
-                <input
-                  type="file"
-                  accept="application/pdf"
-                  onChange={(e) => setFile(e.target.files[0])}
-                  disabled={!isEditMode}
-                  className={fileInputStyle}
-                />
+              <label className={labelStyle}>Tập tin đính kèm (PDF)</label>
+              <div className="flex flex-col gap-2">
+                {contract?.file_url && (
+                  <div className="flex items-center gap-2 p-2.5 bg-blue-50/50 border border-blue-100 rounded-xl">
+                    <FileText className="text-blue-500 min-w-5" size={18} />
+                    <span
+                      className="text-[13px] font-medium text-slate-600 flex-1 truncate"
+                      title={`${contract.name}.pdf`}
+                    >
+                      {contract.name}.pdf
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleDownloadFile}
+                      className="flex items-center gap-1 text-[12px] font-bold text-blue-600 hover:text-blue-700 bg-white px-3 py-1.5 rounded-lg shadow-sm border border-blue-100 transition-colors"
+                    >
+                      <Download size={14} />
+                      Tải về
+                    </button>
+                  </div>
+                )}
+                {isEditMode && (
+                  <div
+                    className={`flex items-center h-11 px-1 rounded-xl border border-slate-200 bg-white`}
+                  >
+                    <input
+                      type="file"
+                      accept="application/pdf"
+                      onChange={(e) => setFile(e.target.files[0])}
+                      className={fileInputStyle}
+                    />
+                  </div>
+                )}
+                {!isEditMode && !contract?.file_url && (
+                  <div className="h-11 px-4 flex items-center bg-slate-50 rounded-xl text-[13px] font-medium text-slate-400 italic border border-transparent">
+                    Không có tập tin đính kèm
+                  </div>
+                )}
               </div>
             </div>
-
           </div>
 
           {contract && (
             <div className="flex justify-between items-center bg-slate-50 p-4 rounded-2xl border border-slate-100 mt-2">
               <div className="flex flex-col">
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Ngày tạo</span>
-                <span className="text-[13px] font-semibold text-slate-600">{createdAt || "Chưa xác định"}</span>
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+                  Ngày tạo
+                </span>
+                <span className="text-[13px] font-semibold text-slate-600">
+                  {createdAt || "Chưa xác định"}
+                </span>
               </div>
               <div className="w-px h-8 bg-slate-200"></div>
               <div className="flex flex-col text-right">
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Cập nhật lần cuối</span>
-                <span className="text-[13px] font-semibold text-slate-600">{updatedAt || "Chưa cập nhật"}</span>
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+                  Cập nhật lần cuối
+                </span>
+                <span className="text-[13px] font-semibold text-slate-600">
+                  {updatedAt || "Chưa cập nhật"}
+                </span>
               </div>
             </div>
           )}
