@@ -68,13 +68,12 @@ export default function Home() {
           .slice(0, 10);
         setTop10Weekly(validTop10);
 
-        // --- CẬP NHẬT Ở ĐÂY: Xử lý lọc chắc chắn phim Premium ---
+        // Xử lý lọc chắc chắn phim Premium
         const rawPremium = unwrap(premiumRes) || [];
         const validPremium = rawPremium
           .filter((m) => m.is_premium === true)
           .slice(0, 5);
         setPremiumMovies(validPremium);
-        // --------------------------------------------------------
 
         const results = await Promise.all(
           countrySlugs.map((slug) =>
@@ -120,6 +119,9 @@ export default function Home() {
   const activeMovie = newestMovies?.[activeSlide];
   const isPremiumUser = profile?.is_premium === true;
   const isPremiumMovie = activeMovie?.is_premium === true;
+  // KIỂM TRA PHIM UPCOMING Ở ĐÂY
+  const isUpcomingMovie = activeMovie?.lifecycle_status === "upcoming";
+
   const handleWatchClick = (e) => {
     e.preventDefault();
 
@@ -185,7 +187,7 @@ export default function Home() {
           >
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-sm bg-blue-600 mb-4 shadow-lg shadow-blue-500/30">
               <span className="text-white text-[10px] md:text-xs font-bold tracking-widest uppercase">
-                Phim Mới Nổi Bật
+                {isUpcomingMovie ? "Sắp Khởi Chiếu" : "Phim Mới Nổi Bật"}
               </span>
             </div>
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-white leading-[1.1] tracking-tight drop-shadow-xl mb-6">
@@ -198,37 +200,42 @@ export default function Home() {
             </p>
 
             <div className="mt-8 flex items-center gap-4">
-              <div className="relative group">
-                <button
-                  onClick={handleWatchClick}
-                  className={`relative flex items-center gap-3 px-8 py-3.5 rounded-full text-sm md:text-base font-bold overflow-hidden shadow-xl transition-all duration-300 ${
-                    isPremiumMovie && !isPremiumUser
-                      ? "bg-slate-300 text-slate-600 cursor-not-allowed"
-                      : "bg-white text-slate-900 hover:scale-105"
-                  }`}
-                >
-                  {isPremiumMovie && !isPremiumUser ? (
-                    <Lock size={18} className="relative z-10" />
-                  ) : (
-                    <Play
-                      fill="currentColor"
-                      size={18}
-                      className="relative z-10"
-                    />
-                  )}
-                  <span className="relative z-10 tracking-wider">
-                    {isPremiumMovie && !isPremiumUser ? "Premium" : "Xem Ngay"}
-                  </span>
-                </button>
-                {isPremiumMovie && !isPremiumUser && (
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 opacity-0 group-hover:opacity-100 transition pointer-events-none z-50">
-                    <div className="bg-black/90 backdrop-blur-md text-white text-xs px-3 py-2 rounded-lg shadow-lg whitespace-nowrap flex items-center gap-2">
-                      <Lock size={12} /> Nâng cấp Premium để xem phim này
+              {/* CHỈ HIỂN THỊ NÚT XEM NGAY NẾU KHÔNG PHẢI PHIM UPCOMING */}
+              {!isUpcomingMovie && (
+                <div className="relative group">
+                  <button
+                    onClick={handleWatchClick}
+                    className={`relative flex items-center gap-3 px-8 py-3.5 rounded-full text-sm md:text-base font-bold overflow-hidden shadow-xl transition-all duration-300 ${
+                      isPremiumMovie && !isPremiumUser
+                        ? "bg-slate-300 text-slate-600 cursor-not-allowed"
+                        : "bg-white text-slate-900 hover:scale-105"
+                    }`}
+                  >
+                    {isPremiumMovie && !isPremiumUser ? (
+                      <Lock size={18} className="relative z-10" />
+                    ) : (
+                      <Play
+                        fill="currentColor"
+                        size={18}
+                        className="relative z-10"
+                      />
+                    )}
+                    <span className="relative z-10 tracking-wider">
+                      {isPremiumMovie && !isPremiumUser
+                        ? "Premium"
+                        : "Xem Ngay"}
+                    </span>
+                  </button>
+                  {isPremiumMovie && !isPremiumUser && (
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 opacity-0 group-hover:opacity-100 transition pointer-events-none z-50">
+                      <div className="bg-black/90 backdrop-blur-md text-white text-xs px-3 py-2 rounded-lg shadow-lg whitespace-nowrap flex items-center gap-2">
+                        <Lock size={12} /> Nâng cấp Premium để xem phim này
+                      </div>
+                      <div className="w-2 h-2 bg-black/90 rotate-45 mx-auto -mt-1 absolute -top-1 left-1/2 -translate-x-1/2"></div>
                     </div>
-                    <div className="w-2 h-2 bg-black/90 rotate-45 mx-auto -mt-1 absolute -top-1 left-1/2 -translate-x-1/2"></div>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
+              )}
 
               <Link
                 to={`/movies/${activeMovie?.slug}`}
