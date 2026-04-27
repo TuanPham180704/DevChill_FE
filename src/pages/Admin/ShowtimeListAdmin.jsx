@@ -11,7 +11,7 @@ import {
   PackageX,
   Filter,
   ArrowUpDown,
-  PlayCircle,
+  FilterX,
 } from "lucide-react";
 import { toast } from "react-toastify";
 
@@ -45,9 +45,14 @@ export default function ShowtimeListAdmin() {
     live: 0,
     ended: 0,
   });
+
   const [selectedId, setSelectedId] = useState(null);
   const [modalMode, setModalMode] = useState("create");
   const [isModalOpen, setModalOpen] = useState(false);
+
+  const isFilterActive =
+    keyword !== "" || statusFilter !== "" || sortOption !== "start_time-desc";
+
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedKeyword(keyword);
@@ -55,26 +60,34 @@ export default function ShowtimeListAdmin() {
     }, 400);
     return () => clearTimeout(handler);
   }, [keyword]);
+
   const fetchShowtimes = useCallback(async () => {
     try {
       setLoading(true);
       const [currentSort, currentOrder] = sortOption.split("-");
 
-      const res = await getAllShowtimesAdmin({
+      const queryParams = {
         page,
         limit,
-        keyword: debouncedKeyword,
-        status: statusFilter,
         sort_by: currentSort,
         order: currentOrder,
-      });
+      };
 
-      const data = res?.data || [];
-      setShowtimes(data);
-      setTotal(res?.pagination?.total || data.length || 0);
-      if (res?.stats) {
-        setStats(res.stats);
-      }
+      if (debouncedKeyword) queryParams.keyword = debouncedKeyword;
+      if (statusFilter) queryParams.status = statusFilter;
+
+      const res = await getAllShowtimesAdmin(queryParams);
+
+      setShowtimes(res?.data || []);
+      const totalItems = res?.pagination?.total || 0;
+      setTotal(totalItems);
+      const backendStats = res?.stats || {};
+      setStats({
+        total: Number(backendStats.total) || totalItems,
+        scheduled: Number(backendStats.scheduled) || 0,
+        live: Number(backendStats.live) || 0,
+        ended: Number(backendStats.ended) || 0,
+      });
     } catch (err) {
       toast.error(err?.message || "Lỗi tải danh sách công chiếu");
       setShowtimes([]);
@@ -97,6 +110,13 @@ export default function ShowtimeListAdmin() {
     setModalMode("edit");
     setSelectedId(id);
     setModalOpen(true);
+  };
+
+  const handleResetFilters = () => {
+    setKeyword("");
+    setStatusFilter("");
+    setSortOption("start_time-desc");
+    setPage(1);
   };
 
   const getStatusBadge = (statusState) => {
@@ -155,6 +175,7 @@ export default function ShowtimeListAdmin() {
               </p>
             </div>
           </div>
+
           <div className="grid grid-cols-4 gap-4 mb-2">
             <div className="bg-white p-4 rounded-2xl shadow-[0_4px_40px_rgba(0,0,0,0.02)] border border-slate-100 flex items-center gap-4 transition-all hover:shadow-sm">
               <div className="w-11 h-11 rounded-xl bg-blue-50/70 flex items-center justify-center text-blue-500">
@@ -165,7 +186,7 @@ export default function ShowtimeListAdmin() {
                   Tổng suất chiếu
                 </div>
                 <div className="text-2xl font-black text-slate-800">
-                  {stats.total || total}
+                  {stats.total}
                 </div>
               </div>
             </div>
@@ -212,6 +233,7 @@ export default function ShowtimeListAdmin() {
               </div>
             </div>
           </div>
+
           <div className="flex flex-col gap-3 bg-white p-4 rounded-2xl shadow-[0_4px_40px_rgba(0,0,0,0.02)] border border-slate-100">
             <div className="flex items-center justify-between gap-4">
               <div className="relative w-80">
@@ -252,7 +274,7 @@ export default function ShowtimeListAdmin() {
                 </button>
                 <button
                   onClick={handleOpenCreate}
-                  className="flex items-center gap-2 px-5 py-2 bg-slate-800 text-white text-[13px] font-bold rounded-xl hover:bg-slate-700 transition-all shadow-[0_4px_20px_rgba(0,0,0,0.1)]"
+                  className="flex items-center gap-1.5 px-4 py-2 text-[13px] font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-sm shadow-blue-200 rounded-xl transition-all"
                 >
                   <Plus size={16} strokeWidth={2.5} />
                   Tạo suất chiếu
@@ -262,9 +284,8 @@ export default function ShowtimeListAdmin() {
 
             <div className="h-px w-full bg-slate-100 my-1"></div>
 
-            {/* Hàng 2: Filters & Sắp xếp */}
+            {/* Filters & Sắp xếp */}
             <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-50/50 p-2 rounded-xl border border-slate-100">
-              {/* Lọc */}
               <div className="flex items-center gap-2 flex-wrap">
                 <div className="flex items-center gap-1.5 px-2 text-slate-400">
                   <Filter size={14} />
@@ -287,9 +308,19 @@ export default function ShowtimeListAdmin() {
                   <option value="ended">Đã kết thúc</option>
                   <option value="cancelled">Đã hủy</option>
                 </select>
+
+                {isFilterActive && (
+                  <button
+                    onClick={handleResetFilters}
+                    className="flex items-center gap-1.5 px-3 py-2 text-[12px] font-bold text-rose-500 bg-rose-50 border border-rose-100 hover:bg-rose-100 hover:text-rose-600 rounded-lg transition-all shadow-sm"
+                    title="Xóa tất cả bộ lọc"
+                  >
+                    <FilterX size={14} strokeWidth={2.5} />
+                    Xóa lọc
+                  </button>
+                )}
               </div>
 
-              {/* Sắp xếp */}
               <div className="flex items-center gap-2 flex-wrap">
                 <div className="flex items-center gap-1.5 px-2 text-slate-400 border-l border-slate-200 pl-3">
                   <ArrowUpDown size={14} />
@@ -313,9 +344,6 @@ export default function ShowtimeListAdmin() {
                     <option value="start_time-asc">
                       Bắt đầu chiếu: Cũ nhất ➝ Mới nhất
                     </option>
-                    <option value="end_time-desc">
-                      Kết thúc: Gần đây nhất
-                    </option>
                   </optgroup>
                   <optgroup label="Thông tin">
                     <option value="id-desc">ID: Mới thêm gần đây</option>
@@ -327,6 +355,7 @@ export default function ShowtimeListAdmin() {
               </div>
             </div>
           </div>
+
           <div className="bg-white rounded-2xl shadow-[0_4px_40px_rgba(0,0,0,0.02)] border border-slate-100 overflow-hidden relative min-h-100">
             {loading && (
               <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center transition-all duration-300">

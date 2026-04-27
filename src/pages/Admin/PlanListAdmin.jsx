@@ -12,6 +12,7 @@ import {
   ToggleRight,
   Filter,
   ArrowUpDown,
+  FilterX,
 } from "lucide-react";
 import { toast } from "react-toastify";
 
@@ -21,6 +22,7 @@ import PlanModal from "../../components/Admin/Plans/PlanModal";
 import ConfirmToggleModal from "../../components/Admin/Plans/ConfirmToggleModal";
 
 import { getAllPlansAdmin, togglePlanStatus } from "../../api/planAdminApi";
+
 const STATUS_LABELS = {
   active: "Đang bán",
   inactive: "Ngừng bán",
@@ -50,8 +52,7 @@ export default function PlanListAdmin() {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [planToToggle, setPlanToToggle] = useState(null);
   const [toggling, setToggling] = useState(false);
-
-  // Debounce tìm kiếm
+  const isFilterActive = statusFilter !== "" || sortOption !== "id-desc";
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedKeyword(keyword);
@@ -59,44 +60,55 @@ export default function PlanListAdmin() {
     }, 400);
     return () => clearTimeout(handler);
   }, [keyword]);
-
-  // Logic gọi API
   const fetchPlans = useCallback(async () => {
     try {
       setLoading(true);
 
       const [currentSort, currentOrder] = sortOption.split("-");
 
-      const res = await getAllPlansAdmin({
+      const queryParams = {
         page,
         limit,
-        keyword: debouncedKeyword,
-        status: statusFilter,
         sort_by: currentSort,
         order: currentOrder,
-      });
+      };
+
+      if (debouncedKeyword) queryParams.keyword = debouncedKeyword;
+      if (statusFilter) queryParams.status = statusFilter;
+
+      const res = await getAllPlansAdmin(queryParams);
 
       const data = res?.data || [];
-      setPlans(data);
-      setTotal(res?.pagination?.total ?? 0);
+      const totalItems = res?.pagination?.total ?? 0;
 
-      // Nếu BE có trả stats thì tốt, không thì tự tính (tạm)
+      setPlans(data);
+      setTotal(totalItems);
+
+      // Lấy chuẩn dữ liệu thống kê từ Backend trả về cho toàn page
+      const backendStats = res?.stats || {};
       setStats({
-        total: res?.total || data.length,
-        active: data.filter((p) => p.status === "active").length,
-        inactive: data.filter((p) => p.status === "inactive").length,
-        popular: data.filter((p) => p.is_popular).length,
+        total: Number(backendStats.total) || totalItems,
+        active: Number(backendStats.active) || 0,
+        inactive: Number(backendStats.inactive) || 0,
+        popular: Number(backendStats.popular) || 0,
       });
     } catch (err) {
       toast.error(err?.message || "Lỗi tải danh sách gói dịch vụ");
     } finally {
       setLoading(false);
     }
-  }, [page, debouncedKeyword, statusFilter, sortOption]);
+  }, [page, limit, debouncedKeyword, statusFilter, sortOption]);
 
   useEffect(() => {
     fetchPlans();
   }, [fetchPlans]);
+
+  // Hàm Reset toàn bộ Filters (Không clear ô tìm kiếm)
+  const handleResetFilters = () => {
+    setStatusFilter("");
+    setSortOption("id-desc");
+    setPage(1);
+  };
 
   const csvData = plans.map((p) => ({
     ID: p.id,
@@ -178,6 +190,8 @@ export default function PlanListAdmin() {
               Thiết lập giá, thời hạn và tính năng cho các gói Premium 💎
             </p>
           </div>
+
+          {/* Thống kê */}
           <div className="grid grid-cols-4 gap-4 mb-2">
             <div className="bg-white p-4 rounded-2xl shadow-[0_4px_40px_rgba(0,0,0,0.02)] border border-slate-100 flex items-center gap-4 transition-all hover:shadow-sm">
               <div className="w-11 h-11 rounded-xl bg-blue-50/70 flex items-center justify-center text-blue-500">
@@ -235,6 +249,7 @@ export default function PlanListAdmin() {
               </div>
             </div>
           </div>
+
           <div className="flex flex-col gap-3 bg-white p-4 rounded-2xl shadow-[0_4px_40px_rgba(0,0,0,0.02)] border border-slate-100">
             <div className="flex items-center justify-between gap-4">
               <div className="relative w-80">
@@ -245,6 +260,11 @@ export default function PlanListAdmin() {
                 <input
                   value={keyword}
                   onChange={(e) => setKeyword(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      setKeyword("");
+                    }
+                  }}
                   placeholder="Tìm kiếm tên gói..."
                   className="w-full pl-10 pr-4 py-2 text-[13px] bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-400 text-slate-700 font-medium"
                 />
@@ -275,7 +295,7 @@ export default function PlanListAdmin() {
                 </button>
                 <button
                   onClick={handleOpenCreate}
-                  className="flex items-center gap-2 px-5 py-2 bg-slate-800 text-white text-[13px] font-bold rounded-xl hover:bg-slate-700 transition-all shadow-[0_4px_20px_rgba(0,0,0,0.1)]"
+                   className="flex items-center gap-1.5 px-4 py-2 text-[13px] font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-sm shadow-blue-200 rounded-xl transition-all"
                 >
                   <Plus size={16} strokeWidth={2.5} />
                   Thêm mới
@@ -284,6 +304,8 @@ export default function PlanListAdmin() {
             </div>
 
             <div className="h-px w-full bg-slate-100 my-1"></div>
+
+            {/* Lọc và Sắp xếp */}
             <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-50/50 p-2 rounded-xl border border-slate-100">
               <div className="flex items-center gap-2 flex-wrap">
                 <div className="flex items-center gap-1.5 px-2 text-slate-400">
@@ -305,6 +327,17 @@ export default function PlanListAdmin() {
                   <option value="active">Đang bán</option>
                   <option value="inactive">Ngừng bán</option>
                 </select>
+
+                {isFilterActive && (
+                  <button
+                    onClick={handleResetFilters}
+                    className="flex items-center gap-1.5 px-3 py-2 text-[12px] font-bold text-rose-500 bg-rose-50 border border-rose-100 hover:bg-rose-100 hover:text-rose-600 rounded-lg transition-all shadow-sm"
+                    title="Xóa tất cả bộ lọc"
+                  >
+                    <FilterX size={14} strokeWidth={2.5} />
+                    Xóa lọc
+                  </button>
+                )}
               </div>
               <div className="flex items-center gap-2 flex-wrap">
                 <div className="flex items-center gap-1.5 px-2 text-slate-400 border-l border-slate-200 pl-3">
@@ -344,6 +377,7 @@ export default function PlanListAdmin() {
               </div>
             </div>
           </div>
+
           <div className="bg-white rounded-2xl shadow-[0_4px_40px_rgba(0,0,0,0.02)] border border-slate-100 overflow-hidden relative min-h-100">
             {loading && (
               <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center transition-all duration-300">

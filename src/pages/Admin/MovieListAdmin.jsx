@@ -12,6 +12,7 @@ import {
   PlayCircle,
   Filter,
   ArrowUpDown,
+  FilterX,
 } from "lucide-react";
 import { toast } from "react-toastify";
 
@@ -20,15 +21,18 @@ import Pagination from "../../components/Admin/Pagination";
 import MoviesModal from "../../components/Admin/Movies/MoviesModal";
 
 import { getAllMovies } from "../../api/moviesAdminApi";
-
-// Từ điển dịch Label UI
 const STATUS_LABELS = {
   draft: "Bản nháp",
   published: "Đã xuất bản",
   hidden: "Đã ẩn",
   active: "Hoạt động",
-  completed: "Hoàn thành",
   expired: "Hết hạn",
+};
+
+const LIFECYCLE_LABELS = {
+  upcoming: "Sắp chiếu",
+  ongoing: "Đang phát",
+  completed: "Hoàn thành",
 };
 
 const TYPE_LABELS = {
@@ -45,9 +49,11 @@ export default function MoviesListAdmin() {
   const [keyword, setKeyword] = useState("");
   const [debouncedKeyword, setDebouncedKeyword] = useState("");
   const [status, setStatus] = useState("");
+  const [lifecycleStatus, setLifecycleStatus] = useState("");
   const [isPremium, setIsPremium] = useState("");
   const [type, setType] = useState("");
   const [sortOption, setSortOption] = useState("id-desc");
+
   const [stats, setStats] = useState({
     total: 0,
     draft: 0,
@@ -57,6 +63,14 @@ export default function MoviesListAdmin() {
   const [selectedMovieId, setSelectedMovieId] = useState(null);
   const [isModalOpen, setModalOpen] = useState(false);
   const [mode, setMode] = useState("edit");
+  const isFilterActive =
+    keyword !== "" ||
+    status !== "" ||
+    lifecycleStatus !== "" ||
+    isPremium !== "" ||
+    type !== "" ||
+    sortOption !== "id-desc";
+
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedKeyword(keyword);
@@ -70,17 +84,21 @@ export default function MoviesListAdmin() {
     try {
       setLoading(true);
       const [currentSort, currentOrder] = sortOption.split("-");
-
-      const res = await getAllMovies({
+      const queryParams = {
         page,
         limit,
-        keyword: debouncedKeyword,
-        status,
-        type,
-        is_premium: isPremium,
         sort_by: currentSort,
         order: currentOrder,
-      });
+      };
+
+      if (debouncedKeyword) queryParams.keyword = debouncedKeyword;
+      if (status) queryParams.status = status;
+      if (type) queryParams.type = type;
+      if (lifecycleStatus) queryParams.lifecycle_status = lifecycleStatus;
+      if (isPremium === "true") queryParams.is_premium = true;
+      if (isPremium === "false") queryParams.is_premium = false;
+
+      const res = await getAllMovies(queryParams);
 
       setMovies(res?.data || []);
       setTotal(res?.pagination?.total || 0);
@@ -97,11 +115,28 @@ export default function MoviesListAdmin() {
     } finally {
       setLoading(false);
     }
-  }, [page, debouncedKeyword, status, type, isPremium, sortOption]);
+  }, [
+    page,
+    debouncedKeyword,
+    status,
+    lifecycleStatus,
+    type,
+    isPremium,
+    sortOption,
+  ]);
 
   useEffect(() => {
     fetchMovies();
   }, [fetchMovies]);
+  const handleResetFilters = () => {
+    setKeyword("");
+    setStatus("");
+    setLifecycleStatus("");
+    setIsPremium("");
+    setType("");
+    setSortOption("id-desc");
+    setPage(1);
+  };
 
   const csvData = movies.map((m) => ({
     ID: m.id,
@@ -110,6 +145,8 @@ export default function MoviesListAdmin() {
     Loại: TYPE_LABELS[m.type?.toLowerCase()] || m.type,
     Tập: m.episode_total,
     "Trạng thái": STATUS_LABELS[m.status?.toLowerCase()] || m.status,
+    "Tiến độ":
+      LIFECYCLE_LABELS[m.lifecycle_status?.toLowerCase()] || m.lifecycle_status,
   }));
 
   const handleOpenCreate = () => {
@@ -138,8 +175,6 @@ export default function MoviesListAdmin() {
         return `${baseStyle} bg-emerald-50 text-emerald-600 border-emerald-100`;
       case "draft":
         return `${baseStyle} bg-slate-100 text-slate-500 border-slate-200`;
-      case "completed":
-        return `${baseStyle} bg-blue-50 text-blue-600 border-blue-100`;
       case "hidden":
       case "expired":
         return `${baseStyle} bg-rose-50 text-rose-600 border-rose-100`;
@@ -151,7 +186,7 @@ export default function MoviesListAdmin() {
   return (
     <div className="flex min-h-screen bg-[#FCFDFE]">
       <div className="flex-1 ml-64 flex flex-col relative">
-        <div className="p-6 space-y-5 flex-1 max-w-350 mx-auto w-full">
+        <div className="p-6 space-y-5 flex-1 max-w-300 mx-auto w-full">
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl font-bold tracking-tight text-slate-800">
               Quản lý phim
@@ -174,7 +209,6 @@ export default function MoviesListAdmin() {
                 </div>
               </div>
             </div>
-
             <div className="bg-white p-4 rounded-2xl shadow-[0_4px_40px_rgba(0,0,0,0.02)] border border-slate-100 flex items-center gap-4 transition-all hover:shadow-sm">
               <div className="w-11 h-11 rounded-xl bg-slate-50 flex items-center justify-center text-slate-500">
                 <FileEdit size={20} strokeWidth={2} />
@@ -188,7 +222,6 @@ export default function MoviesListAdmin() {
                 </div>
               </div>
             </div>
-
             <div className="bg-white p-4 rounded-2xl shadow-[0_4px_40px_rgba(0,0,0,0.02)] border border-slate-100 flex items-center gap-4 transition-all hover:shadow-sm">
               <div className="w-11 h-11 rounded-xl bg-emerald-50/70 flex items-center justify-center text-emerald-500">
                 <CheckCircle size={20} strokeWidth={2} />
@@ -235,7 +268,15 @@ export default function MoviesListAdmin() {
               <div className="flex items-center gap-2">
                 <ExportCSV
                   data={csvData}
-                  fields={["ID", "Tên", "Năm", "Loại", "Tập", "Trạng thái"]}
+                  fields={[
+                    "ID",
+                    "Tên",
+                    "Năm",
+                    "Loại",
+                    "Tập",
+                    "Trạng thái",
+                    "Tiến độ",
+                  ]}
                   fileName="DanhSachPhim"
                 />
                 <button
@@ -257,7 +298,6 @@ export default function MoviesListAdmin() {
                 </button>
               </div>
             </div>
-
             <div className="h-px w-full bg-slate-100 my-1"></div>
             <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-50/50 p-2 rounded-xl border border-slate-100">
               <div className="flex items-center gap-2 flex-wrap">
@@ -280,6 +320,19 @@ export default function MoviesListAdmin() {
                   <option value="draft">Bản nháp</option>
                   <option value="published">Đã xuất bản</option>
                   <option value="hidden">Đã ẩn</option>
+                </select>
+                <select
+                  value={lifecycleStatus}
+                  onChange={(e) => {
+                    setLifecycleStatus(e.target.value);
+                    setPage(1);
+                  }}
+                  className="px-3 py-2 text-[12px] bg-white border border-slate-200 rounded-lg focus:border-blue-400 focus:ring-2 focus:ring-blue-500/10 text-slate-600 font-medium outline-none cursor-pointer transition-all shadow-sm"
+                >
+                  <option value="">Tất cả tiến độ</option>
+                  <option value="upcoming">Sắp chiếu</option>
+                  <option value="ongoing">Đang phát</option>
+                  <option value="completed">Hoàn thành</option>
                 </select>
 
                 <select
@@ -307,7 +360,18 @@ export default function MoviesListAdmin() {
                   <option value="true">Premium (VIP)</option>
                   <option value="false">Miễn phí (Free)</option>
                 </select>
+                {isFilterActive && (
+                  <button
+                    onClick={handleResetFilters}
+                    className="flex items-center gap-1.5 px-3 py-2 text-[12px] font-bold text-rose-500 bg-rose-50 border border-rose-100 hover:bg-rose-100 hover:text-rose-600 rounded-lg transition-all shadow-sm"
+                    title="Xóa tất cả bộ lọc"
+                  >
+                    <FilterX size={14} strokeWidth={2.5} />
+                    Xóa lọc
+                  </button>
+                )}
               </div>
+
               <div className="flex items-center gap-2 flex-wrap">
                 <div className="flex items-center gap-1.5 px-2 text-slate-400 border-l border-slate-200 pl-3">
                   <ArrowUpDown size={14} />
@@ -439,19 +503,29 @@ export default function MoviesListAdmin() {
                         </td>
                         <td className="px-5 py-3 text-center">
                           {m.is_premium ? (
-                            <span className="text-[10px] font-black text-amber-600 bg-amber-50 px-2 py-1 rounded-md border border-amber-100">
+                            <span className="text-[10px] font-black text-amber-600 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-100">
                               VIP
                             </span>
                           ) : (
-                            <span className="text-slate-400 text-[11px] font-medium italic bg-slate-50 px-2 py-1 rounded-md border border-slate-100">
+                            <span className="text-slate-500 text-[10px] font-bold uppercase tracking-wide bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
                               Free
                             </span>
                           )}
                         </td>
                         <td className="px-5 py-3 text-center">
-                          <span className={getStatusBadge(m.status)}>
-                            {STATUS_LABELS[m.status?.toLowerCase()] || m.status}
-                          </span>
+                          <div className="flex flex-col items-center gap-1.5">
+                            <span className={getStatusBadge(m.status)}>
+                              {STATUS_LABELS[m.status?.toLowerCase()] ||
+                                m.status}
+                            </span>
+                            {m.lifecycle_status && (
+                              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                {LIFECYCLE_LABELS[
+                                  m.lifecycle_status?.toLowerCase()
+                                ] || m.lifecycle_status}
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td className="px-5 py-3 text-right">
                           <button
@@ -480,7 +554,6 @@ export default function MoviesListAdmin() {
           />
         </div>
       </div>
-
       {isModalOpen && (
         <MoviesModal
           movieId={selectedMovieId}

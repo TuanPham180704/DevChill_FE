@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   Filter,
   ArrowUpDown,
+  FilterX,
 } from "lucide-react";
 import { toast } from "react-toastify";
 
@@ -32,7 +33,7 @@ export default function PaymentListAdmin() {
   const [keyword, setKeyword] = useState("");
   const [debouncedKeyword, setDebouncedKeyword] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  const [sortOption, setSortOption] = useState("created_at-desc"); 
+  const [sortOption, setSortOption] = useState("created_at-desc");
 
   const [stats, setStats] = useState({
     total: 0,
@@ -45,6 +46,11 @@ export default function PaymentListAdmin() {
   const [isDetailModalOpen, setDetailModalOpen] = useState(false);
   const [isVerifyModalOpen, setVerifyModalOpen] = useState(false);
   const [paymentToVerify, setPaymentToVerify] = useState(null);
+
+  // Nút Xóa lọc chỉ xuất hiện khi có thay đổi trạng thái hoặc sắp xếp
+  const isFilterActive =
+    statusFilter !== "" || sortOption !== "created_at-desc";
+
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedKeyword(keyword);
@@ -81,6 +87,7 @@ export default function PaymentListAdmin() {
   useEffect(() => {
     fetchPayments();
   }, [fetchPayments]);
+
   useEffect(() => {
     let result = [...allPayments];
     if (debouncedKeyword) {
@@ -119,6 +126,13 @@ export default function PaymentListAdmin() {
     const startIndex = (page - 1) * limit;
     setPayments(result.slice(startIndex, startIndex + limit));
   }, [allPayments, debouncedKeyword, statusFilter, sortOption, page]);
+
+  // Hàm Reset toàn bộ Filters
+  const handleResetFilters = () => {
+    setStatusFilter("");
+    setSortOption("created_at-desc");
+    setPage(1);
+  };
 
   const csvData = filteredPayments.map((p) => ({
     ID: p.id,
@@ -262,6 +276,11 @@ export default function PaymentListAdmin() {
                 <input
                   value={keyword}
                   onChange={(e) => setKeyword(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      setKeyword("");
+                    }
+                  }}
                   placeholder="Mã GD hoặc username..."
                   className="w-full pl-10 pr-4 py-2 text-[13px] bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-400 text-slate-700 font-medium"
                 />
@@ -296,6 +315,8 @@ export default function PaymentListAdmin() {
             </div>
 
             <div className="h-px w-full bg-slate-100 my-1"></div>
+
+            {/* Hàng 2: Lọc & Sắp xếp */}
             <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-50/50 p-2 rounded-xl border border-slate-100">
               <div className="flex items-center gap-2 flex-wrap">
                 <div className="flex items-center gap-1.5 px-2 text-slate-400">
@@ -318,6 +339,18 @@ export default function PaymentListAdmin() {
                   <option value="failed">Thất bại</option>
                   <option value="cancelled">Đã huỷ</option>
                 </select>
+
+                {/* NÚT XÓA LỌC */}
+                {isFilterActive && (
+                  <button
+                    onClick={handleResetFilters}
+                    className="flex items-center gap-1.5 px-3 py-2 text-[12px] font-bold text-rose-500 bg-rose-50 border border-rose-100 hover:bg-rose-100 hover:text-rose-600 rounded-lg transition-all shadow-sm"
+                    title="Xóa tất cả bộ lọc"
+                  >
+                    <FilterX size={14} strokeWidth={2.5} />
+                    Xóa lọc
+                  </button>
+                )}
               </div>
 
               <div className="flex items-center gap-2 flex-wrap">
@@ -355,6 +388,7 @@ export default function PaymentListAdmin() {
               </div>
             </div>
           </div>
+
           <div className="bg-white rounded-2xl shadow-[0_4px_40px_rgba(0,0,0,0.02)] border border-slate-100 overflow-hidden relative min-h-100">
             {loading && (
               <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center transition-all duration-300">

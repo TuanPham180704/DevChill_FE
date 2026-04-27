@@ -13,6 +13,7 @@ import {
   Filter,
   ArrowUpDown,
   UserCheck,
+  FilterX, // Thêm icon FilterX
 } from "lucide-react";
 import ExportCSV from "../../components/common/ExportCSV";
 import Pagination from "../../components/Admin/Pagination";
@@ -32,11 +33,15 @@ export default function CustomerList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [sortOption, setSortOption] = useState("id-desc"); 
+  const [sortOption, setSortOption] = useState("id-desc");
   const [selectedUser, setSelectedUser] = useState(null);
   const [isCustomerModalOpen, setCustomerModalOpen] = useState(false);
   const [isLockModalOpen, setLockModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // Kiểm tra xem có bộ lọc nào đang được áp dụng hay không
+  const isFilterActive =
+    searchTerm !== "" || statusFilter !== "all" || sortOption !== "id-desc";
 
   const fetchUsers = async () => {
     try {
@@ -60,6 +65,7 @@ export default function CustomerList() {
   useEffect(() => {
     fetchUsers();
   }, []);
+
   const filteredUsers = useMemo(() => {
     const keyword = searchTerm.toLowerCase();
 
@@ -148,6 +154,14 @@ export default function CustomerList() {
     } finally {
       setLoadingLock(false);
     }
+  };
+
+  // Hàm Reset toàn bộ Filters
+  const handleResetFilters = () => {
+    setSearchTerm("");
+    setStatusFilter("all");
+    setSortOption("id-desc");
+    setCurrentPage(1);
   };
 
   const badge = (style) =>
@@ -287,8 +301,6 @@ export default function CustomerList() {
             </div>
 
             <div className="h-px w-full bg-slate-100 my-1"></div>
-
-            {/* Hàng 2: Filters & Sắp xếp */}
             <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-50/50 p-2 rounded-xl border border-slate-100">
               <div className="flex items-center gap-2 flex-wrap">
                 <div className="flex items-center gap-1.5 px-2 text-slate-400">
@@ -307,6 +319,18 @@ export default function CustomerList() {
                   <option value="inactive">Chưa kích hoạt</option>
                   <option value="locked">Bị khóa</option>
                 </select>
+
+                {/* NÚT XÓA LỌC */}
+                {isFilterActive && (
+                  <button
+                    onClick={handleResetFilters}
+                    className="flex items-center gap-1.5 px-3 py-2 text-[12px] font-bold text-rose-500 bg-rose-50 border border-rose-100 hover:bg-rose-100 hover:text-rose-600 rounded-lg transition-all shadow-sm"
+                    title="Xóa tất cả bộ lọc"
+                  >
+                    <FilterX size={14} strokeWidth={2.5} />
+                    Xóa lọc
+                  </button>
+                )}
               </div>
 
               <div className="flex items-center gap-2 flex-wrap">

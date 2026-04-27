@@ -1,4 +1,3 @@
-
 /* eslint-disable no-unused-vars */
 import { useState, useEffect, useCallback } from "react";
 import {
@@ -14,6 +13,7 @@ import {
   Filter,
   ArrowUpDown,
   PlayCircle,
+  FilterX,
 } from "lucide-react";
 import { toast } from "react-toastify";
 
@@ -44,7 +44,7 @@ export default function ContractList() {
   const [keyword, setKeyword] = useState("");
   const [debouncedKeyword, setDebouncedKeyword] = useState("");
   const [status, setStatus] = useState("");
-  const [sortOption, setSortOption] = useState("id-desc"); 
+  const [sortOption, setSortOption] = useState("id-desc");
   const [selectedContract, setSelectedContract] = useState(null);
   const [isContractModalOpen, setContractModalOpen] = useState(false);
   const [stats, setStats] = useState({
@@ -54,6 +54,10 @@ export default function ContractList() {
     expired: 0,
     cancelled: 0,
   });
+
+  // Kiểm tra xem có bộ lọc nào đang được áp dụng không (không tính keyword)
+  const isFilterActive = status !== "" || sortOption !== "id-desc";
+
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedKeyword(keyword);
@@ -62,6 +66,7 @@ export default function ContractList() {
 
     return () => clearTimeout(handler);
   }, [keyword]);
+
   const fetchContracts = useCallback(async () => {
     try {
       setLoading(true);
@@ -69,7 +74,7 @@ export default function ContractList() {
       const res = await getContracts({
         page,
         limit,
-        name: debouncedKeyword, 
+        name: debouncedKeyword,
         status: status,
         sort_by: currentSort,
         order: currentOrder,
@@ -99,6 +104,14 @@ export default function ContractList() {
   useEffect(() => {
     fetchContracts();
   }, [fetchContracts]);
+
+  // Hàm Reset toàn bộ Filters (Không clear ô tìm kiếm)
+  const handleResetFilters = () => {
+    setStatus("");
+    setSortOption("id-desc");
+    setPage(1);
+  };
+
   const handleSaveContract = async (data) => {
     try {
       if (selectedContract?.id) {
@@ -241,6 +254,11 @@ export default function ContractList() {
                 <input
                   value={keyword}
                   onChange={(e) => setKeyword(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      setKeyword("");
+                    }
+                  }}
                   placeholder="Tìm kiếm hợp đồng..."
                   className="w-full pl-10 pr-4 py-2 text-[13px] bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-400 text-slate-700 font-medium"
                 />
@@ -309,6 +327,18 @@ export default function ContractList() {
                   <option value="expired">Hết hạn</option>
                   <option value="cancelled">Đã hủy</option>
                 </select>
+
+                {/* NÚT XÓA LỌC */}
+                {isFilterActive && (
+                  <button
+                    onClick={handleResetFilters}
+                    className="flex items-center gap-1.5 px-3 py-2 text-[12px] font-bold text-rose-500 bg-rose-50 border border-rose-100 hover:bg-rose-100 hover:text-rose-600 rounded-lg transition-all shadow-sm"
+                    title="Xóa tất cả bộ lọc"
+                  >
+                    <FilterX size={14} strokeWidth={2.5} />
+                    Xóa lọc
+                  </button>
+                )}
               </div>
 
               {/* Sắp xếp */}
@@ -465,7 +495,7 @@ export default function ContractList() {
         <div className="sticky bottom-0 bg-white/80 backdrop-blur-xl border-t border-slate-200 py-3 flex justify-center z-20 shadow-[0_-4px_20px_rgba(0,0,0,0.02)]">
           <Pagination
             currentPage={page}
-            totalPages={Math.ceil(total / limit)}
+            totalPages={Math.ceil(total / limit) || 1}
             onPageChange={setPage}
             totalItems={total}
             itemsPerPage={limit}
