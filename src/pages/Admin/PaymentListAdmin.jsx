@@ -46,8 +46,6 @@ export default function PaymentListAdmin() {
   const [isDetailModalOpen, setDetailModalOpen] = useState(false);
   const [isVerifyModalOpen, setVerifyModalOpen] = useState(false);
   const [paymentToVerify, setPaymentToVerify] = useState(null);
-
-  // Nút Xóa lọc chỉ xuất hiện khi có thay đổi trạng thái hoặc sắp xếp
   const isFilterActive =
     statusFilter !== "" || sortOption !== "created_at-desc";
 
@@ -126,8 +124,6 @@ export default function PaymentListAdmin() {
     const startIndex = (page - 1) * limit;
     setPayments(result.slice(startIndex, startIndex + limit));
   }, [allPayments, debouncedKeyword, statusFilter, sortOption, page]);
-
-  // Hàm Reset toàn bộ Filters
   const handleResetFilters = () => {
     setStatusFilter("");
     setSortOption("created_at-desc");
@@ -208,6 +204,19 @@ export default function PaymentListAdmin() {
           </div>
           <div className="grid grid-cols-4 gap-4 mb-2">
             <div className="bg-white p-4 rounded-2xl shadow-[0_4px_40px_rgba(0,0,0,0.02)] border border-slate-100 flex items-center gap-4 transition-all hover:shadow-sm">
+              <div className="w-11 h-11 rounded-xl bg-amber-50 flex items-center justify-center text-amber-500">
+                <DollarSign size={20} strokeWidth={2.5} />
+              </div>
+              <div>
+                <div className="text-slate-400 text-[11px] font-semibold mb-0.5 uppercase tracking-wider">
+                  Doanh thu
+                </div>
+                <div className="text-xl font-black text-slate-800">
+                  {formatCurrency(stats.revenue)}
+                </div>
+              </div>
+            </div>
+            <div className="bg-white p-4 rounded-2xl shadow-[0_4px_40px_rgba(0,0,0,0.02)] border border-slate-100 flex items-center gap-4 transition-all hover:shadow-sm">
               <div className="w-11 h-11 rounded-xl bg-blue-50/70 flex items-center justify-center text-blue-500">
                 <CreditCard size={20} strokeWidth={2.5} />
               </div>
@@ -248,25 +257,8 @@ export default function PaymentListAdmin() {
                 </div>
               </div>
             </div>
-
-            <div className="bg-white p-4 rounded-2xl shadow-[0_4px_40px_rgba(0,0,0,0.02)] border border-slate-100 flex items-center gap-4 transition-all hover:shadow-sm">
-              <div className="w-11 h-11 rounded-xl bg-amber-50 flex items-center justify-center text-amber-500">
-                <DollarSign size={20} strokeWidth={2.5} />
-              </div>
-              <div>
-                <div className="text-slate-400 text-[11px] font-semibold mb-0.5 uppercase tracking-wider">
-                  Doanh thu
-                </div>
-                <div className="text-xl font-black text-slate-800">
-                  {formatCurrency(stats.revenue)}
-                </div>
-              </div>
-            </div>
           </div>
-
-          {/* Công cụ & Bộ lọc */}
           <div className="flex flex-col gap-3 bg-white p-4 rounded-2xl shadow-[0_4px_40px_rgba(0,0,0,0.02)] border border-slate-100">
-            {/* Hàng 1: Search & Actions */}
             <div className="flex items-center justify-between gap-4">
               <div className="relative w-80">
                 <Search
@@ -315,8 +307,6 @@ export default function PaymentListAdmin() {
             </div>
 
             <div className="h-px w-full bg-slate-100 my-1"></div>
-
-            {/* Hàng 2: Lọc & Sắp xếp */}
             <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-50/50 p-2 rounded-xl border border-slate-100">
               <div className="flex items-center gap-2 flex-wrap">
                 <div className="flex items-center gap-1.5 px-2 text-slate-400">
@@ -339,8 +329,6 @@ export default function PaymentListAdmin() {
                   <option value="failed">Thất bại</option>
                   <option value="cancelled">Đã huỷ</option>
                 </select>
-
-                {/* NÚT XÓA LỌC */}
                 {isFilterActive && (
                   <button
                     onClick={handleResetFilters}
@@ -510,8 +498,6 @@ export default function PaymentListAdmin() {
             </div>
           </div>
         </div>
-
-        {/* Pagination Sticky */}
         <div className="sticky bottom-0 bg-white/80 backdrop-blur-xl border-t border-slate-200 py-3 flex justify-center z-20 shadow-[0_-4px_20px_rgba(0,0,0,0.02)]">
           <Pagination
             currentPage={page}

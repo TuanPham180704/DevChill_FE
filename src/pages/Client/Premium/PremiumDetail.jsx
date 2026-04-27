@@ -1,7 +1,13 @@
 /* eslint-disable no-unused-vars */
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { CheckCircle2, ArrowLeft, CreditCard, ShieldCheck } from "lucide-react";
+import {
+  CheckCircle2,
+  ArrowLeft,
+  CreditCard,
+  ShieldCheck,
+  AlertCircle,
+} from "lucide-react";
 import { toast } from "react-toastify";
 import { planApi } from "../../../api/planApi";
 
@@ -31,10 +37,9 @@ export default function PremiumDetail() {
   }, [id, navigate]);
 
   const handleCheckout = async () => {
-    if (!isAgreed) {
-      toast.error("Vui lòng đồng ý với chính sách và điều khoản!");
-      return;
-    }
+    // Check này vẫn giữ để đảm bảo logic nghiệp vụ an toàn
+    if (!isAgreed) return;
+
     if (paymentMethod === "momo") {
       toast.warning("Cổng Momo đang bảo trì, vui lòng chọn VNPay!");
       return;
@@ -67,14 +72,13 @@ export default function PremiumDetail() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] py-10 px-4 flex justify-center">
       <div className="w-full max-w-4xl">
-        {" "}
-        {/* Đã thu nhỏ layout */}
         <button
           onClick={() => navigate("/premium")}
           className="flex items-center gap-1.5 text-slate-500 hover:text-slate-900 mb-6 text-sm font-semibold transition-colors w-fit"
         >
           <ArrowLeft size={16} /> Quay lại
         </button>
+
         <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden flex flex-col md:flex-row border border-slate-100">
           {/* CỘT TRÁI (DARK) */}
           <div className="p-8 md:w-[45%] bg-slate-900 text-white flex flex-col justify-between relative overflow-hidden">
@@ -205,14 +209,27 @@ export default function PremiumDetail() {
                 </span>
               </label>
             </div>
+            <div className="relative group/btn w-full">
+              {!isAgreed && (
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-3 py-2 bg-slate-800 text-white text-[11px] font-semibold rounded-lg opacity-0 invisible group-hover/btn:visible group-hover/btn:opacity-100 transition-all duration-300 whitespace-nowrap shadow-xl">
+                  <div className="flex items-center gap-1.5">
+                    <AlertCircle size={14} className="text-amber-400" />
+                    Vui lòng bấm đồng ý để tiếp tục thanh toán
+                  </div>
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-slate-800"></div>
+                </div>
+              )}
 
-            <button
-              onClick={handleCheckout}
-              disabled={isProcessing}
-              className="w-full py-3.5 bg-sky-500 text-white rounded-xl font-bold text-sm hover:bg-sky-600 active:scale-[0.98] disabled:opacity-70 transition-all shadow-md shadow-sky-500/20"
-            >
-              {isProcessing ? "Đang xử lý..." : "Xác nhận & Thanh toán"}
-            </button>
+              <button
+                onClick={handleCheckout}
+                disabled={isProcessing || !isAgreed}
+                className={`w-full py-3.5 text-white rounded-xl font-bold text-sm transition-all shadow-md active:scale-[0.98]
+                  ${!isAgreed ? "bg-slate-300 cursor-not-allowed shadow-none" : "bg-sky-500 hover:bg-sky-600 shadow-sky-500/20"}
+                  ${isProcessing ? "opacity-70" : ""}`}
+              >
+                {isProcessing ? "Đang xử lý..." : "Xác nhận & Thanh toán"}
+              </button>
+            </div>
           </div>
         </div>
       </div>
