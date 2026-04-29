@@ -108,7 +108,7 @@ export default function PaymentModal({ isOpen, paymentId, onClose }) {
                 <h4 className="text-[12px] font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-1.5">
                   <CheckCircle2 size={14} /> Thông tin nội bộ
                 </h4>
-                <div className="bg-white border border-slate-100 rounded-2xl p-4 space-y-3 shadow-sm">
+                <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 space-y-3">
                   <DetailRow
                     label="Khách hàng"
                     value={data.username || `User #${data.user_id}`}

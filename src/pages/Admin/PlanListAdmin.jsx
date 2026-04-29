@@ -180,8 +180,8 @@ export default function PlanListAdmin() {
 
   return (
     <div className="flex min-h-screen bg-[#FCFDFE]">
-      <div className="flex-1 ml-64 flex flex-col relative">
-        <div className="p-6 space-y-5 flex-1 max-w-350 mx-auto w-full">
+      <div className="flex flex-col relative w-full min-h-full bg-[#FCFDFE]">
+        <div className="space-y-5 flex-1 w-full">
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl font-bold tracking-tight text-slate-800">
               Quản lý gói dịch vụ
@@ -295,7 +295,7 @@ export default function PlanListAdmin() {
                 </button>
                 <button
                   onClick={handleOpenCreate}
-                   className="flex items-center gap-1.5 px-4 py-2 text-[13px] font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-sm shadow-blue-200 rounded-xl transition-all"
+                  className="flex items-center gap-1.5 px-4 py-2 text-[13px] font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-sm shadow-blue-200 rounded-xl transition-all"
                 >
                   <Plus size={16} strokeWidth={2.5} />
                   Thêm mới

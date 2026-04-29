@@ -34,6 +34,7 @@ import AccountLayout from "../pages/Client/Profile/AccountLayout";
 import PaymentListAdmin from "../pages/Admin/PaymentListAdmin";
 import ShowtimeListAdmin from "../pages/Admin/ShowtimeListAdmin";
 import WatchHistory from "../pages/Client/Profile/WatchHistory";
+import AdminProfile from "../pages/Admin/AdminProfile";
 export default function AppRouter() {
   return (
     <>
@@ -77,6 +78,7 @@ export default function AppRouter() {
               <Route path="/admin/plans" element={<PlanListAdmin />} />
               <Route path="/admin/payment" element={<PaymentListAdmin />} />
               <Route path="/admin/showtimes" element={<ShowtimeListAdmin />} />
+              <Route path="/admin/profile" element={<AdminProfile />} />
             </Route>
           </Route>
 

@@ -185,8 +185,8 @@ export default function MoviesListAdmin() {
 
   return (
     <div className="flex min-h-screen bg-[#FCFDFE]">
-      <div className="flex-1 ml-64 flex flex-col relative">
-        <div className="p-6 space-y-5 flex-1 max-w-300 mx-auto w-full">
+      <div className="flex flex-col relative w-full min-h-full bg-[#FCFDFE]">
+        <div className="space-y-5 flex-1 w-full">
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl font-bold tracking-tight text-slate-800">
               Quản lý phim
