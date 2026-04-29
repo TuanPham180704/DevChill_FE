@@ -12,7 +12,7 @@ import VerifyOtp from "../components/VerifyOtp";
 import ForgotPassword from "../components/Forgotpassword";
 import ResetPassword from "../components/Resetpassword";
 import Profile from "../pages/Client/Profile/Profile";
-import HistoryView from "../pages/Client/Profile/HistoryView";
+import HistoryView from "../pages/Client/Profile/WatchHistory";
 import MovieList from "@/pages/MovieList";
 import MovieDetail from "@/pages/MovieDetail";
 import Support from "../pages/Client/Profile/Support";
@@ -33,6 +33,7 @@ import MySubscription from "../pages/Client/Profile/MySubscription";
 import AccountLayout from "../pages/Client/Profile/AccountLayout";
 import PaymentListAdmin from "../pages/Admin/PaymentListAdmin";
 import ShowtimeListAdmin from "../pages/Admin/ShowtimeListAdmin";
+import WatchHistory from "../pages/Client/Profile/WatchHistory";
 export default function AppRouter() {
   return (
     <>
@@ -62,6 +63,7 @@ export default function AppRouter() {
               <Route path="/profile" element={<AccountLayout />}>
                 <Route index element={<Profile />} />
                 <Route path="my-premium" element={<MySubscription />} />
+                <Route path="history" element={<WatchHistory />} />
               </Route>
             </Route>
           </Route>

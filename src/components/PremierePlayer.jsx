@@ -26,10 +26,12 @@ export default function PremierePlayer({ url, startTime = 0, onTimeUpdate }) {
   const [isMuted, setIsMuted] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
+
   const getCurrentLiveEdge = () => {
     const elapsedSeconds = (Date.now() - joinTimeRef.current) / 1000;
     return initialOffsetRef.current + elapsedSeconds;
   };
+
   useEffect(() => {
     const video = videoRef.current;
     const startVideo = () => {
@@ -59,14 +61,26 @@ export default function PremierePlayer({ url, startTime = 0, onTimeUpdate }) {
       if (hlsRef.current) hlsRef.current.destroy();
     };
   }, [url]);
+
   useEffect(() => {
     const video = videoRef.current;
     const handleTimeUpdate = () => {
       if (!isDragging) {
         setCurrentTime(video.currentTime);
       }
-      if (onTimeUpdate) onTimeUpdate(video.currentTime);
+
       const liveEdge = getCurrentLiveEdge();
+
+      // 👉 ĐÃ SỬA DÒNG NÀY: Truyền thêm thời lượng (dùng video.duration hoặc liveEdge làm backup)
+      if (onTimeUpdate) {
+        onTimeUpdate(
+          video.currentTime,
+          video.duration && video.duration !== Infinity
+            ? video.duration
+            : liveEdge,
+        );
+      }
+
       if (video.currentTime > liveEdge + 2) {
         video.currentTime = liveEdge;
       }
@@ -75,6 +89,7 @@ export default function PremierePlayer({ url, startTime = 0, onTimeUpdate }) {
     video.addEventListener("timeupdate", handleTimeUpdate);
     return () => video.removeEventListener("timeupdate", handleTimeUpdate);
   }, [isDragging]);
+
   const handleSeek = (e) => {
     if (!progressBarRef.current || !videoRef.current) return;
     const rect = progressBarRef.current.getBoundingClientRect();

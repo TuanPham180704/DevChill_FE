@@ -1,8 +1,11 @@
-/* eslint-disable no-unused-vars */
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import VideoPlayer from "../components/VideoPlayer";
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { watchMovie, getPublicMovieBySlug } from "../api/moviesPublicApi";
+import {
+  getEpisodeProgress,
+  updateWatchProgress,
+} from "../api/watchHistoryApi";
 import {
   ChevronLeft,
   Play,
@@ -25,6 +28,8 @@ export default function WatchMovie() {
   const [movieDetail, setMovieDetail] = useState(null);
   const [loading, setLoading] = useState(false);
   const [selectedStream, setSelectedStream] = useState(null);
+  const [startTime, setStartTime] = useState(0);
+  const lastSavedTimeRef = useRef(0);
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -37,6 +42,19 @@ export default function WatchMovie() {
 
         const watchPayload = watchRes?.data?.data || watchRes?.data;
         const moviePayload = movieRes?.data?.data || movieRes?.data;
+        let savedTime = 0;
+        if (!watchPayload?.locked && watchPayload?.episode?.id) {
+          try {
+            const progRes = await getEpisodeProgress(watchPayload.episode.id);
+            if (progRes?.success && progRes?.watchedDuration) {
+              savedTime = progRes.watchedDuration;
+            }
+          } catch (err) {
+            console.error("Lỗi lấy tiến độ (có thể chưa đăng nhập):", err);
+          }
+        }
+        setStartTime(savedTime);
+        lastSavedTimeRef.current = savedTime;
 
         setData(watchPayload);
         setMovieDetail(moviePayload);
@@ -58,7 +76,26 @@ export default function WatchMovie() {
     };
     fetchAllData();
   }, [slug, ep, serverId]);
-  const handleTimeUpdate = (currentTime) => {};
+  const handleTimeUpdate = (currentTime, duration) => {
+    if (
+      !data?.episode?.id ||
+      !movieDetail?.id ||
+      !duration ||
+      duration === 0 ||
+      currentTime === 0
+    )
+      return;
+    const timeDiff = Math.abs(currentTime - lastSavedTimeRef.current);
+    if (timeDiff >= 10) {
+      lastSavedTimeRef.current = currentTime;
+      updateWatchProgress({
+        movieId: movieDetail.id,
+        episodeId: data.episode.id,
+        watchedDuration: currentTime,
+        totalDuration: duration,
+      }).catch((err) => console.error("Lỗi lưu tiến độ ngầm:", err));
+    }
+  };
 
   if (!data || !movieDetail) {
     return (
@@ -141,7 +178,7 @@ export default function WatchMovie() {
             <VideoPlayer
               key={selectedStream?.link_m3u8}
               url={selectedStream?.link_m3u8}
-              startTime={0}
+              startTime={startTime}
               onTimeUpdate={handleTimeUpdate}
             />
           ) : selectedStream?.link_embed ? (
@@ -199,10 +236,12 @@ export default function WatchMovie() {
 
                       {isActive ? (
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <Disc2
-                            size={20}
-                            className="text-white animate-spin-slow shadow-lg rounded-full"
-                          />
+                          <div className="w-5 h-5 bg-blue-500/80 rounded-full flex items-center justify-center animate-pulse">
+                            <Disc2
+                              size={20}
+                              className="text-white animate-spin-slow shadow-lg rounded-full"
+                            />
+                          </div>
                         </div>
                       ) : (
                         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -286,8 +325,6 @@ export default function WatchMovie() {
       <style
         dangerouslySetInnerHTML={{
           __html: `
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
         .animate-spin-slow { animation: spin 3s linear infinite; }
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }

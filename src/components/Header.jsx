@@ -194,17 +194,17 @@ export default function Header() {
                   </Link>
 
                   <Link
-                    to="/histoty-view"
+                    to="/profile/history"
                     className="block px-4 py-2.5 font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
                   >
                     Lịch Sử Xem
                   </Link>
 
                   <Link
-                    to="/premium"
+                    to="/profile/my-premium"
                     className="block px-4 py-2.5 font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
                   >
-                    Premium
+                    Gói Đã Mua
                   </Link>
                   <Link
                     to="/support"

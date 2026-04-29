@@ -1,10 +1,11 @@
 /* eslint-disable no-unused-vars */
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 import { showtimesApi } from "../../../api/showtimeApi";
 import { getProfile } from "../../../api/userApi";
 import { getToken } from "../../../utils/auth";
+import { updateWatchProgress } from "../../../api/watchHistoryApi";
 import { ChevronLeft, Radio, ShieldAlert } from "lucide-react";
 import ChatRoom from "./ChatRoom";
 import RoomCinematic from "./RoomCinematic";
@@ -24,6 +25,7 @@ export default function PremiereRoom() {
   const [isEnded, setIsEnded] = useState(false);
   const [isCancelled, setIsCancelled] = useState(false);
   const [socketInstance, setSocketInstance] = useState(null);
+  const lastSavedTimeRef = useRef(0);
 
   useEffect(() => {
     const initRoom = async () => {
@@ -97,8 +99,6 @@ export default function PremiereRoom() {
     if (loading || pageError || isPremiumLocked) return;
 
     const socketUrl = import.meta.env.VITE_API_URL;
-
-    // FIX LỖI POLLING: Ép dùng thẳng WebSocket
     const socket = io(socketUrl, {
       transports: ["websocket"],
       upgrade: false,
@@ -140,6 +140,28 @@ export default function PremiereRoom() {
       socket.disconnect();
     };
   }, [id, loading, pageError, isPremiumLocked, currentUser]);
+  const handleTimeUpdate = (currentTime, duration) => {
+    if (
+      !roomData?.movie_id ||
+      !roomData?.episode_id ||
+      !duration ||
+      duration === 0 ||
+      currentTime === 0
+    )
+      return;
+
+    const timeDiff = Math.abs(currentTime - lastSavedTimeRef.current);
+
+    if (timeDiff >= 10) {
+      lastSavedTimeRef.current = currentTime;
+      updateWatchProgress({
+        movieId: roomData.movie_id,
+        episodeId: roomData.episode_id,
+        watchedDuration: currentTime,
+        totalDuration: duration,
+      }).catch((err) => console.error("Lỗi lưu tiến độ công chiếu:", err));
+    }
+  };
 
   if (loading)
     return (
@@ -215,6 +237,7 @@ export default function PremiereRoom() {
             isCancelled={isCancelled}
             isEnded={isEnded}
             isScheduled={isScheduled}
+            onTimeUpdate={handleTimeUpdate}
           />
           {!isPremiumLocked && !isCancelled && !isEnded && (
             <RoomInfo

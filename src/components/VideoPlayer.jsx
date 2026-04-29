@@ -38,6 +38,7 @@ export default function VideoPlayer({ url, startTime = 0, onTimeUpdate }) {
   const [showSpeedMenu, setShowSpeedMenu] = useState(false);
   const [playbackRate, setPlaybackRate] = useState(1);
   const speeds = [0.5, 0.75, 1, 1.25, 1.5, 2];
+
   useEffect(() => {
     let hls;
     const video = videoRef.current;
@@ -63,16 +64,18 @@ export default function VideoPlayer({ url, startTime = 0, onTimeUpdate }) {
       if (hls) hls.destroy();
     };
   }, [url, startTime]);
+
   useEffect(() => {
     const video = videoRef.current;
     const handleTimeUpdate = () => {
       if (!isDragging) setCurrentTime(video.currentTime);
       setDuration(video.duration || 0);
-      if (onTimeUpdate) onTimeUpdate(video.currentTime);
+      if (onTimeUpdate) onTimeUpdate(video.currentTime, video.duration || 0);
     };
     video.addEventListener("timeupdate", handleTimeUpdate);
     return () => video.removeEventListener("timeupdate", handleTimeUpdate);
-  }, [isDragging]);
+  }, [isDragging]); 
+
   useEffect(() => {
     const handleMouseMove = (e) => {
       if (
@@ -99,6 +102,7 @@ export default function VideoPlayer({ url, startTime = 0, onTimeUpdate }) {
       document.removeEventListener("mouseup", handleMouseUp);
     };
   }, [isDragging, duration]);
+
   const togglePlay = () => {
     videoRef.current.paused
       ? videoRef.current.play()
@@ -140,6 +144,7 @@ export default function VideoPlayer({ url, startTime = 0, onTimeUpdate }) {
     setPlaybackRate(speed);
     setShowSpeedMenu(false);
   };
+
   useEffect(() => {
     let timeout;
     const resetTimer = () => {

@@ -1,14 +1,12 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { User, Ticket, Crown, LifeBuoy, LogOut } from "lucide-react";
 import { toast } from "react-toastify";
-import avatarImg from "../../assets/devchill-logo.png"; // Nhớ check lại đúng đường dẫn file ảnh của bạn
+import avatarImg from "../../assets/devchill-logo.png"; // Nhớ check lại đúng đường dẫn
 
-export default function Sidebar({
-  user,
-  onLogout,
-  active = "profile",
-  customAvatar,
-}) {
+export default function Sidebar({ user, onLogout, customAvatar }) {
+  // Dùng useLocation để lấy URL hiện tại
+  const location = useLocation();
+
   const menuItems = [
     {
       id: "profile",
@@ -20,7 +18,7 @@ export default function Sidebar({
       id: "tickets",
       icon: <Ticket size={20} />,
       label: "Lịch sử xem phim",
-      path: "/history",
+      path: "/profile/history",
     },
     {
       id: "subscription",
@@ -51,21 +49,26 @@ export default function Sidebar({
         </h2>
 
         <ul className="space-y-2">
-          {menuItems.map((item) => (
-            <li key={item.id}>
-              <Link
-                to={item.path}
-                className={`flex items-center gap-4 px-5 py-3.5 rounded-2xl transition-all duration-300 border border-transparent ${
-                  active === item.id
-                    ? "text-blue-600 bg-blue-50 border-blue-100 font-bold shadow-sm"
-                    : "text-slate-500 hover:text-slate-900 hover:bg-slate-50 font-medium"
-                }`}
-              >
-                {item.icon}
-                <span className="text-[14px]">{item.label}</span>
-              </Link>
-            </li>
-          ))}
+          {menuItems.map((item) => {
+            // Kiểm tra xem URL hiện tại có khớp với path của menu không
+            const isActive = location.pathname === item.path;
+
+            return (
+              <li key={item.id}>
+                <Link
+                  to={item.path}
+                  className={`flex items-center gap-4 px-5 py-3.5 rounded-2xl transition-all duration-300 border border-transparent ${
+                    isActive
+                      ? "text-blue-600 bg-blue-50 border-blue-100 font-bold shadow-sm"
+                      : "text-slate-500 hover:text-slate-900 hover:bg-slate-50 font-medium"
+                  }`}
+                >
+                  {item.icon}
+                  <span className="text-[14px]">{item.label}</span>
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       </div>
 

@@ -19,6 +19,7 @@ export default function RoomCinematic({
   isCancelled,
   isEnded,
   isScheduled,
+  onTimeUpdate,
 }) {
   const navigate = useNavigate();
 
@@ -155,6 +156,7 @@ export default function RoomCinematic({
             <PremierePlayer
               url={streamData.streams[activeStreamIndex].link_m3u8}
               startTime={streamData.current_offset || 0}
+              onTimeUpdate={onTimeUpdate}
             />
           </div>
         )
