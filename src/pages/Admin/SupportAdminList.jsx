@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import {
   Search,
@@ -48,7 +47,8 @@ export default function SupportAdminList() {
   const [isModalOpen, setModalOpen] = useState(false);
 
   const isFilterActive =
-    statusFilter !== "" || sortOption !== "created_at-desc";
+    statusFilter !== "" || sortOption !== "created_at-desc" || keyword !== "";
+
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedKeyword(keyword);
@@ -61,19 +61,21 @@ export default function SupportAdminList() {
     try {
       setLoading(true);
 
+      // 1. Lấy tổng số vé chưa đọc (Chờ xử lý) toàn cục - API này đã chuẩn
       const unreadRes = await getUnreadSupportCountAdmin();
       const unreadCount =
         unreadRes?.data?.unread_count || unreadRes?.unread_count || 0;
 
-      const [sort_by, order] = sortOption.split("-");
+      const [currentSort, currentOrder] = sortOption.split("-");
 
+      // 2. Gọi API lấy danh sách vé kèm phân trang
       const res = await getAllSupportTicketsAdmin({
         page,
         limit,
         search: debouncedKeyword,
         status: statusFilter,
-        sort_by: sort_by === "created_at" ? "" : sort_by,
-        order,
+        sort_by: currentSort,
+        order: currentOrder,
       });
 
       const ticketData = res?.data?.tickets || res?.tickets || res?.data || [];
@@ -82,14 +84,25 @@ export default function SupportAdminList() {
         res?.pagination?.total ||
         ticketData.length;
 
+      // 3. Lấy cục stats từ Backend trả về (Giống hệt bên Movie)
+      const apiStats = res?.data?.stats || res?.stats || {};
+
       setTickets(ticketData);
       setTotal(totalItems);
 
+      // FIX: Cập nhật Stats toàn cục dựa vào Backend thay vì đếm 5 item cục bộ
       setStats({
-        unread: unreadCount,
-        total: totalItems,
-        resolved: ticketData.filter((t) => t.status === "resolved").length,
-        inProgress: ticketData.filter((t) => t.status === "in_progress").length,
+        unread: unreadCount, // Số lượng chờ xử lý từ API count riêng
+        total: apiStats.total || totalItems,
+        // Nếu Backend chưa kịp làm apiStats thì nó sẽ tạm đếm số ảo cục bộ để tránh lỗi UI
+        resolved:
+          apiStats.resolved !== undefined
+            ? apiStats.resolved
+            : ticketData.filter((t) => t.status === "resolved").length,
+        inProgress:
+          apiStats.in_progress !== undefined
+            ? apiStats.in_progress
+            : ticketData.filter((t) => t.status === "in_progress").length,
       });
     } catch (err) {
       toast.error(
@@ -206,7 +219,7 @@ export default function SupportAdminList() {
                   Tổng đơn
                 </div>
                 <div className="text-2xl font-black text-slate-800">
-                  {total}
+                  {stats.total}
                 </div>
               </div>
             </div>
@@ -352,10 +365,20 @@ export default function SupportAdminList() {
                   }}
                   className="px-3 py-2 text-[12px] bg-white border border-slate-200 rounded-lg focus:border-blue-400 outline-none cursor-pointer shadow-sm font-semibold text-slate-700"
                 >
-                  <option value="created_at-desc">Ngày tạo: Mới nhất</option>
-                  <option value="created_at-asc">Ngày tạo: Cũ nhất</option>
-                  <option value="status-asc">Trạng thái (A-Z)</option>
-                  <option value="priority-asc">Ưu tiên (Cao xuống thấp)</option>
+                  <optgroup label="Thời gian tạo">
+                    <option value="created_at-desc">
+                      Ngày tạo: Gần đây nhất
+                    </option>
+                    <option value="created_at-asc">Ngày tạo: Cũ nhất</option>
+                  </optgroup>
+                  <optgroup label="Mức độ ưu tiên">
+                    <option value="priority-desc">Ưu tiên: Giảm dần</option>
+                    <option value="priority-asc">Ưu tiên: Tăng dần</option>
+                  </optgroup>
+                  <optgroup label="Trạng thái">
+                    <option value="status-asc">Trạng thái (A-Z)</option>
+                    <option value="status-desc">Trạng thái (Z-A)</option>
+                  </optgroup>
                 </select>
               </div>
             </div>
