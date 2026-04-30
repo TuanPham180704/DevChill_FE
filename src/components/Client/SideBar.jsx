@@ -30,7 +30,7 @@ export default function Sidebar({ user, onLogout, customAvatar }) {
       id: "support",
       icon: <LifeBuoy size={20} />,
       label: "Hỗ trợ",
-      path: "/support",
+      path: "/profile/support",
     },
   ];
 
@@ -50,7 +50,6 @@ export default function Sidebar({ user, onLogout, customAvatar }) {
 
         <ul className="space-y-2">
           {menuItems.map((item) => {
-            // Kiểm tra xem URL hiện tại có khớp với path của menu không
             const isActive = location.pathname === item.path;
 
             return (

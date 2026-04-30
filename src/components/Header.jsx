@@ -1,12 +1,19 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { Link, useNavigate } from "react-router-dom";
 import { removeToken } from "../utils/auth";
 import { useState, useEffect, useRef } from "react";
 import { FaUser, FaCrown, FaTv } from "react-icons/fa";
 import { HiMenu } from "react-icons/hi";
+import { Bell, Clock } from "lucide-react";
 import axios from "axios";
 import SearchBox from "./SearchBox";
 import { toast } from "react-toastify";
 import { getProfile } from "../api/userApi";
+import {
+  getMyNotificationsClient,
+  markNotificationReadClient,
+} from "../api/supportUserApi";
+import SupportClientModal from "./Client/Support/SupportClientModal";
 
 export default function Header() {
   const navigate = useNavigate();
@@ -18,9 +25,14 @@ export default function Header() {
 
   const [openUserMenu, setOpenUserMenu] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [openNotifMenu, setOpenNotifMenu] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [selectedTicketId, setSelectedTicketId] = useState(null);
+  const [isModalOpen, setModalOpen] = useState(false);
 
   const userMenuRef = useRef(null);
-
+  const notifMenuRef = useRef(null);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -41,20 +53,40 @@ export default function Header() {
     fetchData();
   }, []);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      if (!token) return;
+  const loadNotifications = async () => {
+    if (!token) return;
+    try {
+      const userData = await getProfile();
+      setUser(userData);
 
-      try {
-        const data = await getProfile();
-        setUser(data);
-      } catch (err) {
-        console.error(err);
+      const notifData = await getMyNotificationsClient();
+      const notifs = notifData?.data || notifData || [];
+      setNotifications(notifs);
+      setUnreadCount(notifs.filter((n) => !n.is_read).length);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    loadNotifications();
+  }, [token]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setOpenUserMenu(false);
+      }
+      if (
+        notifMenuRef.current &&
+        !notifMenuRef.current.contains(event.target)
+      ) {
+        setOpenNotifMenu(false);
       }
     };
-
-    fetchUser();
-  }, [token]);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const buildLink = (key, value) => {
     const params = new URLSearchParams();
@@ -76,6 +108,43 @@ export default function Header() {
       return;
     }
     navigate("/premium");
+  };
+
+  const handleToggleNotif = () => {
+    setOpenNotifMenu(!openNotifMenu);
+    setOpenUserMenu(false);
+  };
+  const handleNotifClick = async (notif) => {
+    setOpenNotifMenu(false); 
+    if (notif.reference_id) {
+      setSelectedTicketId(notif.reference_id);
+      setModalOpen(true);
+    } else {
+      navigate("/profile/support");
+    }
+    if (!notif.is_read) {
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === notif.id ? { ...n, is_read: true } : n)),
+      );
+      setUnreadCount((prev) => Math.max(0, prev - 1));
+      try {
+        await markNotificationReadClient(notif.id);
+      } catch (error) {
+        console.error("Lỗi khi đánh dấu đã đọc:", error);
+      }
+    }
+  };
+
+  const timeAgo = (dateStr) => {
+    if (!dateStr) return "";
+    const seconds = Math.floor((new Date() - new Date(dateStr)) / 1000);
+    if (seconds < 60) return "Vừa xong";
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes} phút trước`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} giờ trước`;
+    const days = Math.floor(hours / 24);
+    return `${days} ngày trước`;
   };
 
   return (
@@ -153,73 +222,147 @@ export default function Header() {
               Premium
             </button>
           </nav>
+
           <div className="flex items-center gap-3">
             {token ? (
-              <div className="relative" ref={userMenuRef}>
-                <button
-                  onClick={() => setOpenUserMenu((p) => !p)}
-                  className="flex items-center gap-2 bg-white/60 border border-blue-100 px-3 py-1.5 rounded-full hover:bg-white shadow-sm transition-all"
-                >
-                  <img
-                    src={user?.avatar_url || "/default-avatar.png"}
-                    onError={(e) => (e.target.src = "/default-avatar.png")}
-                    className="w-8 h-8 rounded-full object-cover border border-gray-200"
-                    alt="avatar"
-                  />
-                  <span className="font-semibold text-gray-800 whitespace-nowrap max-w-25 truncate">
-                    {user?.username || "User"}
-                  </span>
-                  {user?.is_premium ? (
-                    <FaCrown
-                      className="text-yellow-500 drop-shadow-sm"
-                      title="Premium"
+              <div className="flex items-center gap-3">
+                <div className="relative" ref={notifMenuRef}>
+                  <button
+                    onClick={handleToggleNotif}
+                    className="relative p-2 text-gray-600 hover:bg-white hover:text-blue-600 rounded-full transition-all"
+                  >
+                    <Bell size={22} />
+                    {unreadCount > 0 && (
+                      <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 border-2 border-white rounded-full text-[9px] font-bold text-white flex items-center justify-center shadow-sm">
+                        {unreadCount > 99 ? "99+" : unreadCount}
+                      </span>
+                    )}
+                  </button>
+
+                  <div
+                    className={`absolute right-0 mt-3 w-80 bg-white border border-gray-100 rounded-2xl shadow-[0_10px_40px_rgb(0,0,0,0.1)] py-2 transition-all duration-200 z-50 origin-top-right
+                    ${openNotifMenu ? "opacity-100 visible pointer-events-auto scale-100" : "opacity-0 invisible pointer-events-none scale-95"}`}
+                  >
+                    <div className="px-4 py-2 border-b border-gray-50 flex justify-between items-center">
+                      <span className="font-bold text-gray-800">Thông báo</span>
+                      <Link
+                        to="/profile/support"
+                        className="text-[12px] text-blue-500 hover:underline"
+                        onClick={() => setOpenNotifMenu(false)}
+                      >
+                        Xem tất cả
+                      </Link>
+                    </div>
+                    <div className="max-h-87.5 overflow-y-auto hidden-scrollbar">
+                      {notifications.length === 0 ? (
+                        <div className="p-6 text-center text-sm text-gray-400">
+                          Không có thông báo mới
+                        </div>
+                      ) : (
+                        notifications.map((notif) => (
+                          <div
+                            key={notif.id}
+                            onClick={() => handleNotifClick(notif)}
+                            className={`relative px-4 py-3 border-b border-gray-50 cursor-pointer transition-colors ${
+                              !notif.is_read
+                                ? "bg-blue-50/40 hover:bg-blue-50/70" 
+                                : "bg-white hover:bg-slate-50"
+                            }`}
+                          >
+                            {!notif.is_read && (
+                              <div className="absolute top-1/2 -translate-y-1/2 left-2 w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_5px_rgba(59,130,246,0.5)]"></div>
+                            )}
+
+                            <div className={!notif.is_read ? "pl-3" : "pl-1"}>
+                              <p
+                                className={`text-[13px] mb-0.5 ${!notif.is_read ? "font-extrabold text-blue-900" : "font-medium text-slate-700"}`}
+                              >
+                                {notif.title}
+                              </p>
+                              <p
+                                className={`text-[12px] line-clamp-2 ${!notif.is_read ? "text-gray-800" : "text-gray-500"}`}
+                              >
+                                {notif.content}
+                              </p>
+                              <span className="text-[10px] text-gray-400 flex items-center gap-1 mt-1">
+                                <Clock size={10} /> {timeAgo(notif.created_at)}
+                              </span>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div className="relative" ref={userMenuRef}>
+                  <button
+                    onClick={() => {
+                      setOpenUserMenu(!openUserMenu);
+                      setOpenNotifMenu(false);
+                    }}
+                    className="flex items-center gap-2 bg-white/60 border border-blue-100 px-3 py-1.5 rounded-full hover:bg-white shadow-sm transition-all"
+                  >
+                    <img
+                      src={user?.avatar_url || "/default-avatar.png"}
+                      onError={(e) => (e.target.src = "/default-avatar.png")}
+                      className="w-8 h-8 rounded-full object-cover border border-gray-200"
+                      alt="avatar"
                     />
-                  ) : (
-                    <span className="text-xs text-gray-500"></span>
-                  )}
-                </button>
-                <div
-                  className={`absolute right-0 mt-3 w-56 bg-white border border-gray-100 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] py-2 transition-all duration-150 z-50 origin-top-right
-        ${
-          openUserMenu
-            ? "opacity-100 visible pointer-events-auto scale-100"
-            : "opacity-0 invisible pointer-events-none scale-95"
-        }`}
-                >
-                  <Link
-                    to="/profile"
-                    className="block px-4 py-2.5 font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                    <span className="font-semibold text-gray-800 whitespace-nowrap max-w-25 truncate">
+                      {user?.username || "User"}
+                    </span>
+                    {user?.is_premium ? (
+                      <FaCrown
+                        className="text-yellow-500 drop-shadow-sm"
+                        title="Premium"
+                      />
+                    ) : (
+                      <span className="text-xs text-gray-500"></span>
+                    )}
+                  </button>
+                  <div
+                    className={`absolute right-0 mt-3 w-56 bg-white border border-gray-100 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] py-2 transition-all duration-150 z-50 origin-top-right
+                    ${openUserMenu ? "opacity-100 visible pointer-events-auto scale-100" : "opacity-0 invisible pointer-events-none scale-95"}`}
                   >
-                    Hồ sơ
-                  </Link>
-
-                  <Link
-                    to="/profile/history"
-                    className="block px-4 py-2.5 font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
-                  >
-                    Lịch Sử Xem
-                  </Link>
-
-                  <Link
-                    to="/profile/my-premium"
-                    className="block px-4 py-2.5 font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
-                  >
-                    Gói Đã Mua
-                  </Link>
-                  <Link
-                    to="/support"
-                    className="block px-4 py-2.5 font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
-                  >
-                    Hỗ Trợ
-                  </Link>
-
-                  <div className="border-t border-gray-100 mt-1 pt-1">
-                    <button
-                      onClick={handleLogout}
-                      className="w-full text-left px-4 py-2.5 font-medium text-red-600 hover:bg-red-50 transition-colors"
+                    <Link
+                      to="/profile"
+                      className="block px-4 py-2.5 font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                      onClick={() => setOpenUserMenu(false)}
                     >
-                      Đăng xuất
-                    </button>
+                      Hồ sơ
+                    </Link>
+
+                    <Link
+                      to="/profile/history"
+                      className="block px-4 py-2.5 font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                      onClick={() => setOpenUserMenu(false)}
+                    >
+                      Lịch Sử Xem
+                    </Link>
+
+                    <Link
+                      to="/profile/my-premium"
+                      className="block px-4 py-2.5 font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                      onClick={() => setOpenUserMenu(false)}
+                    >
+                      Gói Đã Mua
+                    </Link>
+                    <Link
+                      to="/profile/support"
+                      className="block px-4 py-2.5 font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                      onClick={() => setOpenUserMenu(false)}
+                    >
+                      Hỗ Trợ
+                    </Link>
+
+                    <div className="border-t border-gray-100 mt-1 pt-1">
+                      <button
+                        onClick={handleLogout}
+                        className="w-full text-left px-4 py-2.5 font-medium text-red-600 hover:bg-red-50 transition-colors"
+                      >
+                        Đăng xuất
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -322,6 +465,12 @@ export default function Header() {
           </div>
         </div>
       </div>
+      <SupportClientModal
+        isOpen={isModalOpen}
+        ticketId={selectedTicketId}
+        onClose={() => setModalOpen(false)}
+        onReload={loadNotifications}
+      />
     </>
   );
 }
@@ -378,6 +527,7 @@ function Dropdown({ title, items = [], type, buildLink }) {
     </div>
   );
 }
+
 function MobileDropdown({ title, items = [], type, buildLink, closeMenu }) {
   const navigate = useNavigate();
 

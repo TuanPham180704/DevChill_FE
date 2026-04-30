@@ -35,6 +35,8 @@ import PaymentListAdmin from "../pages/Admin/PaymentListAdmin";
 import ShowtimeListAdmin from "../pages/Admin/ShowtimeListAdmin";
 import WatchHistory from "../pages/Client/Profile/WatchHistory";
 import AdminProfile from "../pages/Admin/AdminProfile";
+import SupportAdminList from "../pages/Admin/SupportAdminList";
+import GuestSupport from "../pages/Client/GuestSupport";
 export default function AppRouter() {
   return (
     <>
@@ -57,6 +59,7 @@ export default function AppRouter() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/verify-otp" element={<VerifyOtp />} />
+          <Route path="/guest-support" element={<GuestSupport />} />
 
           <Route element={<ProtectedRoute roles={["user"]} />}>
             <Route element={<AppLayout />}>
@@ -65,6 +68,7 @@ export default function AppRouter() {
                 <Route index element={<Profile />} />
                 <Route path="my-premium" element={<MySubscription />} />
                 <Route path="history" element={<WatchHistory />} />
+                <Route path="support" element={<Support />} />
               </Route>
             </Route>
           </Route>
@@ -78,6 +82,7 @@ export default function AppRouter() {
               <Route path="/admin/plans" element={<PlanListAdmin />} />
               <Route path="/admin/payment" element={<PaymentListAdmin />} />
               <Route path="/admin/showtimes" element={<ShowtimeListAdmin />} />
+              <Route path="/admin/support" element={<SupportAdminList />} />
               <Route path="/admin/profile" element={<AdminProfile />} />
             </Route>
           </Route>
