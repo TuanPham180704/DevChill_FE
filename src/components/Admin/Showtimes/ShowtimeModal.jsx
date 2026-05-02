@@ -271,7 +271,7 @@ export default function ShowtimeModal({
                 }
                 className={`${inputBase} h-9 text-xs ${isEditing && !isOriginallyLive ? "bg-white border-slate-200" : "bg-transparent border-transparent cursor-not-allowed"}`}
               >
-                <option value="">Tài khoản</option>
+                <option value="">Phim Premium/Thường</option>
                 <option value="true">Premium</option>
                 <option value="false">Thường</option>
               </select>
@@ -369,7 +369,7 @@ export default function ShowtimeModal({
                 className={`${inputBase} ${isEditing && !isOriginallyLive ? editableStyle : lockedStyle} h-11`}
               >
                 <option value={true}>🔥 Công Chiếu Trực Tiếp (Live)</option>
-                <option value={false}>Chờ Duyệt</option>
+                <option value={false}>Lịch Nháp</option>
               </select>
             </div>
           </div>
