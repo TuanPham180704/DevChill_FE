@@ -7,7 +7,7 @@ import {
   User,
   Loader2,
   Sparkles,
-  Pencil,
+  RefreshCw,
   Play,
   Info,
 } from "lucide-react";
@@ -17,16 +17,31 @@ import { askDevChillAI } from "../../api/aiAPI";
 import { getToken } from "../../utils/auth";
 import { getProfile } from "../../api/userAPI";
 
+const INITIAL_OPTIONS = [
+  "Gợi ý phim hay",
+  "Tư vấn gói Premium",
+  "Lỗi thanh toán",
+  "Hỗ trợ tài khoản",
+];
+
 export default function DevChillBot() {
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
-  const [sessionKey, setSessionKey] = useState("devchill_chat_guest");
 
-  const [userName, setUserName] = useState("bạn");
   const messagesEndRef = useRef(null);
   const navigate = useNavigate();
+
+  const [sessionKey, setSessionKey] = useState(() => {
+    const t = getToken();
+    return t ? `devchill_chat_${t.slice(-15)}` : "devchill_chat_guest";
+  });
+
+  const [userName, setUserName] = useState(() => {
+    return "bạn";
+  });
+
   const personalizeText = (text) => {
     if (!text || userName.toLowerCase() === "bạn") return text;
     return text
@@ -42,7 +57,6 @@ export default function DevChillBot() {
       .replace(/bạn xem/gi, `${userName} xem`)
       .replace(/bạn thích/gi, `${userName} thích`);
   };
-
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -60,7 +74,6 @@ export default function DevChillBot() {
     };
     fetchUser();
   }, [sessionKey]);
-
   useEffect(() => {
     const checkTokenChange = () => {
       const currentToken = getToken();
@@ -82,26 +95,38 @@ export default function DevChillBot() {
       clearInterval(interval);
     };
   }, [sessionKey]);
-
   useEffect(() => {
     const savedChat = localStorage.getItem(sessionKey);
+    const displayDanhXung = userName && userName !== "bạn" ? userName : "bạn";
+
     if (savedChat) {
-      setMessages(JSON.parse(savedChat));
+      let parsed = JSON.parse(savedChat);
+      if (parsed.length > 0 && parsed[0].sender === "bot" && parsed[0].id) {
+        parsed[0].content = `Chào ${userName || "bạn"}! Mình là AI của DevChill. ${displayDanhXung} đang cần hỗ trợ vấn đề gì nào?`;
+        if (parsed.length === 1) {
+          parsed[0].options = INITIAL_OPTIONS;
+        }
+      }
+      setMessages(parsed);
     } else {
       setMessages([
         {
           id: Date.now(),
           sender: "bot",
           type: "text",
-          content: `Chào ${userName}! Mình là AI của DevChill. Bạn muốn mở phim hay tìm phim gì hôm nay?`,
+          content: `Chào ${userName || "bạn"}! Mình là AI của DevChill. ${displayDanhXung} đang cần hỗ trợ vấn đề gì nào?`,
+          options: INITIAL_OPTIONS,
         },
       ]);
     }
   }, [sessionKey, userName]);
-
   useEffect(() => {
     if (messages.length > 0) {
-      localStorage.setItem(sessionKey, JSON.stringify(messages));
+      const messagesToSave = messages.map((m) => ({
+        ...m,
+        options: undefined,
+      }));
+      localStorage.setItem(sessionKey, JSON.stringify(messagesToSave));
     }
     scrollToBottom();
   }, [messages, sessionKey]);
@@ -112,28 +137,38 @@ export default function DevChillBot() {
 
   const handleClearChat = () => {
     localStorage.removeItem(sessionKey);
+    const displayDanhXung = userName !== "bạn" ? userName : "Bạn";
     setMessages([
       {
         id: Date.now(),
         sender: "bot",
         type: "text",
-        content: `Đã làm mới cuộc trò chuyện. Chào ${userName}, mình bắt đầu lại nhé!`,
+        content: ` Chào ${userName} đang cần hỗ trợ gì nào?`,
+        options: INITIAL_OPTIONS,
       },
     ]);
   };
 
-  const handleSendMessage = async (e) => {
-    e.preventDefault();
-    if (!message.trim()) return;
+  const handleActionSend = async (textToProcess) => {
+    if (!textToProcess.trim() || isTyping) return;
 
     const userMsg = {
       id: Date.now(),
       sender: "user",
       type: "text",
-      content: message.trim(),
+      content: textToProcess.trim(),
     };
 
-    const chatHistory = messages.slice(-6).map((m) => {
+    let currentMessages = [];
+
+    setMessages((prev) => {
+      currentMessages = [...prev];
+      return [...prev.map((m) => ({ ...m, options: undefined })), userMsg];
+    });
+
+    setIsTyping(true);
+
+    const chatHistory = currentMessages.slice(-6).map((m) => {
       let text = m.content || "";
       if (m.type === "movies" && m.payload) {
         const movieNames = m.payload.map((p) => p.name || p.title).join(", ");
@@ -145,10 +180,6 @@ export default function DevChillBot() {
       };
     });
 
-    setMessages((prev) => [...prev, userMsg]);
-    setMessage("");
-    setIsTyping(true);
-
     try {
       const response = await askDevChillAI(userMsg.content, chatHistory);
       let botMsg = { id: Date.now() + 1, sender: "bot" };
@@ -157,7 +188,6 @@ export default function DevChillBot() {
         botMsg.type = "text";
         botMsg.content = personalizeText(response.message);
         setMessages((prev) => [...prev, botMsg]);
-
         setTimeout(() => {
           setIsOpen(false);
           navigate(`/movies/watch/${response.slug}`);
@@ -169,7 +199,6 @@ export default function DevChillBot() {
         botMsg.type = "text";
         botMsg.content = personalizeText(response.message);
         setMessages((prev) => [...prev, botMsg]);
-
         setTimeout(() => {
           setIsOpen(false);
           navigate(`/movies/${response.slug}`);
@@ -181,10 +210,20 @@ export default function DevChillBot() {
         botMsg.type = "text";
         botMsg.content = personalizeText(response.message);
         setMessages((prev) => [...prev, botMsg]);
-
         setTimeout(() => {
           setIsOpen(false);
           navigate(`/premium`);
+        }, 2000);
+        return;
+      }
+
+      if (response.action === "redirect_support") {
+        botMsg.type = "text";
+        botMsg.content = personalizeText(response.message);
+        setMessages((prev) => [...prev, botMsg]);
+        setTimeout(() => {
+          setIsOpen(false);
+          navigate(`/profile/support`);
         }, 2000);
         return;
       }
@@ -234,6 +273,13 @@ export default function DevChillBot() {
     }
   };
 
+  const handleSendMessage = (e) => {
+    e.preventDefault();
+    const text = message;
+    setMessage("");
+    handleActionSend(text);
+  };
+
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end font-sans">
       <div
@@ -243,33 +289,36 @@ export default function DevChillBot() {
             : "scale-50 opacity-0 translate-y-10 pointer-events-none absolute"
         }`}
       >
-        <div className="bg-slate-900 p-4 flex items-center justify-between relative overflow-hidden shrink-0">
-          <div className="absolute -right-10 -top-10 w-32 h-32 bg-blue-500/20 rounded-full blur-3xl"></div>
+        {/* HEADER */}
+        <div className="bg-blue-50 border-b border-blue-100 p-4 flex items-center justify-between relative overflow-hidden shrink-0">
+          <div className="absolute -right-10 -top-10 w-32 h-32 bg-blue-200/40 rounded-full blur-3xl"></div>
+
           <div className="flex items-center gap-3 relative z-10">
-            <div className="w-10 h-10 rounded-full bg-linear-to-tr from-blue-500 to-indigo-500 flex items-center justify-center shadow-lg">
+            <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center shadow-md">
               <Bot size={22} className="text-white" />
             </div>
             <div>
-              <h3 className="text-white font-bold text-[15px] tracking-wide flex items-center gap-1.5">
-                DevChill AI <Sparkles size={14} className="text-yellow-400" />
+              <h3 className="text-slate-800 font-bold text-[15px] tracking-wide flex items-center gap-1.5">
+                DevChill AI <Sparkles size={14} className="text-blue-500" />
               </h3>
-              <span className="flex items-center gap-1.5 text-slate-400 text-[11px] font-medium uppercase tracking-wider">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span className="flex items-center gap-1.5 text-slate-500 text-[11px] font-semibold uppercase tracking-wider">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                 Trực tuyến
               </span>
             </div>
           </div>
+
           <div className="flex gap-2 relative z-10">
             <button
               onClick={handleClearChat}
-              className="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-800 hover:text-white transition-all"
+              className="w-8 h-8 flex items-center justify-center rounded-full text-slate-500 hover:bg-blue-100 hover:text-blue-700 transition-all"
               title="Làm mới cuộc trò chuyện"
             >
-              <Pencil size={16} />
+              <RefreshCw size={15} />
             </button>
             <button
               onClick={() => setIsOpen(false)}
-              className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition-all"
+              className="w-8 h-8 flex items-center justify-center rounded-full text-slate-500 hover:bg-blue-100 hover:text-red-500 transition-all"
             >
               <X size={18} />
             </button>
@@ -310,6 +359,20 @@ export default function DevChillBot() {
                     {msg.content}
                   </div>
                 )}
+                {msg.options && (
+                  <div className="mt-3 flex flex-col items-start gap-2 pr-1 w-full">
+                    {msg.options.map((opt, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleActionSend(opt)}
+                        disabled={isTyping}
+                        className="px-4 py-2 bg-white text-blue-600 text-[13px] font-semibold rounded-xl border border-blue-200 shadow-sm hover:bg-blue-600 hover:text-white hover:border-blue-600 hover:shadow-md transition-all disabled:opacity-50 text-left w-fit"
+                      >
+                        {opt}
+                      </button>
+                    ))}
+                  </div>
+                )}
 
                 {msg.type === "movies" && (
                   <div className="mt-2 space-y-3 w-65 pr-1">
@@ -325,8 +388,8 @@ export default function DevChillBot() {
                         />
                         <div className="flex flex-col flex-1 py-0.5 justify-center">
                           <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider mb-1 flex items-center gap-1">
-                            <Play size={10} fill="currentColor" /> Phim bạn vừa
-                            cày
+                            <Play size={10} fill="currentColor" /> Phim{" "}
+                            {userName !== "bạn" ? userName : "bạn"} vừa cày
                           </span>
                           <span className="text-[13px] font-bold text-slate-800 line-clamp-2 leading-tight">
                             {msg.watchedMovie.movie_name}
@@ -420,7 +483,7 @@ export default function DevChillBot() {
             <button
               type="submit"
               disabled={!message.trim() || isTyping}
-              className="absolute right-2 w-10 h-10 flex items-center justify-center bg-slate-900 hover:bg-blue-600 disabled:bg-slate-300 disabled:hover:bg-slate-300 text-white rounded-xl transition-colors"
+              className="absolute right-2 w-10 h-10 flex items-center justify-center bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:hover:bg-slate-300 text-white rounded-xl transition-colors"
             >
               {isTyping ? (
                 <Loader2 size={18} className="animate-spin" />
@@ -440,7 +503,7 @@ export default function DevChillBot() {
       >
         <div className="absolute inset-0 bg-blue-500 rounded-full blur-xl opacity-50 group-hover:opacity-70 transition-opacity duration-300"></div>
 
-        <div className="relative w-16 h-16 bg-slate-900 rounded-full flex items-center justify-center shadow-2xl text-white transform group-hover:-translate-y-1 transition-all duration-300 border-2 border-white/10">
+        <div className="relative w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center shadow-2xl text-white transform group-hover:-translate-y-1 transition-all duration-300 border-2 border-white/10">
           <Sparkles
             size={16}
             className="absolute top-3 right-3 text-yellow-300"
