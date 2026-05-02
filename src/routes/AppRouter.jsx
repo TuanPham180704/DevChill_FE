@@ -37,6 +37,7 @@ import WatchHistory from "../pages/Client/Profile/WatchHistory";
 import AdminProfile from "../pages/Admin/AdminProfile";
 import SupportAdminList from "../pages/Admin/SupportAdminList";
 import GuestSupport from "../pages/Client/GuestSupport";
+import DevChillBot from "../pages/Client/DevChillBot";
 export default function AppRouter() {
   return (
     <>
@@ -89,6 +90,7 @@ export default function AppRouter() {
 
           <Route element={<NotFound />} path="*" />
         </Routes>
+        <DevChillBot />
       </BrowserRouter>
       <ToastContainer position="top-right" autoClose={2000} />
     </>
