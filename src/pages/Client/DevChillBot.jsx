@@ -14,17 +14,74 @@ import {
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { askDevChillAI } from "../../api/aiAPI";
+import { getToken } from "../../utils/auth";
+import { getProfile } from "../../api/userAPI";
 
 export default function DevChillBot() {
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
+  const [sessionKey, setSessionKey] = useState("devchill_chat_guest");
+
+  const [userName, setUserName] = useState("bạn");
   const messagesEndRef = useRef(null);
   const navigate = useNavigate();
+  const personalizeText = (text) => {
+    if (!text || userName.toLowerCase() === "bạn") return text;
+    return text
+      .replace(/Chào bạn/gi, `Chào ${userName}`)
+      .replace(/cho bạn/gi, `cho ${userName}`)
+      .replace(/của bạn/gi, `của ${userName}`)
+      .replace(/Bạn muốn/g, `${userName} muốn`)
+      .replace(/Bạn cần/g, `${userName} cần`)
+      .replace(/Bạn chưa/g, `${userName} chưa`)
+      .replace(/Bạn kiểm tra/g, `${userName} kiểm tra`)
+      .replace(/bạn vui lòng/gi, `${userName} vui lòng`)
+      .replace(/bạn chờ/gi, `${userName} chờ`)
+      .replace(/bạn xem/gi, `${userName} xem`)
+      .replace(/bạn thích/gi, `${userName} thích`);
+  };
 
-  const token = localStorage.getItem("access_token");
-  const sessionKey = token ? `devchill_chat_user` : `devchill_chat_guest`;
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        if (getToken()) {
+          const data = await getProfile();
+          const name =
+            data?.username || data?.name || data?.data?.username || "bạn";
+          setUserName(name);
+        } else {
+          setUserName("bạn");
+        }
+      } catch (error) {
+        console.error("Lỗi lấy thông tin user:", error);
+      }
+    };
+    fetchUser();
+  }, [sessionKey]);
+
+  useEffect(() => {
+    const checkTokenChange = () => {
+      const currentToken = getToken();
+      const newKey = currentToken
+        ? `devchill_chat_${currentToken.slice(-15)}`
+        : "devchill_chat_guest";
+
+      if (newKey !== sessionKey) {
+        setSessionKey(newKey);
+      }
+    };
+
+    checkTokenChange();
+    window.addEventListener("storage", checkTokenChange);
+    const interval = setInterval(checkTokenChange, 1000);
+
+    return () => {
+      window.removeEventListener("storage", checkTokenChange);
+      clearInterval(interval);
+    };
+  }, [sessionKey]);
 
   useEffect(() => {
     const savedChat = localStorage.getItem(sessionKey);
@@ -36,12 +93,11 @@ export default function DevChillBot() {
           id: Date.now(),
           sender: "bot",
           type: "text",
-          content:
-            "Chào bạn! Mình là AI của DevChill. Bạn muốn mở phim hay tìm phim gì hôm nay?",
+          content: `Chào ${userName}! Mình là AI của DevChill. Bạn muốn mở phim hay tìm phim gì hôm nay?`,
         },
       ]);
     }
-  }, [sessionKey]);
+  }, [sessionKey, userName]);
 
   useEffect(() => {
     if (messages.length > 0) {
@@ -61,7 +117,7 @@ export default function DevChillBot() {
         id: Date.now(),
         sender: "bot",
         type: "text",
-        content: "Đã làm mới cuộc trò chuyện. Mình bắt đầu lại nhé!",
+        content: `Đã làm mới cuộc trò chuyện. Chào ${userName}, mình bắt đầu lại nhé!`,
       },
     ]);
   };
@@ -76,6 +132,7 @@ export default function DevChillBot() {
       type: "text",
       content: message.trim(),
     };
+
     const chatHistory = messages.slice(-6).map((m) => {
       let text = m.content || "";
       if (m.type === "movies" && m.payload) {
@@ -98,7 +155,7 @@ export default function DevChillBot() {
 
       if (response.action === "redirect_play") {
         botMsg.type = "text";
-        botMsg.content = response.message;
+        botMsg.content = personalizeText(response.message);
         setMessages((prev) => [...prev, botMsg]);
 
         setTimeout(() => {
@@ -110,7 +167,7 @@ export default function DevChillBot() {
 
       if (response.action === "redirect_detail") {
         botMsg.type = "text";
-        botMsg.content = response.message;
+        botMsg.content = personalizeText(response.message);
         setMessages((prev) => [...prev, botMsg]);
 
         setTimeout(() => {
@@ -120,13 +177,30 @@ export default function DevChillBot() {
         return;
       }
 
+      if (response.action === "redirect_premium") {
+        botMsg.type = "text";
+        botMsg.content = personalizeText(response.message);
+        setMessages((prev) => [...prev, botMsg]);
+
+        setTimeout(() => {
+          setIsOpen(false);
+          navigate(`/premium`);
+        }, 2000);
+        return;
+      }
+
       if (response.action === "ask_user") {
         botMsg.type = "text";
-        botMsg.content = response.message;
+        botMsg.content = personalizeText(response.message);
       } else if (response.action === "show_detail") {
         botMsg.type = "movies";
         botMsg.content = "Đây là thông tin chi tiết phim bạn cần:";
         botMsg.payload = response.payload;
+      } else if (response.action === "suggest_movies") {
+        botMsg.type = "movies";
+        botMsg.content = personalizeText(response.message);
+        botMsg.payload = response.payload;
+        botMsg.watchedMovie = response.watchedMovie;
       } else if (Array.isArray(response)) {
         if (response.length === 0) {
           botMsg.type = "text";
@@ -139,7 +213,8 @@ export default function DevChillBot() {
         }
       } else {
         botMsg.type = "text";
-        botMsg.content = response.message || "Đã xử lý xong yêu cầu của bạn!";
+        botMsg.content =
+          personalizeText(response.message) || "Đã xử lý xong yêu cầu của bạn!";
       }
 
       setMessages((prev) => [...prev, botMsg]);
@@ -205,7 +280,9 @@ export default function DevChillBot() {
           {messages.map((msg) => (
             <div
               key={msg.id}
-              className={`flex gap-3 ${msg.sender === "user" ? "flex-row-reverse" : "flex-row"}`}
+              className={`flex gap-3 ${
+                msg.sender === "user" ? "flex-row-reverse" : "flex-row"
+              }`}
             >
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 shadow-sm ${
@@ -234,53 +311,78 @@ export default function DevChillBot() {
                   </div>
                 )}
 
-                {msg.type === "movies" && msg.payload && (
-                  <div className="mt-2 space-y-3 w-65 max-h-87.5 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 pr-1">
-                    {msg.payload.map((movie, idx) => (
-                      <div
-                        key={idx}
-                        className="flex gap-3 bg-white p-2.5 rounded-xl border border-slate-200 shadow-sm"
-                      >
+                {msg.type === "movies" && (
+                  <div className="mt-2 space-y-3 w-65 pr-1">
+                    {msg.watchedMovie && (
+                      <div className="bg-blue-50/60 p-2.5 rounded-xl border border-blue-200 shadow-sm flex gap-3 mb-4">
                         <img
                           src={
-                            movie.thumb_url ||
-                            movie.poster_url ||
+                            msg.watchedMovie.thumb_url ||
                             "https://placehold.co/100x150/png"
                           }
-                          alt={movie.name}
-                          className="w-16 h-24 object-cover rounded-lg"
+                          alt={msg.watchedMovie.movie_name}
+                          className="w-12 h-16 object-cover rounded-md border border-blue-100"
                         />
-                        <div className="flex flex-col flex-1 py-0.5 min-w-0">
-                          <span
-                            className="text-[14px] font-bold text-black line-clamp-1"
-                            title={movie.name || movie.title}
-                          >
-                            {movie.name || movie.title}
+                        <div className="flex flex-col flex-1 py-0.5 justify-center">
+                          <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider mb-1 flex items-center gap-1">
+                            <Play size={10} fill="currentColor" /> Phim bạn vừa
+                            cày
                           </span>
-                          <span className="text-[11px] text-gray-500 mt-0.5 line-clamp-1">
-                            {movie.year || "2024"} •{" "}
-                            {movie.type === "series" ? "Phim Bộ" : "Phim Lẻ"}
+                          <span className="text-[13px] font-bold text-slate-800 line-clamp-2 leading-tight">
+                            {msg.watchedMovie.movie_name}
                           </span>
-
-                          <div className="mt-auto flex gap-1.5 pt-2">
-                            <button
-                              onClick={() =>
-                                navigate(`/movies/watch/${movie.slug}`)
-                              }
-                              className="flex-1 flex justify-center items-center gap-1 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold rounded-md transition-colors"
-                            >
-                              <Play size={10} fill="currentColor" /> Phát
-                            </button>
-                            <button
-                              onClick={() => navigate(`/movies/${movie.slug}`)}
-                              className="flex-1 flex justify-center items-center gap-1 py-1.5 bg-slate-100 hover:bg-slate-200 text-black text-[10px] font-bold rounded-md transition-colors"
-                            >
-                              <Info size={10} /> Chi tiết
-                            </button>
-                          </div>
                         </div>
                       </div>
-                    ))}
+                    )}
+
+                    {msg.payload &&
+                      msg.payload.map((movie, idx) => (
+                        <div
+                          key={idx}
+                          className="flex gap-3 bg-white p-2.5 rounded-xl border border-slate-200 shadow-sm"
+                        >
+                          <img
+                            src={
+                              movie.thumb_url ||
+                              movie.poster_url ||
+                              "https://placehold.co/100x150/png"
+                            }
+                            alt={movie.name}
+                            className="w-16 h-24 object-cover rounded-lg"
+                          />
+                          <div className="flex flex-col flex-1 py-0.5 min-w-0">
+                            <span
+                              className="text-[14px] font-bold text-black line-clamp-1"
+                              title={movie.name || movie.title}
+                            >
+                              {movie.name || movie.title}
+                            </span>
+                            <span className="text-[11px] text-gray-500 mt-0.5 line-clamp-1">
+                              {movie.year || "2024"} •{" "}
+                              {movie.type === "series" ? "Phim Bộ" : "Phim Lẻ"}
+                            </span>
+
+                            <div className="mt-auto flex gap-1.5 pt-2">
+                              <button
+                                onClick={() =>
+                                  navigate(`/movies/watch/${movie.slug}`)
+                                }
+                                className="flex-1 flex justify-center items-center gap-1 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold rounded-md transition-colors"
+                              >
+                                <Play size={10} fill="currentColor" /> Phát
+                              </button>
+                              <button
+                                onClick={() =>
+                                  navigate(`/movies/${movie.slug}`)
+                                }
+                                className="flex-1 flex justify-center items-center gap-1 py-1.5 bg-slate-100 hover:bg-slate-200 text-black text-[10px] font-bold rounded-md transition-colors"
+                              >
+                                <Info size={10} /> Chi tiết
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                   </div>
                 )}
               </div>
