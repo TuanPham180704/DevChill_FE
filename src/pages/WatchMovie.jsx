@@ -14,6 +14,7 @@ import {
   ShieldAlert,
   Disc2,
   CheckCircle2,
+  CalendarClock,
 } from "lucide-react";
 
 export default function WatchMovie() {
@@ -106,6 +107,28 @@ export default function WatchMovie() {
             Đang tải dữ liệu phòng chiếu...
           </span>
         </div>
+      </div>
+    );
+  }
+  if (movieDetail.lifecycle_status === "upcoming") {
+    return (
+      <div className="h-screen flex flex-col items-center justify-center bg-[#FAFAFA] px-4 font-sans">
+        <div className="w-16 h-16 bg-white border border-gray-200 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
+          <CalendarClock size={32} className="text-blue-500" />
+        </div>
+        <h1 className="text-xl font-semibold text-gray-900 mb-2 tracking-tight">
+          Phim chưa công chiếu
+        </h1>
+        <p className="text-gray-500 text-sm mb-8 max-w-sm text-center leading-relaxed">
+          Nội dung này sắp ra mắt và chưa có video chính thức. Hacker vui lòng
+          quay lại sau nhé!
+        </p>
+        <button
+          onClick={() => navigate(`/movies/${slug}`)}
+          className="px-8 py-2.5 bg-gray-900 text-white rounded-xl text-sm font-medium shadow-md hover:bg-black transition-all active:scale-95"
+        >
+          Trở về trang thông tin
+        </button>
       </div>
     );
   }

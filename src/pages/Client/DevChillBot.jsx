@@ -11,6 +11,7 @@ import {
   Play,
   Info,
 } from "lucide-react";
+import confetti from "canvas-confetti";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { askDevChillAI } from "../../api/aiAPI";
@@ -23,6 +24,41 @@ const INITIAL_OPTIONS = [
   "Lỗi thanh toán",
   "Hỗ trợ tài khoản",
 ];
+
+const triggerFireworks = () => {
+  const duration = 8 * 1000;
+  const animationEnd = Date.now() + duration;
+  const defaults = {
+    startVelocity: 30,
+    spread: 360,
+    ticks: 60,
+    zIndex: 999999,
+  };
+
+  const randomInRange = (min, max) => Math.random() * (max - min) + min;
+
+  const interval = setInterval(function () {
+    const timeLeft = animationEnd - Date.now();
+
+    if (timeLeft <= 0) {
+      return clearInterval(interval);
+    }
+
+    const particleCount = 50 * (timeLeft / duration);
+    confetti(
+      Object.assign({}, defaults, {
+        particleCount,
+        origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
+      }),
+    );
+    confetti(
+      Object.assign({}, defaults, {
+        particleCount,
+        origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
+      }),
+    );
+  }, 250);
+};
 
 export default function DevChillBot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -57,6 +93,7 @@ export default function DevChillBot() {
       .replace(/bạn xem/gi, `${userName} xem`)
       .replace(/bạn thích/gi, `${userName} thích`);
   };
+
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -74,6 +111,7 @@ export default function DevChillBot() {
     };
     fetchUser();
   }, [sessionKey]);
+
   useEffect(() => {
     const checkTokenChange = () => {
       const currentToken = getToken();
@@ -95,6 +133,7 @@ export default function DevChillBot() {
       clearInterval(interval);
     };
   }, [sessionKey]);
+
   useEffect(() => {
     const savedChat = localStorage.getItem(sessionKey);
     const displayDanhXung = userName && userName !== "bạn" ? userName : "bạn";
@@ -120,6 +159,7 @@ export default function DevChillBot() {
       ]);
     }
   }, [sessionKey, userName]);
+
   useEffect(() => {
     if (messages.length > 0) {
       const messagesToSave = messages.map((m) => ({
@@ -143,7 +183,7 @@ export default function DevChillBot() {
         id: Date.now(),
         sender: "bot",
         type: "text",
-        content: ` Chào ${userName} đang cần hỗ trợ gì nào?`,
+        content: ` Chào ${displayDanhXung} đang cần hỗ trợ gì nào?`,
         options: INITIAL_OPTIONS,
       },
     ]);
@@ -228,7 +268,18 @@ export default function DevChillBot() {
         return;
       }
 
-      if (response.action === "ask_user") {
+      // THÊM ĐOẠN LOGIC RANDOM VÀ BẮN PHÁO HOA
+      if (response.action === "random_surprise") {
+        botMsg.type = "movies";
+        botMsg.content = personalizeText(
+          response.message ||
+            "Tadaa! DevChill đã bốc đại cho bạn siêu phẩm này. Bấm Phát cày luôn cho nóng! 🎉",
+        );
+        botMsg.payload = response.payload;
+
+        // Kích hoạt pháo hoa nổ tung tóe
+        triggerFireworks();
+      } else if (response.action === "ask_user") {
         botMsg.type = "text";
         botMsg.content = personalizeText(response.message);
       } else if (response.action === "show_detail") {
@@ -426,19 +477,29 @@ export default function DevChillBot() {
                             </span>
 
                             <div className="mt-auto flex gap-1.5 pt-2">
-                              <button
-                                onClick={() =>
-                                  navigate(`/movies/watch/${movie.slug}`)
-                                }
-                                className="flex-1 flex justify-center items-center gap-1 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold rounded-md transition-colors"
-                              >
-                                <Play size={10} fill="currentColor" /> Phát
-                              </button>
+                              {movie.lifecycle_status === "upcoming" ? (
+                                <button
+                                  disabled
+                                  className="flex-1 flex justify-center items-center gap-1 py-1.5 bg-slate-200 text-slate-500 cursor-not-allowed text-[10px] font-bold rounded-md transition-colors"
+                                >
+                                  <Info size={10} /> Sắp chiếu
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() =>
+                                    navigate(`/movies/watch/${movie.slug}`)
+                                  }
+                                  className="flex-1 flex justify-center items-center gap-1 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold rounded-md transition-colors shadow-sm"
+                                >
+                                  <Play size={10} fill="currentColor" /> Phát
+                                </button>
+                              )}
+
                               <button
                                 onClick={() =>
                                   navigate(`/movies/${movie.slug}`)
                                 }
-                                className="flex-1 flex justify-center items-center gap-1 py-1.5 bg-slate-100 hover:bg-slate-200 text-black text-[10px] font-bold rounded-md transition-colors"
+                                className="flex-1 flex justify-center items-center gap-1 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-[10px] font-bold rounded-md transition-colors"
                               >
                                 <Info size={10} /> Chi tiết
                               </button>
