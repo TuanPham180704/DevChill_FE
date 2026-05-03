@@ -324,6 +324,17 @@ export default function DevChillBot() {
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end font-sans">
+      <style>{`
+        @keyframes float-bubble {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-8px); }
+        }
+        .animate-float-bubble {
+          animation: float-bubble 3.5s ease-in-out infinite;
+          will-change: transform;
+        }
+      `}</style>
+
       <div
         className={`mb-4 w-87.5 sm:w-100 h-137.5 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-slate-100 flex flex-col overflow-hidden transition-all duration-300 ease-in-out origin-bottom-right ${
           isOpen
@@ -356,8 +367,9 @@ export default function DevChillBot() {
           isTyping={isTyping}
         />
       </div>
-
-      <FloatingButton isOpen={isOpen} setIsOpen={setIsOpen} />
+      <div className={!isOpen ? "animate-float-bubble" : ""}>
+        <FloatingButton isOpen={isOpen} setIsOpen={setIsOpen} />
+      </div>
     </div>
   );
 }

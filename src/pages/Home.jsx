@@ -60,15 +60,11 @@ export default function Home() {
         setCategories(unwrap(cateRes) || []);
         setUpcomingMovies(unwrap(upcomingRes) || []);
         setCartoonMovies(unwrap(cartoonRes) || []);
-
-        // Xử lý lọc Top 10
         const rawTop10 = unwrap(top10Res) || [];
         const validTop10 = rawTop10
           .filter((m) => m.lifecycle_status !== "upcoming")
           .slice(0, 10);
         setTop10Weekly(validTop10);
-
-        // Xử lý lọc chắc chắn phim Premium
         const rawPremium = unwrap(premiumRes) || [];
         const validPremium = rawPremium
           .filter((m) => m.is_premium === true)
@@ -85,8 +81,6 @@ export default function Home() {
           countryData[slug] = unwrap(results[idx]) || [];
         });
         setMoviesByCountry(countryData);
-
-        // Logic gọi API lấy Profile y hệt MovieDetail
         if (token) {
           try {
             const profileRes = await getProfile();
@@ -119,7 +113,6 @@ export default function Home() {
   const activeMovie = newestMovies?.[activeSlide];
   const isPremiumUser = profile?.is_premium === true;
   const isPremiumMovie = activeMovie?.is_premium === true;
-  // KIỂM TRA PHIM UPCOMING Ở ĐÂY
   const isUpcomingMovie = activeMovie?.lifecycle_status === "upcoming";
 
   const handleWatchClick = (e) => {
@@ -132,7 +125,7 @@ export default function Home() {
     }
 
     if (isPremiumMovie && !isPremiumUser) {
-      toast.error("Phim này yêu cầu tài khoản Premium 👑");
+      toast.error("Phim này yêu cầu tài khoản Premium");
       return;
     }
 
@@ -161,54 +154,51 @@ export default function Home() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 1.5, ease: "easeInOut" }}
+            transition={{ duration: 1.2, ease: "easeInOut" }}
             className="absolute inset-0"
           >
             <motion.img
-              initial={{ scale: 1.1 }}
+              initial={{ scale: 1.05 }}
               animate={{ scale: 1 }}
-              transition={{ duration: 15, ease: "easeOut" }}
+              transition={{ duration: 20, ease: "easeOut" }}
               src={activeMovie?.thumb_url || activeMovie?.poster_url}
-              className="w-full h-full object-cover object-[center_20%] opacity-80"
+              className="w-full h-full object-cover object-[center_20%] opacity-100"
               alt={activeMovie?.name}
             />
-            <div className="absolute inset-0 bg-linear-to-r from-[#060A14] via-[#060A14]/70 to-transparent w-[80%] md:w-[60%]" />
-            <div className="absolute inset-0 bg-linear-to-t from-[#F0F6FC] via-[#F0F6FC]/10 to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-r from-[#060A14] via-[#060A14]/70 to-transparent w-[95%] md:w-[70%]" />
+            <div className="absolute bottom-0 inset-x-0 h-48 bg-linear-to-t from-[#060A14] via-[#060A14]/60 to-transparent" />
+            <div className="absolute inset-y-0 right-0 w-32 bg-linear-to-l from-[#060A14]/50 to-transparent" />
           </motion.div>
         </AnimatePresence>
-
         <div className="relative z-10 max-w-7xl mx-auto px-4 lg:px-8 w-full flex items-center h-full">
           <motion.div
             key={`content-${activeMovie?.id}`}
             initial={{ y: 30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.4, duration: 0.8, ease: "easeOut" }}
-            className="w-full max-w-2xl mt-20"
+            transition={{ delay: 0.3, duration: 0.8, ease: "easeOut" }}
+            className="w-full max-w-2xl mt-12 md:mt-20"
           >
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-sm bg-blue-600 mb-4 shadow-lg shadow-blue-500/30">
               <span className="text-white text-[10px] md:text-xs font-bold tracking-widest uppercase">
                 {isUpcomingMovie ? "Sắp Khởi Chiếu" : "Phim Mới Nổi Bật"}
               </span>
             </div>
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-white leading-[1.1] tracking-tight drop-shadow-xl mb-6">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-white leading-[1.1] tracking-tight drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)] mb-6">
               {activeMovie?.name}
             </h1>
-
-            <p className="text-base md:text-lg text-slate-300 line-clamp-3 leading-relaxed font-normal max-w-xl drop-shadow-md">
+            <p className="text-base md:text-lg text-slate-200 line-clamp-3 leading-relaxed font-normal max-w-xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
               {activeMovie?.content ||
                 "Khám phá siêu phẩm điện ảnh với chất lượng đỉnh cao và nội dung lôi cuốn ngay hôm nay trên nền tảng của chúng tôi."}
             </p>
-
             <div className="mt-8 flex items-center gap-4">
-              {/* CHỈ HIỂN THỊ NÚT XEM NGAY NẾU KHÔNG PHẢI PHIM UPCOMING */}
               {!isUpcomingMovie && (
                 <div className="relative group">
                   <button
                     onClick={handleWatchClick}
-                    className={`relative flex items-center gap-3 px-8 py-3.5 rounded-full text-sm md:text-base font-bold overflow-hidden shadow-xl transition-all duration-300 ${
+                    className={`relative flex items-center gap-3 px-8 py-3.5 rounded-full text-sm md:text-base font-bold overflow-hidden shadow-[0_8px_20px_rgba(0,0,0,0.3)] transition-all duration-300 ${
                       isPremiumMovie && !isPremiumUser
-                        ? "bg-slate-300 text-slate-600 cursor-not-allowed"
-                        : "bg-white text-slate-900 hover:scale-105"
+                        ? "bg-slate-800 text-slate-400 cursor-not-allowed border border-slate-700"
+                        : "bg-white text-slate-900 hover:scale-105 hover:shadow-[0_0_25px_rgba(255,255,255,0.4)]"
                     }`}
                   >
                     {isPremiumMovie && !isPremiumUser ? (
@@ -226,12 +216,14 @@ export default function Home() {
                         : "Xem Ngay"}
                     </span>
                   </button>
+                  {/* Tooltip khi chưa có Premium */}
                   {isPremiumMovie && !isPremiumUser && (
                     <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 opacity-0 group-hover:opacity-100 transition pointer-events-none z-50">
-                      <div className="bg-black/90 backdrop-blur-md text-white text-xs px-3 py-2 rounded-lg shadow-lg whitespace-nowrap flex items-center gap-2">
-                        <Lock size={12} /> Nâng cấp Premium để xem phim này
+                      <div className="bg-black/90 backdrop-blur-md text-white text-xs px-3 py-2 rounded-lg shadow-lg whitespace-nowrap flex items-center gap-2 border border-slate-800">
+                        <Lock size={12} className="text-yellow-500" /> Nâng cấp
+                        Premium để xem phim này
                       </div>
-                      <div className="w-2 h-2 bg-black/90 rotate-45 mx-auto -mt-1 absolute -top-1 left-1/2 -translate-x-1/2"></div>
+                      <div className="w-2 h-2 bg-black/90 border-t border-l border-slate-800 rotate-45 mx-auto -mt-1 absolute -top-1 left-1/2 -translate-x-1/2"></div>
                     </div>
                   )}
                 </div>
@@ -239,7 +231,7 @@ export default function Home() {
 
               <Link
                 to={`/movies/${activeMovie?.slug}`}
-                className="flex items-center gap-3 px-8 py-3.5 rounded-full bg-slate-500/40 text-white hover:bg-slate-500/60 backdrop-blur-md border border-white/10 transition-all duration-300 text-sm md:text-base font-bold"
+                className="flex items-center gap-3 px-8 py-3.5 rounded-full bg-slate-800/60 text-white hover:bg-slate-700/80 backdrop-blur-md border border-white/10 hover:border-white/20 transition-all duration-300 text-sm md:text-base font-bold shadow-[0_8px_20px_rgba(0,0,0,0.3)]"
               >
                 <Info size={18} />
                 <span className="tracking-wider">Chi Tiết</span>
@@ -247,6 +239,8 @@ export default function Home() {
             </div>
           </motion.div>
         </div>
+
+        {/* KHỐI THUMBNAIL TÙY CHỌN BÊN DƯỚI GÓC PHẢI */}
         <div className="absolute bottom-8 right-4 lg:right-8 flex items-end gap-2 z-20">
           {newestMovies.map((movie, idx) => {
             const isActive = activeSlide === idx;
@@ -256,7 +250,7 @@ export default function Home() {
                 onClick={() => setActiveSlide(idx)}
                 className={`relative overflow-hidden rounded-md transition-all duration-500 ease-out outline-none bg-slate-900 ${
                   isActive
-                    ? "w-20 md:w-28 h-12 md:h-16 ring-2 ring-white shadow-2xl scale-110"
+                    ? "w-20 md:w-28 h-12 md:h-16 ring-2 ring-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.5)] scale-110"
                     : "w-12 md:w-16 h-8 md:h-12 opacity-50 hover:opacity-100"
                 }`}
               >
@@ -271,28 +265,47 @@ export default function Home() {
         </div>
       </section>
       <div className="relative z-10 pt-8">
-        <section className="mb-14">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 lg:gap-5">
+        <section className="mb-20 relative perspective-1000">
+          <div className="max-w-7xl mx-auto px-4 mt-12">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-y-14 gap-x-3 lg:gap-x-5">
               {categories.slice(0, 6).map((cate, index) => (
                 <motion.div
                   key={cate.id}
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05, duration: 0.4 }}
+                  className="flex flex-col items-center"
                 >
-                  <Link
-                    to={`/movies/category/${cate.slug}`}
-                    className="group flex items-center justify-between py-6 px-7 rounded-2xl bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md hover:bg-blue-50 transition-all duration-300 border-2 border-blue-400 hover:border-blue-600"
+                  <div
+                    className="relative flex flex-col items-center talisman-sway w-full group"
+                    style={{ animationDelay: `${index * 0.3}s` }}
                   >
-                    <span className="text-xs lg:text-sm font-semibold tracking-wide uppercase text-slate-600 group-hover:text-blue-600">
-                      {cate.name}
-                    </span>
-                    <ChevronRight
-                      size={16}
-                      className="text-slate-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all"
-                    />
-                  </Link>
+                    <div className="w-px h-12 bg-linear-to-b from-transparent to-blue-500/60" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500 -mt-0.5 z-10 shadow-[0_0_8px_rgba(59,130,246,0.6)] group-hover:scale-150 group-hover:bg-blue-400 transition-all duration-300" />
+                    <Link
+                      to={`/movies/category/${cate.slug}`}
+                      className="relative w-full water-wave-effect flex items-center justify-between py-5 px-4 sm:px-5 bg-linear-to-br from-white/90 via-blue-50/90 to-cyan-50/90 backdrop-blur-md shadow-[0_4px_15px_rgba(59,130,246,0.15)] hover:shadow-[0_8px_25px_rgba(59,130,246,0.3)] transition-all duration-300 border border-blue-400 hover:border-blue-500 -mt-px rounded-sm overflow-hidden"
+                    >
+                      <div className="absolute inset-0 bg-linear-to-br from-blue-200/90 via-blue-300/90 to-cyan-300/90 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0"></div>
+                      <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-blue-500/80 group-hover:border-white/70 transition-colors duration-300 z-10"></div>
+                      <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-blue-500/80 group-hover:border-white/70 transition-colors duration-300 z-10"></div>
+
+                      <span className="text-[11px] lg:text-xs font-bold tracking-[0.12em] uppercase text-slate-800 group-hover:text-slate-900 relative z-10 transition-colors">
+                        {cate.name}
+                      </span>
+
+                      <ChevronRight
+                        size={16}
+                        className="text-blue-500 group-hover:text-slate-900 group-hover:translate-x-1 transition-all duration-300 relative z-10"
+                      />
+                      <div className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/60 to-transparent group-hover:animate-[shimmer_1.5s_infinite] z-10 pointer-events-none"></div>
+                    </Link>
+                    <div className="flex gap-2 mt-1 opacity-60 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="w-1 h-4 bg-linear-to-b from-blue-400/80 to-transparent rounded-b-full"></div>
+                      <div className="w-1 h-6 bg-linear-to-b from-blue-500/80 to-transparent mt-0.5 rounded-b-full"></div>
+                      <div className="w-1 h-4 bg-linear-to-b from-blue-400/80 to-transparent rounded-b-full"></div>
+                    </div>
+                  </div>
                 </motion.div>
               ))}
             </div>
