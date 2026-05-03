@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import AppLayout from "../layouts/AppLayout";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -37,7 +37,29 @@ import WatchHistory from "../pages/Client/Profile/WatchHistory";
 import AdminProfile from "../pages/Admin/AdminProfile";
 import SupportAdminList from "../pages/Admin/SupportAdminList";
 import GuestSupport from "../pages/Client/GuestSupport";
-import DevChillBot from "../pages/Client/DevChillBot";
+import DevChillBot from "../pages/Client/Chat/DevChillBot";
+
+const ConditionalBot = () => {
+  const location = useLocation();
+  const hiddenPaths = [
+    "/login",
+    "/terms",
+    "/register",
+    "/forgot-password",
+    "/reset-password",
+    "/verify-otp",
+    "/guest-support",
+  ];
+  const isHidden =
+    hiddenPaths.includes(location.pathname) ||
+    location.pathname.startsWith("/admin");
+
+  if (isHidden) {
+    return null;
+  }
+
+  return <DevChillBot />;
+};
 export default function AppRouter() {
   return (
     <>
@@ -90,7 +112,7 @@ export default function AppRouter() {
 
           <Route element={<NotFound />} path="*" />
         </Routes>
-        <DevChillBot />
+        <ConditionalBot />
       </BrowserRouter>
       <ToastContainer position="top-right" autoClose={2000} />
     </>
