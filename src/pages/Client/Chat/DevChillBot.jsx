@@ -4,7 +4,7 @@ import confetti from "canvas-confetti";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { askDevChillAI } from "../../../api/aiAPI";
-import { getToken } from "../../../utils/auth";
+import { getAccessToken } from "../../../utils/auth";
 import { getProfile } from "../../../api/userAPI";
 import ChatHeader from "./ChatHeader";
 import TypingIndicator from "./TypingIndicator";
@@ -64,7 +64,7 @@ export default function DevChillBot() {
   const navigate = useNavigate();
 
   const [sessionKey, setSessionKey] = useState(() => {
-    const t = getToken();
+    const t = getAccessToken();
     return t ? `devchill_chat_${t.slice(-15)}` : "devchill_chat_guest";
   });
 
@@ -91,7 +91,7 @@ export default function DevChillBot() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        if (getToken()) {
+        if (getAccessToken()) {
           const data = await getProfile();
           const name =
             data?.username || data?.name || data?.data?.username || "bạn";
@@ -108,7 +108,7 @@ export default function DevChillBot() {
 
   useEffect(() => {
     const checkTokenChange = () => {
-      const currentToken = getToken();
+      const currentToken = getAccessToken();
       const newKey = currentToken
         ? `devchill_chat_${currentToken.slice(-15)}`
         : "devchill_chat_guest";

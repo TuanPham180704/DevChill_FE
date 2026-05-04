@@ -1,10 +1,9 @@
 import { Link, useLocation } from "react-router-dom";
 import { User, Ticket, Crown, LifeBuoy, LogOut } from "lucide-react";
 import { toast } from "react-toastify";
-import avatarImg from "../../assets/devchill-logo.png"; // Nhớ check lại đúng đường dẫn
+import avatarImg from "../../assets/devchill-logo.png"; 
 
 export default function Sidebar({ user, onLogout, customAvatar }) {
-  // Dùng useLocation để lấy URL hiện tại
   const location = useLocation();
 
   const menuItems = [

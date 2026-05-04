@@ -1,13 +1,19 @@
-export const setToken = (token) => {
-  if (token) localStorage.setItem("token", token);
+export const setTokens = (accessToken, refreshToken) => {
+  if (accessToken) localStorage.setItem("accessToken", accessToken);
+  if (refreshToken) localStorage.setItem("refreshToken", refreshToken);
 };
 
-export const getToken = () => {
-  return localStorage.getItem("token");
+export const getAccessToken = () => {
+  return localStorage.getItem("accessToken");
 };
 
-export const removeToken = () => {
-  localStorage.removeItem("token");
+export const getRefreshToken = () => {
+  return localStorage.getItem("refreshToken");
+};
+
+export const removeTokens = () => {
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("refreshToken");
 };
 
 export const setMe = (user) => {
@@ -24,7 +30,7 @@ export const removeMe = () => {
 };
 
 export const logout = () => {
-  removeToken();
+  removeTokens();
   removeMe();
   const keysToRemove = [];
   for (let i = 0; i < localStorage.length; i++) {
@@ -48,4 +54,4 @@ export const removeForgotEmail = () => {
   localStorage.removeItem("forgotemail");
 };
 
-export const isLogedIn = () => !!getToken();
+export const isLogedIn = () => !!getAccessToken();

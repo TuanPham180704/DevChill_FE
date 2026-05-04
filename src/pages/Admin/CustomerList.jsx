@@ -38,8 +38,6 @@ export default function CustomerList() {
   const [isCustomerModalOpen, setCustomerModalOpen] = useState(false);
   const [isLockModalOpen, setLockModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-
-  // Kiểm tra xem có bộ lọc nào đang được áp dụng hay không
   const isFilterActive =
     searchTerm !== "" || statusFilter !== "all" || sortOption !== "id-desc";
 

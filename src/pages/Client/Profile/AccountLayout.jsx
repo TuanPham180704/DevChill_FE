@@ -5,7 +5,7 @@ import Sidebar from "../../../components/Client/SideBar";
 import PageHeader from "./PageHeader";
 import { getProfile } from "../../../api/userApi";
 import { planApi } from "../../../api/planApi";
-import { removeToken } from "../../../utils/auth";
+import { removeTokens } from "../../../utils/auth";
 
 export default function AccountLayout() {
   const [user, setUser] = useState(null);
@@ -33,7 +33,7 @@ export default function AccountLayout() {
   }, []);
 
   const handleLogout = () => {
-    removeToken();
+    removeTokens();
     window.location.href = "/login";
   };
 

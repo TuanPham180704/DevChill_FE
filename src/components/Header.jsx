@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { Link, useNavigate } from "react-router-dom";
-import { removeToken } from "../utils/auth";
+import { removeTokens, getAccessToken } from "../utils/auth";
 import { useState, useEffect, useRef } from "react";
 import { FaUser, FaCrown, FaTv } from "react-icons/fa";
 import { HiMenu } from "react-icons/hi";
@@ -17,7 +17,7 @@ import SupportClientModal from "./Client/Support/SupportClientModal";
 
 export default function Header() {
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
+  const token = getAccessToken();
   const [user, setUser] = useState(null);
   const [categories, setCategories] = useState([]);
   const [countries, setCountries] = useState([]);
@@ -96,7 +96,7 @@ export default function Header() {
   };
 
   const handleLogout = () => {
-    removeToken();
+    removeTokens();
     navigate("/login");
     toast.info("Đã đăng xuất!");
   };
@@ -115,7 +115,7 @@ export default function Header() {
     setOpenUserMenu(false);
   };
   const handleNotifClick = async (notif) => {
-    setOpenNotifMenu(false); 
+    setOpenNotifMenu(false);
     if (notif.reference_id) {
       setSelectedTicketId(notif.reference_id);
       setModalOpen(true);
@@ -265,7 +265,7 @@ export default function Header() {
                             onClick={() => handleNotifClick(notif)}
                             className={`relative px-4 py-3 border-b border-gray-50 cursor-pointer transition-colors ${
                               !notif.is_read
-                                ? "bg-blue-50/40 hover:bg-blue-50/70" 
+                                ? "bg-blue-50/40 hover:bg-blue-50/70"
                                 : "bg-white hover:bg-slate-50"
                             }`}
                           >

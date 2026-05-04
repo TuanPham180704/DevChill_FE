@@ -6,7 +6,7 @@ import { getPublicMovieBySlug } from "../api/moviesPublicApi";
 import { getProfile } from "../api/userApi";
 import Pagination from "../components/Pagination";
 import { toast } from "react-toastify";
-import { getToken } from "../utils/auth";
+import { getAccessToken } from "../utils/auth";
 import { getLifecycleStatus } from "../utils/getLifecycleStatus";
 import { Lock, Crown } from "lucide-react";
 
@@ -26,7 +26,7 @@ export default function MovieDetail() {
 
   const [showTrailer, setShowTrailer] = useState(false);
 
-  const token = getToken();
+  const token = getAccessToken();
 
   useEffect(() => {
     const fetchData = async () => {

@@ -6,7 +6,7 @@ import Checkbox from "../../Checkbox";
 const STATUS = [
   { label: "Bản nháp", value: "draft" },
   { label: "Đã xuất bản", value: "published" },
-  { label: "Đã ẩn", value: "hidden" },
+  { label: "Ngưng phát hành", value: "hidden" },
 ];
 
 const LIFECYCLE = [
@@ -90,7 +90,7 @@ export default function SettingTab({ edit, onChange }) {
 
             <div className="flex flex-wrap gap-6">
               <Checkbox
-                label="Available"
+                label="Hiển thị cho người dùng"
                 checked={!!edit.is_available}
                 onChange={(v) => onChange("is_available", v)}
               />

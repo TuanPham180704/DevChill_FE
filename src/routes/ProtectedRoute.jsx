@@ -1,9 +1,9 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-import { getToken } from "../utils/auth";
+import { getAccessToken } from "../utils/auth";
 
 export default function ProtectedRoute({ roles }) {
-  const token = getToken();
+  const token = getAccessToken();
   if (!token) return <Navigate to="/login" replace />;
 
   try {

@@ -4,7 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 import { showtimesApi } from "../../../api/showtimeApi";
 import { getProfile } from "../../../api/userApi";
-import { getToken } from "../../../utils/auth";
+import { getAccessToken } from "../../../utils/auth";
 import { updateWatchProgress } from "../../../api/watchHistoryApi";
 import { ChevronLeft, Radio, ShieldAlert } from "lucide-react";
 import ChatRoom from "./ChatRoom";
@@ -39,7 +39,7 @@ export default function PremiereRoom() {
           setRoomData(currentRoomData);
         }
 
-        const token = getToken() || localStorage.getItem("token");
+        const token = getAccessToken() || localStorage.getItem("token");
         if (!token) {
           setPageError({
             type: "auth",

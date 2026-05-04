@@ -16,6 +16,7 @@ import { useState, useEffect } from "react";
 import { getProfile } from "../../api/userApi";
 import { toast } from "react-toastify";
 import { logout } from "../../utils/auth";
+import { getAccessToken } from "../../utils/auth";
 import avatarImg from "../../assets/devchill-logo.png";
 
 export default function Sidebar({ isOpen }) {
@@ -26,7 +27,7 @@ export default function Sidebar({ isOpen }) {
 
   useEffect(() => {
     const fetchUser = async () => {
-      const token = localStorage.getItem("token");
+      const token = getAccessToken();
       if (!token) {
         toast.error("Bạn chưa đăng nhập!");
         setLoading(false);

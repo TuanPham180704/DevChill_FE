@@ -52,7 +52,7 @@ export default function WatchHistory() {
   const [totalPages, setTotalPages] = useState(1);
   const [isDeletingAll, setIsDeletingAll] = useState(false);
 
-  const ITEMS_PER_PAGE = 10;
+  const ITEMS_PER_PAGE = 8;
 
   const fetchHistory = async () => {
     setLoading(true);

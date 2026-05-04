@@ -8,7 +8,7 @@ import { loginSchema } from "../schemas/auth";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { loginApi } from "../api/authApi";
-import { setToken } from "../utils/auth";
+import { setTokens, setMe } from "../utils/auth";
 import { toast } from "react-toastify";
 
 const inputBase =
@@ -47,11 +47,21 @@ export default function Login() {
   const mutation = useMutation({
     mutationFn: loginApi,
     onSuccess(data) {
-      const token = data?.token;
+      // 1. Lấy token mới và refresh token (Dùng data?.accessToken nếu backend đã đổi tên biến, hoặc data?.token nếu chưa)
+      const accessToken = data?.accessToken || data?.token;
+      const refreshToken = data?.refreshToken;
       const user = data?.user;
 
-      if (token) {
-        setToken(token);
+      // 2. Kiểm tra có đủ CẢ 2 token không
+      if (accessToken && refreshToken) {
+        // 3. Gọi hàm lưu CẢ 2 token vào localStorage
+        setTokens(accessToken, refreshToken);
+
+        // 4. (Tùy chọn) Lưu thông tin user nếu cần
+        if (user) {
+          setMe(user);
+        }
+
         qc.invalidateQueries({ queryKey: ["me"] });
 
         toast.success(`Chào mừng ${user?.username || "bạn"} quay lại!`);
@@ -62,7 +72,7 @@ export default function Login() {
           navigate("/", { replace: true });
         }
       } else {
-        toast.error("Đăng nhập thất bại");
+        toast.error("Đăng nhập thất bại: Thiếu token xác thực");
       }
     },
     onError(err) {

@@ -13,7 +13,7 @@ import MovieGrid from "./landing/MovieGrid";
 import Upcoming3DCarousel from "./landing/Upcoming3DCarousel";
 import Top10WeeklySection from "./landing/Top10WeeklySection";
 import PremiumExclusiveSection from "./landing/PremiumExclusiveSection";
-import { getToken } from "../utils/auth";
+import { getAccessToken } from "../utils/auth";
 import { getProfile } from "../api/userApi";
 
 const countrySlugs = ["han-quoc", "trung-quoc", "viet-nam"];
@@ -21,7 +21,7 @@ const unwrap = (res) => res?.data?.data ?? res?.data ?? [];
 
 export default function Home() {
   const navigate = useNavigate();
-  const token = getToken();
+  const token = getAccessToken();
 
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState(null);
