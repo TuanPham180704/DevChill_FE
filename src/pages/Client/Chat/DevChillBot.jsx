@@ -4,7 +4,7 @@ import confetti from "canvas-confetti";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { askDevChillAI } from "../../../api/aiAPI";
-import { getAccessToken } from "../../../utils/auth";
+import { getAccessToken, getMe } from "../../../utils/auth";
 import { getProfile } from "../../../api/userAPI";
 import ChatHeader from "./ChatHeader";
 import TypingIndicator from "./TypingIndicator";
@@ -62,6 +62,26 @@ export default function DevChillBot() {
 
   const messagesEndRef = useRef(null);
   const navigate = useNavigate();
+  const customNavigate = (to, options) => {
+    if (typeof to === "string" && to.includes("/movies/watch/")) {
+      const currentUser = getMe() || {};
+      if (currentUser?.is_premium !== true) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now(),
+            sender: "bot",
+            type: "text",
+            content: personalizeText(
+              "Phim này là nội dung độc quyền. Bạn cần nâng cấp tài khoản Premium để trải nghiệm nhé! ",
+            ),
+          },
+        ]);
+        return;
+      }
+    }
+    navigate(to, options);
+  };
 
   const [sessionKey, setSessionKey] = useState(() => {
     const t = getAccessToken();
@@ -202,7 +222,7 @@ export default function DevChillBot() {
 
     setIsTyping(true);
 
-    const chatHistory = currentMessages.slice(-2).map((m) => {
+    const chatHistory = currentMessages.slice(-6).map((m) => {
       let text = m.content || "";
       if (m.type === "movies" && m.payload) {
         const movieNames = m.payload.map((p) => p.name || p.title).join(", ");
@@ -219,6 +239,16 @@ export default function DevChillBot() {
       let botMsg = { id: Date.now() + 1, sender: "bot" };
 
       if (response.action === "redirect_play") {
+        const currentUser = getMe() || {};
+        if (currentUser?.is_premium !== true) {
+          botMsg.type = "text";
+          botMsg.content = personalizeText(
+            "Phim này là nội dung độc quyền. Bạn cần nâng cấp tài khoản Premium để xem nhé! 👑",
+          );
+          setMessages((prev) => [...prev, botMsg]);
+          return;
+        }
+
         botMsg.type = "text";
         botMsg.content = personalizeText(response.message);
         setMessages((prev) => [...prev, botMsg]);
@@ -352,7 +382,7 @@ export default function DevChillBot() {
               userName={userName}
               isTyping={isTyping}
               handleActionSend={handleActionSend}
-              navigate={navigate}
+              navigate={customNavigate}
             />
           ))}
 

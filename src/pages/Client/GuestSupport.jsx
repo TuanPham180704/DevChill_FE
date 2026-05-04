@@ -152,7 +152,6 @@ export default function GuestSupport() {
             </div>
 
             <div>
-              {/* Đã sửa Label thành text-slate-900 (màu đen đậm) */}
               <label className="block text-[12.5px] font-bold text-slate-900 uppercase tracking-wider mb-2">
                 Mô tả chi tiết <span className="text-red-500">*</span>
               </label>

@@ -14,6 +14,7 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { toast } from "react-toastify";
+import { getAccessToken } from "../../../utils/auth";
 import {
   createTicketClient,
   getMyTicketsClient,
@@ -21,7 +22,7 @@ import {
 import SupportClientModal from "../../../components/Client/Support/SupportClientModal";
 
 export default function Support() {
-  const token = localStorage.getItem("token");
+  const token = getAccessToken();
   const [activeTab, setActiveTab] = useState("create");
   const [loading, setLoading] = useState(false);
   const [category, setCategory] = useState("Tài khoản");
