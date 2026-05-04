@@ -213,15 +213,17 @@ export default function DevChillBot() {
       content: textToProcess.trim(),
     };
 
-    let currentMessages = [];
+    // FIX: Lấy đồng bộ toàn bộ tin nhắn hiện tại
+    const currentMessages = [...messages];
 
-    setMessages((prev) => {
-      currentMessages = [...prev];
-      return [...prev.map((m) => ({ ...m, options: undefined })), userMsg];
-    });
-
+    // Cập nhật State để hiển thị câu nói của user lên màn hình
+    setMessages((prev) => [
+      ...prev.map((m) => ({ ...m, options: undefined })),
+      userMsg,
+    ]);
     setIsTyping(true);
 
+    // Xây dựng chat history dựa trên state đồng bộ (chắc chắn chứa câu trước đó của bot)
     const chatHistory = currentMessages.slice(-6).map((m) => {
       let text = m.content || "";
       if (m.type === "movies" && m.payload) {
