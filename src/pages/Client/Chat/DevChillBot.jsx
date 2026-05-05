@@ -213,18 +213,16 @@ export default function DevChillBot() {
       content: textToProcess.trim(),
     };
 
-    // FIX: Lấy đồng bộ toàn bộ tin nhắn hiện tại
     const currentMessages = [...messages];
 
-    // Cập nhật State để hiển thị câu nói của user lên màn hình
     setMessages((prev) => [
       ...prev.map((m) => ({ ...m, options: undefined })),
       userMsg,
     ]);
     setIsTyping(true);
 
-    // Xây dựng chat history dựa trên state đồng bộ (chắc chắn chứa câu trước đó của bot)
-    const chatHistory = currentMessages.slice(-6).map((m) => {
+    // FIX CHỐNG LỖI 413 TOKEN: Giảm từ slice(-6) xuống slice(-4) để nén dữ liệu gửi cho Groq
+    const chatHistory = currentMessages.slice(-4).map((m) => {
       let text = m.content || "";
       if (m.type === "movies" && m.payload) {
         const movieNames = m.payload.map((p) => p.name || p.title).join(", ");
@@ -310,6 +308,7 @@ export default function DevChillBot() {
         botMsg.content = "Đây là thông tin chi tiết phim bạn cần:";
         botMsg.payload = response.payload;
       } else if (response.action === "suggest_movies") {
+        // TÍNH NĂNG NÀY SẼ CATCH ĐƯỢC CÂU CẢM XÚC TỪ BACKEND TRẢ VỀ
         botMsg.type = "movies";
         botMsg.content = personalizeText(response.message);
         botMsg.payload = response.payload;
@@ -339,7 +338,7 @@ export default function DevChillBot() {
           sender: "bot",
           type: "text",
           content:
-            "Đường truyền tới hệ thống AI đang gián đoạn, bạn chờ chút nhé!",
+            "Đường truyền tới hệ thống AI đang gián đoạn do quá tải, bạn chờ chút nhé!",
         },
       ]);
     } finally {

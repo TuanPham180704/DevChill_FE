@@ -265,45 +265,63 @@ export default function Home() {
         </div>
       </section>
       <div className="relative z-10 pt-8">
-        <section className="mb-20 relative perspective-1000">
+        <section className="mb-24 relative perspective-1000">
           <div className="max-w-7xl mx-auto px-4 mt-12">
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-y-14 gap-x-3 lg:gap-x-5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-y-12 gap-x-4 lg:gap-x-6">
               {categories.slice(0, 6).map((cate, index) => (
                 <motion.div
                   key={cate.id}
-                  initial={{ opacity: 0, y: 15 }}
+                  initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05, duration: 0.4 }}
+                  transition={{
+                    delay: index * 0.08,
+                    duration: 0.5,
+                    ease: "easeOut",
+                  }}
                   className="flex flex-col items-center"
                 >
-                  <div
-                    className="relative flex flex-col items-center talisman-sway w-full group"
-                    style={{ animationDelay: `${index * 0.3}s` }}
-                  >
-                    <div className="w-px h-12 bg-linear-to-b from-transparent to-blue-500/60" />
-                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500 -mt-0.5 z-10 shadow-[0_0_8px_rgba(59,130,246,0.6)] group-hover:scale-150 group-hover:bg-blue-400 transition-all duration-300" />
-                    <Link
-                      to={`/movies/category/${cate.slug}`}
-                      className="relative w-full water-wave-effect flex items-center justify-between py-5 px-4 sm:px-5 bg-linear-to-br from-white/90 via-blue-50/90 to-cyan-50/90 backdrop-blur-md shadow-[0_4px_15px_rgba(59,130,246,0.15)] hover:shadow-[0_8px_25px_rgba(59,130,246,0.3)] transition-all duration-300 border border-blue-400 hover:border-blue-500 -mt-px rounded-sm overflow-hidden"
+                  <div className="relative flex flex-col items-center w-full group cursor-pointer">
+                    <style>{`
+              @keyframes float-card {
+                0%, 100% { transform: translateY(0px); }
+                50% { transform: translateY(-6px); }
+              }
+              .animate-float-card {
+                animation: float-card 5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+                will-change: transform;
+              }
+            `}</style>
+
+                    {/* Dây quang học lửng lơ - Light Mode */}
+                    <div
+                      className="animate-float-card flex flex-col items-center w-full"
+                      style={{ animationDelay: `${index * 0.2}s` }}
                     >
-                      <div className="absolute inset-0 bg-linear-to-br from-blue-200/90 via-blue-300/90 to-cyan-300/90 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0"></div>
-                      <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-blue-500/80 group-hover:border-white/70 transition-colors duration-300 z-10"></div>
-                      <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-blue-500/80 group-hover:border-white/70 transition-colors duration-300 z-10"></div>
+                      <div className="w-[1.5px] h-10 bg-linear-to-b from-transparent via-blue-300/60 to-blue-500/80 group-hover:shadow-[0_0_10px_rgba(59,130,246,0.4)] transition-shadow duration-300" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-blue-400 -mt-0.5 z-10 group-hover:scale-150 group-hover:bg-blue-500 group-hover:shadow-[0_0_8px_rgba(59,130,246,0.6)] transition-all duration-300" />
 
-                      <span className="text-[11px] lg:text-xs font-bold tracking-[0.12em] uppercase text-slate-800 group-hover:text-slate-900 relative z-10 transition-colors">
-                        {cate.name}
-                      </span>
+                      {/* Thẻ Category - Premium Light UI */}
+                      <Link
+                        to={`/movies/category/${cate.slug}`}
+                        className="relative mt-2 w-full flex items-center justify-between py-4 px-5 backdrop-blur-xl bg-white/85 border border-white/70 shadow-[0_4px_15px_rgba(37,99,235,0.05)] hover:shadow-[0_12px_35px_rgba(37,99,235,0.15)] hover:border-blue-200 transition-all duration-500 rounded-2xl overflow-hidden"
+                      >
+                        {/* Nền hover gradient */}
+                        <div className="absolute inset-0 bg-linear-to-br from-blue-50/80 to-cyan-50/60 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0"></div>
 
-                      <ChevronRight
-                        size={16}
-                        className="text-blue-500 group-hover:text-slate-900 group-hover:translate-x-1 transition-all duration-300 relative z-10"
-                      />
-                      <div className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/60 to-transparent group-hover:animate-[shimmer_1.5s_infinite] z-10 pointer-events-none"></div>
-                    </Link>
-                    <div className="flex gap-2 mt-1 opacity-60 group-hover:opacity-100 transition-opacity duration-300">
-                      <div className="w-1 h-4 bg-linear-to-b from-blue-400/80 to-transparent rounded-b-full"></div>
-                      <div className="w-1 h-6 bg-linear-to-b from-blue-500/80 to-transparent mt-0.5 rounded-b-full"></div>
-                      <div className="w-1 h-4 bg-linear-to-b from-blue-400/80 to-transparent rounded-b-full"></div>
+                        {/* Ánh sáng quét qua thẻ */}
+                        <div className="absolute top-0 -left-[100%] w-full h-full bg-linear-to-r from-transparent via-white/80 to-transparent skew-x-[-20deg] group-hover:animate-[shimmer_1.5s_ease-in-out_infinite] z-10 pointer-events-none"></div>
+
+                        <span className="text-xs lg:text-sm font-bold tracking-[0.1em] uppercase text-slate-600 group-hover:text-blue-600 relative z-10 transition-colors duration-300">
+                          {cate.name}
+                        </span>
+
+                        <div className="relative z-10 flex items-center justify-center w-6 h-6 rounded-full bg-blue-50/50 group-hover:bg-blue-500 transition-colors duration-300 shadow-sm border border-blue-100/50 group-hover:border-transparent">
+                          <ChevronRight
+                            size={14}
+                            className="text-blue-400 group-hover:text-white transition-colors duration-300"
+                          />
+                        </div>
+                      </Link>
                     </div>
                   </div>
                 </motion.div>

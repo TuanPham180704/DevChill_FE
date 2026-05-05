@@ -1,83 +1,87 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Droplet } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 export default function SectionHeader({ title, link }) {
+  // Tách chuỗi thành mảng để xử lý nháy từng ký tự
+  const letters = typeof title === "string" ? title.split("") : [];
+
   return (
-    <div className="flex items-start justify-between mb-8 group relative perspective-1000">
+    <div className="flex items-start justify-between mb-12 group relative perspective-1000">
       <style>{`
-        @keyframes sway-water {
-          0%, 100% { transform: rotate(-1.5deg) translateY(0px); }
-          50% { transform: rotate(1.5deg) translateY(-6px); }
+        @keyframes float-premium {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-8px); }
         }
-        @keyframes sway-water-reverse {
-          0%, 100% { transform: rotate(2deg) translateY(-4px); }
-          50% { transform: rotate(-1.5deg) translateY(2px); }
+        /* Nháy từng chữ: Từ ĐEN (slate-950) sang XANH DƯƠNG */
+        @keyframes neon-letter-run-light {
+          0%, 100% { color: #020617; text-shadow: none; } /* Đen đậm */
+          5%, 15% { color: #2563eb; text-shadow: 0 0 12px rgba(59,130,246,0.6), 0 0 24px rgba(59,130,246,0.4); } /* Xanh dương */
         }
-        @keyframes wave-bg {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
+        /* Nháy full chữ: Chớp nháy liên tục ở cuối chu kỳ */
+        @keyframes neon-flash-all-light {
+          0%, 65% { opacity: 1; filter: none; }
+          66%, 68% { opacity: 0.6; filter: none; }
+          69%, 75% { opacity: 1; filter: drop-shadow(0 0 10px rgba(37,99,235,0.4)); }
+          76%, 78% { opacity: 0.6; filter: none; }
+          79%, 85% { opacity: 1; filter: drop-shadow(0 0 15px rgba(37,99,235,0.6)) brightness(1.2); }
+          86%, 88% { opacity: 0.6; filter: none; }
+          89%, 100% { opacity: 1; filter: none; }
         }
-        .talisman-sway {
-          animation: sway-water 5s ease-in-out infinite;
-          transform-origin: top center;
+        .animate-float-premium {
+          animation: float-premium 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
           will-change: transform;
         }
-        .talisman-sway-reverse {
-          animation: sway-water-reverse 6s ease-in-out infinite;
-          transform-origin: top center;
-          will-change: transform;
+        .neon-text-container-light {
+          animation: neon-flash-all-light 5s infinite;
         }
-        .water-wave-effect {
-          background-size: 200% 200%;
-          animation: wave-bg 6s ease-in-out infinite;
+        .neon-letter-light {
+          color: #020617; /* Đen đậm mặc định */
+          animation: neon-letter-run-light 5s infinite;
         }
       `}</style>
-      <div className="flex flex-col items-center talisman-sway relative ml-2">
-        <div className="w-0.5 h-20 bg-linear-to-b from-transparent via-blue-400/60 to-blue-600 shadow-[0_0_8px_rgba(59,130,246,0.4)]" />
-        <div className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.6)] -mt-1 z-10" />
-        <div className="relative water-wave-effect bg-linear-to-br from-blue-100/90 via-cyan-50/90 to-blue-200/90 backdrop-blur-md border border-white/60 px-8 py-3 min-w-50 text-center shadow-[0_8px_30px_rgba(37,99,235,0.15)] -mt-0.5 overflow-hidden rounded-sm">
-          <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-blue-400/60"></div>
-          <div className="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2 border-blue-400/60"></div>
-          <div className="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-blue-400/60"></div>
-          <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-blue-400/60"></div>
-          <div className="absolute top-0 -left-full w-1/2 h-full bg-linear-to-r from-transparent via-white/40 to-transparent skew-x-[-20deg] group-hover:animate-[shimmer_2s_infinite]"></div>
-
-          <h2 className="text-xl lg:text-2xl font-black capitalize tracking-widest relative z-10 flex items-center gap-3 text-slate-900 drop-shadow-sm">
-            <Droplet
-              size={20}
-              className="text-blue-500 animate-[pulse_3s_ease-in-out_infinite] fill-blue-200"
-            />
-            {title}
-            <Droplet
-              size={20}
-              className="text-blue-500 animate-[pulse_3s_ease-in-out_infinite] fill-blue-200"
-            />
+      <div className="flex flex-col items-center animate-float-premium relative ml-4">
+        <div className="w-0.5 h-16 bg-linear-to-b from-transparent via-blue-400 to-blue-600 shadow-[0_0_12px_rgba(59,130,246,0.4)]" />
+        <div className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.6),inset_0_0_4px_#fff] -mt-1 z-10" />
+        <div className="relative mt-2 backdrop-blur-2xl bg-white/85 border border-white/60 w-70 md:w-85 h-14 md:h-16 flex items-center justify-center text-center shadow-[0_8px_30px_rgba(37,99,235,0.1)] hover:shadow-[0_8px_30px_rgba(37,99,235,0.2)] transition-shadow duration-500 rounded-2xl overflow-hidden group/title">
+          <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-blue-400/60 rounded-tl-2xl"></div>
+          <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-blue-500/60 rounded-br-2xl"></div>
+          <div className="absolute top-0 -left-full w-[120%] h-full bg-linear-to-r from-transparent via-blue-100/40 to-transparent skew-x-[-25deg] group-hover/title:animate-[shimmer_2s_infinite]"></div>
+          <h2 className="text-sm sm:text-base md:text-lg lg:text-xl font-black uppercase tracking-[0.08em] md:tracking-[0.12em] relative z-10 neon-text-container-light flex justify-center whitespace-nowrap">
+            {letters.map((char, index) => (
+              <span
+                key={index}
+                className="neon-letter-light inline-block"
+                style={{
+                  animationDelay: `${index * 0.1}s`,
+                  marginRight: char === " " ? "0.4em" : "1px",
+                }}
+              >
+                {char}
+              </span>
+            ))}
           </h2>
-        </div>
-        <div className="flex gap-4 mt-1 opacity-60">
-          <div className="w-1.5 h-10 bg-linear-to-b from-blue-300/80 to-transparent rounded-b-full"></div>
-          <div className="w-1.5 h-16 bg-linear-to-b from-blue-400/80 to-transparent mt-2 rounded-b-full"></div>
-          <div className="w-1.5 h-10 bg-linear-to-b from-blue-300/80 to-transparent rounded-b-full"></div>
         </div>
       </div>
       {link && (
-        <div className="flex flex-col items-center talisman-sway-reverse mt-4 mr-2">
-          <div className="w-px h-14 bg-linear-to-b from-transparent to-blue-500/60" />
-          <div className="w-1.5 h-1.5 rounded-full bg-blue-500/80 -mt-0.5 z-10" />
+        <div
+          className="flex flex-col items-center animate-float-premium mt-4 mr-4"
+          style={{ animationDelay: "0.8s" }}
+        >
+          <div className="w-[1.5px] h-12 bg-linear-to-b from-transparent via-blue-300 to-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.3)]" />
+          <div className="w-2 h-2 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(59,130,246,0.5)] -mt-1 z-10" />
+
           <Link
             to={link}
-            className="relative water-wave-effect bg-linear-to-br from-blue-50/90 via-white/80 to-cyan-50/90 backdrop-blur-sm border border-white/80 px-4 py-2 hover:border-blue-300 transition-all duration-300 flex items-center gap-2 shadow-[0_4px_15px_rgba(37,99,235,0.1)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.2)] -mt-px rounded-sm group/link overflow-hidden"
+            className="relative mt-2 backdrop-blur-xl bg-white/80 border border-white/80 px-5 py-2 hover:bg-blue-50/80 hover:border-blue-200 transition-all duration-300 flex items-center gap-2 shadow-[0_4px_15px_rgba(37,99,235,0.05)] hover:shadow-[0_8px_20px_rgba(37,99,235,0.15)] hover:-translate-y-0.5 rounded-xl group/link overflow-hidden"
           >
-            <span className="font-bold text-[11px] text-slate-800 group-hover/link:text-blue-700 transition-colors uppercase tracking-[0.15em] flex items-center gap-1.5 relative z-10">
+            <span className="font-bold text-xs text-slate-700 group-hover/link:text-blue-600 transition-colors uppercase tracking-widest flex items-center gap-1.5 relative z-10">
               Xem tất cả
               <ArrowRight
                 size={14}
-                className="group-hover/link:translate-x-1 transition-transform duration-300 text-blue-500"
+                className="group-hover/link:translate-x-1.5 transition-transform duration-300 text-blue-500"
               />
             </span>
           </Link>
-          <div className="w-3 h-6 border-x border-b border-blue-200/80 rounded-b-full mt-1 bg-linear-to-b from-blue-100/50 to-transparent"></div>
         </div>
       )}
     </div>
