@@ -84,10 +84,10 @@ export default function InfoTab({ edit, onChange, contracts, errors }) {
                     --- Chọn loại hình ---
                   </option>
                   <option key="type-movie" value="movie">
-                    🎬 Phim lẻ (Movie)
+                    Phim lẻ (Movie)
                   </option>
                   <option key="type-series" value="series">
-                    📺 Phim bộ (Series)
+                    Phim bộ (Series)
                   </option>
                 </select>
                 <FaChevronDown
@@ -122,7 +122,7 @@ export default function InfoTab({ edit, onChange, contracts, errors }) {
                     --- Liên kết hợp đồng bản quyền ---
                   </option>
                   {contracts
-                    .filter((c) => c.status === "active") 
+                    .filter((c) => c.status === "active")
                     .map((c) => (
                       <option key={`contract-${c.id}`} value={c.id}>
                         {c.name}
