@@ -68,20 +68,23 @@ export default function SupportClientModal({
   };
 
   const handleReplySubmit = async (e) => {
-    e.preventDefault();
+    if (e?.preventDefault) e.preventDefault();
     if (!replyContent.trim() && previewImages.length === 0) {
       return toast.warning("Vui lòng nhập nội dung hoặc đính kèm ảnh!");
     }
+    const finalContent =
+      replyContent.trim() === "" ? "Đã gửi tệp đính kèm" : replyContent;
 
     try {
       setIsSubmitting(true);
       await replyTicketClient(ticketId, {
-        content_response: replyContent,
-        attachments: previewImages, // Đẩy mảng Base64 lên Backend
+        content_response: finalContent,
+        attachments: previewImages,
       });
+
       toast.success("Đã phản hồi thành công!");
-      fetchDetail(); // Reload lại chat ngay lập tức
-      if (onReload) onReload(); // Cập nhật trạng thái ở trang gốc
+      fetchDetail();
+      if (onReload) onReload();
     } catch (err) {
       toast.error("Lỗi gửi tin nhắn!");
     } finally {
@@ -123,9 +126,7 @@ export default function SupportClientModal({
           </div>
         ) : (
           <div className="flex flex-col flex-1 overflow-hidden bg-slate-50/70">
-            {/* Lịch sử Chat */}
             <div className="flex-1 overflow-y-auto p-6 space-y-6 hidden-scrollbar">
-              {/* Tin nhắn đầu tiên của User (Yêu cầu gốc) */}
               <div className="flex w-full justify-end">
                 <div className="max-w-[80%] bg-blue-600 text-white rounded-2xl rounded-tr-sm p-4 shadow-sm border border-blue-500">
                   <div className="flex justify-between items-center mb-2 gap-4">
@@ -138,7 +139,6 @@ export default function SupportClientModal({
                   <div className="text-[14px] leading-relaxed whitespace-pre-wrap">
                     {data.description}
                   </div>
-                  {/* Ảnh đính kèm của yêu cầu gốc */}
                   {data.attachments && data.attachments.length > 0 && (
                     <div className="flex gap-2 mt-3 flex-wrap">
                       {data.attachments.map((img, i) => (
@@ -155,15 +155,12 @@ export default function SupportClientModal({
                   )}
                 </div>
               </div>
-
-              {/* Vòng lặp tin nhắn phản hồi (Admin / User rep thêm) */}
               {data.responses?.map((res) => (
                 <div
                   key={res.id}
                   className={`flex w-full ${res.is_admin_reply ? "justify-start" : "justify-end"}`}
                 >
                   {res.is_admin_reply ? (
-                    // Bong bóng của Admin (Trái)
                     <div className="flex gap-3 max-w-[85%]">
                       <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0 mt-1">
                         <ShieldCheck size={16} />
@@ -181,7 +178,6 @@ export default function SupportClientModal({
                         <div className="text-[14px] leading-relaxed whitespace-pre-wrap">
                           {res.content_response}
                         </div>
-                        {/* ẢNH ĐÍNH KÈM CỦA ADMIN GỬI */}
                         {res.attachments && res.attachments.length > 0 && (
                           <div className="mt-3 flex gap-2 flex-wrap">
                             {res.attachments.map((url, idx) => (
@@ -206,7 +202,6 @@ export default function SupportClientModal({
                       </div>
                     </div>
                   ) : (
-                    // Bong bóng của User (Phải)
                     <div className="max-w-[80%] bg-blue-600 text-white rounded-2xl rounded-tr-sm p-4 shadow-sm border border-blue-500">
                       <div className="flex justify-between items-center mb-2 gap-4">
                         <span className="font-bold text-[13px]">Bạn</span>
@@ -218,7 +213,6 @@ export default function SupportClientModal({
                       <div className="text-[14px] leading-relaxed whitespace-pre-wrap">
                         {res.content_response}
                       </div>
-                      {/* ẢNH ĐÍNH KÈM CỦA USER KHI REP THÊM */}
                       {res.attachments && res.attachments.length > 0 && (
                         <div className="mt-3 flex gap-2 flex-wrap">
                           {res.attachments.map((url, idx) => (
@@ -245,15 +239,12 @@ export default function SupportClientModal({
                 </div>
               ))}
             </div>
-
-            {/* Khung nhập Chat bên dưới */}
             {data.status !== "closed" ? (
               <div className="p-4 bg-white border-t border-slate-100 shrink-0">
                 <form
                   onSubmit={handleReplySubmit}
                   className="flex flex-col gap-2"
                 >
-                  {/* Hiển thị ảnh đang chọn để gửi đi */}
                   {previewImages.length > 0 && (
                     <div className="flex gap-2 flex-wrap mb-1 px-1">
                       {previewImages.map((src, i) => (
@@ -283,7 +274,6 @@ export default function SupportClientModal({
                   )}
 
                   <div className="flex items-end gap-2">
-                    {/* Nút Upload Ảnh */}
                     {previewImages.length < 3 && (
                       <label className="shrink-0 mb-1 p-3 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-xl cursor-pointer transition-colors border border-transparent hover:border-blue-100">
                         <FileImage size={24} />
@@ -296,8 +286,6 @@ export default function SupportClientModal({
                         />
                       </label>
                     )}
-
-                    {/* Ô nhập Text */}
                     <div className="relative flex-1">
                       <textarea
                         value={replyContent}

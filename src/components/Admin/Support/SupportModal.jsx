@@ -77,15 +77,21 @@ export default function SupportModal({ isOpen, ticketId, onClose, onReload }) {
 
   const handleReplySubmit = async (e) => {
     e.preventDefault();
-    if (!replyContent.trim()) {
-      toast.warning("Vui lòng nhập nội dung phản hồi!");
+
+    // Kiểm tra: Nếu không có chữ VÀ cũng không có ảnh thì mới chặn
+    if (!replyContent.trim() && previewImages.length === 0) {
+      toast.warning("Vui lòng nhập nội dung phản hồi hoặc đính kèm ảnh!");
       return;
     }
+
+    // TẠO BIẾN TRUNG GIAN: Nếu chỉ gửi ảnh, tự động điền text mặc định để không bị lỗi 400 Backend
+    const finalContent =
+      replyContent.trim() === "" ? "Đã gửi tệp đính kèm." : replyContent;
 
     try {
       setIsSubmitting(true);
       await replySupportTicketAdmin(ticketId, {
-        content_response: replyContent,
+        content_response: finalContent, // Sử dụng biến finalContent ở đây
         status: replyStatus,
         attachments: previewImages,
       });
@@ -153,7 +159,6 @@ export default function SupportModal({ isOpen, ticketId, onClose, onReload }) {
           </div>
         ) : (
           <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
-            {/* Lệnh bên TRÁI: Thông tin gốc của Ticket */}
             <div className="w-full md:w-1/3 border-r border-slate-100 bg-slate-50/50 p-6 overflow-y-auto hidden-scrollbar">
               <h4 className="text-[12px] font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-1.5">
                 <User size={14} /> Thông tin khách hàng
@@ -311,7 +316,10 @@ export default function SupportModal({ isOpen, ticketId, onClose, onReload }) {
                     />
                     <button
                       type="submit"
-                      disabled={isSubmitting || !replyContent.trim()}
+                      disabled={
+                        isSubmitting ||
+                        (!replyContent.trim() && previewImages.length === 0)
+                      }
                       className="absolute bottom-3 right-3 p-2.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md shadow-blue-200 flex items-center justify-center"
                       title="Gửi phản hồi"
                     >
