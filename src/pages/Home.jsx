@@ -165,11 +165,11 @@ export default function Home() {
               className="w-full h-full object-cover object-[center_20%] opacity-100"
               alt={activeMovie?.name}
             />
-            <div className="absolute inset-0 bg-linear-to-r from-[#060A14] via-[#060A14]/70 to-transparent w-[95%] md:w-[70%]" />
-            <div className="absolute bottom-0 inset-x-0 h-48 bg-linear-to-t from-[#060A14] via-[#060A14]/60 to-transparent" />
-            <div className="absolute inset-y-0 right-0 w-32 bg-linear-to-l from-[#060A14]/50 to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-r from-black/40 via-black/5 to-transparent w-full md:w-[60%]" />
+            <div className="absolute bottom-0 inset-x-0 h-28 bg-linear-to-t from-black/30 to-transparent" />
           </motion.div>
         </AnimatePresence>
+
         <div className="relative z-10 max-w-7xl mx-auto px-4 lg:px-8 w-full flex items-center h-full">
           <motion.div
             key={`content-${activeMovie?.id}`}
@@ -186,7 +186,7 @@ export default function Home() {
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-white leading-[1.1] tracking-tight drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)] mb-6">
               {activeMovie?.name}
             </h1>
-            <p className="text-base md:text-lg text-slate-200 line-clamp-3 leading-relaxed font-normal max-w-xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
+            <p className="text-base md:text-lg text-slate-100 line-clamp-3 leading-relaxed font-normal max-w-xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
               {activeMovie?.content ||
                 "Khám phá siêu phẩm điện ảnh với chất lượng đỉnh cao và nội dung lôi cuốn ngay hôm nay trên nền tảng của chúng tôi."}
             </p>
@@ -216,7 +216,6 @@ export default function Home() {
                         : "Xem Ngay"}
                     </span>
                   </button>
-                  {/* Tooltip khi chưa có Premium */}
                   {isPremiumMovie && !isPremiumUser && (
                     <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 opacity-0 group-hover:opacity-100 transition pointer-events-none z-50">
                       <div className="bg-black/90 backdrop-blur-md text-white text-xs px-3 py-2 rounded-lg shadow-lg whitespace-nowrap flex items-center gap-2 border border-slate-800">
@@ -291,27 +290,20 @@ export default function Home() {
                 will-change: transform;
               }
             `}</style>
-
-                    {/* Dây quang học lửng lơ - Light Mode */}
                     <div
                       className="animate-float-card flex flex-col items-center w-full"
                       style={{ animationDelay: `${index * 0.2}s` }}
                     >
                       <div className="w-[1.5px] h-10 bg-linear-to-b from-transparent via-blue-300/60 to-blue-500/80 group-hover:shadow-[0_0_10px_rgba(59,130,246,0.4)] transition-shadow duration-300" />
                       <div className="w-1.5 h-1.5 rounded-full bg-blue-400 -mt-0.5 z-10 group-hover:scale-150 group-hover:bg-blue-500 group-hover:shadow-[0_0_8px_rgba(59,130,246,0.6)] transition-all duration-300" />
-
-                      {/* Thẻ Category - Premium Light UI */}
                       <Link
                         to={`/movies/category/${cate.slug}`}
                         className="relative mt-2 w-full flex items-center justify-between py-4 px-5 backdrop-blur-xl bg-white/85 border border-white/70 shadow-[0_4px_15px_rgba(37,99,235,0.05)] hover:shadow-[0_12px_35px_rgba(37,99,235,0.15)] hover:border-blue-200 transition-all duration-500 rounded-2xl overflow-hidden"
                       >
-                        {/* Nền hover gradient */}
                         <div className="absolute inset-0 bg-linear-to-br from-blue-50/80 to-cyan-50/60 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0"></div>
+                        <div className="absolute top-0 -left-full w-full h-full bg-linear-to-r from-transparent via-white/80 to-transparent skew-x-[-20deg] group-hover:animate-[shimmer_1.5s_ease-in-out_infinite] z-10 pointer-events-none"></div>
 
-                        {/* Ánh sáng quét qua thẻ */}
-                        <div className="absolute top-0 -left-[100%] w-full h-full bg-linear-to-r from-transparent via-white/80 to-transparent skew-x-[-20deg] group-hover:animate-[shimmer_1.5s_ease-in-out_infinite] z-10 pointer-events-none"></div>
-
-                        <span className="text-xs lg:text-sm font-bold tracking-[0.1em] uppercase text-slate-600 group-hover:text-blue-600 relative z-10 transition-colors duration-300">
+                        <span className="text-xs lg:text-sm font-bold tracking-widest uppercase text-slate-600 group-hover:text-blue-600 relative z-10 transition-colors duration-300">
                           {cate.name}
                         </span>
 
