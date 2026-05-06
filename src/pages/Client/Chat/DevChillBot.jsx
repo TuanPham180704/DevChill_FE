@@ -1,9 +1,9 @@
-/* eslint-disable no-unused-vars */
-import { useState, useRef, useEffect } from "react";
+/* eslint-disable react-hooks/immutability */
+import { useState, useRef, useEffect, useCallback } from "react";
 import confetti from "canvas-confetti";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { askDevChillAI } from "../../../api/aiAPI";
+import { io } from "socket.io-client";
 import { getAccessToken, getMe } from "../../../utils/auth";
 import { getProfile } from "../../../api/userAPI";
 import ChatHeader from "./ChatHeader";
@@ -11,6 +11,9 @@ import TypingIndicator from "./TypingIndicator";
 import FloatingButton from "./FloatingButton";
 import ChatInput from "./ChatInput";
 import ChatMessage from "./ChatMessage";
+
+const BACKEND_SOCKET_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:8080";
 
 const INITIAL_OPTIONS = [
   "Gợi ý phim hay",
@@ -61,7 +64,9 @@ export default function DevChillBot() {
   const [isTyping, setIsTyping] = useState(false);
 
   const messagesEndRef = useRef(null);
+  const socketRef = useRef(null); 
   const navigate = useNavigate();
+
   const customNavigate = (to, options) => {
     if (typeof to === "string" && to.includes("/movies/watch/")) {
       const currentUser = getMe() || {};
@@ -73,7 +78,7 @@ export default function DevChillBot() {
             sender: "bot",
             type: "text",
             content: personalizeText(
-              "Phim này là nội dung độc quyền. Bạn cần nâng cấp tài khoản Premium để trải nghiệm nhé! ",
+              "Phim này là nội dung độc quyền. Bạn cần nâng cấp tài khoản Premium để trải nghiệm nhé! 👑",
             ),
           },
         ]);
@@ -92,21 +97,30 @@ export default function DevChillBot() {
     return "bạn";
   });
 
-  const personalizeText = (text) => {
-    if (!text || userName.toLowerCase() === "bạn") return text;
-    return text
-      .replace(/Chào bạn/gi, `Chào ${userName}`)
-      .replace(/cho bạn/gi, `cho ${userName}`)
-      .replace(/của bạn/gi, `của ${userName}`)
-      .replace(/Bạn muốn/g, `${userName} muốn`)
-      .replace(/Bạn cần/g, `${userName} cần`)
-      .replace(/Bạn chưa/g, `${userName} chưa`)
-      .replace(/Bạn kiểm tra/g, `${userName} kiểm tra`)
-      .replace(/bạn vui lòng/gi, `${userName} vui lòng`)
-      .replace(/bạn chờ/gi, `${userName} chờ`)
-      .replace(/bạn xem/gi, `${userName} xem`)
-      .replace(/bạn thích/gi, `${userName} thích`);
-  };
+  const personalizeText = useCallback(
+    (text) => {
+      if (!text) return text;
+      let cleanText = text
+        .replace(/giửp/g, "giúp")
+        .replace(/đưưùc/g, "được")
+        .replace(/kô/gi, "không")
+        .replace(/nhĩ/g, "nhỉ");
+      if (userName.toLowerCase() === "bạn") return cleanText;
+      return text
+        .replace(/Chào bạn/gi, `Chào ${userName}`)
+        .replace(/cho bạn/gi, `cho ${userName}`)
+        .replace(/của bạn/gi, `của ${userName}`)
+        .replace(/Bạn muốn/g, `${userName} muốn`)
+        .replace(/Bạn cần/g, `${userName} cần`)
+        .replace(/Bạn chưa/g, `${userName} chưa`)
+        .replace(/Bạn kiểm tra/g, `${userName} kiểm tra`)
+        .replace(/bạn vui lòng/gi, `${userName} vui lòng`)
+        .replace(/bạn chờ/gi, `${userName} chờ`)
+        .replace(/bạn xem/gi, `${userName} xem`)
+        .replace(/bạn thích/gi, `${userName} thích`);
+    },
+    [userName],
+  );
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -202,40 +216,30 @@ export default function DevChillBot() {
       },
     ]);
   };
-
-  const handleActionSend = async (textToProcess) => {
-    if (!textToProcess.trim() || isTyping) return;
-
-    const userMsg = {
-      id: Date.now(),
-      sender: "user",
-      type: "text",
-      content: textToProcess.trim(),
-    };
-
-    const currentMessages = [...messages];
-
-    setMessages((prev) => [
-      ...prev.map((m) => ({ ...m, options: undefined })),
-      userMsg,
-    ]);
-    setIsTyping(true);
-
-    // FIX CHỐNG LỖI 413 TOKEN: Giảm từ slice(-6) xuống slice(-4) để nén dữ liệu gửi cho Groq
-    const chatHistory = currentMessages.slice(-4).map((m) => {
-      let text = m.content || "";
-      if (m.type === "movies" && m.payload) {
-        const movieNames = m.payload.map((p) => p.name || p.title).join(", ");
-        text = `[Hệ thống đã trả về danh sách phim: ${movieNames}]`;
-      }
-      return {
-        role: m.sender === "user" ? "user" : "assistant",
-        content: text,
-      };
+  useEffect(() => {
+    socketRef.current = io(BACKEND_SOCKET_URL, {
+      auth: { token: getAccessToken() },
+      transports: ["websocket", "polling"],
     });
-
-    try {
-      const response = await askDevChillAI(userMsg.content, chatHistory);
+    socketRef.current.on("bot_typing", (data) => {
+      setIsTyping(data.isTyping);
+    });
+    socketRef.current.on("bot_error", (data) => {
+      setIsTyping(false);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now() + 1,
+          sender: "bot",
+          type: "text",
+          content:
+            data.error ||
+            "Đường truyền tới hệ thống AI đang gián đoạn do quá tải, bạn chờ chút nhé!",
+        },
+      ]);
+    });
+    socketRef.current.on("bot_reply", (response) => {
+      setIsTyping(false);
       let botMsg = { id: Date.now() + 1, sender: "bot" };
 
       if (response.action === "redirect_play") {
@@ -308,20 +312,23 @@ export default function DevChillBot() {
         botMsg.content = "Đây là thông tin chi tiết phim bạn cần:";
         botMsg.payload = response.payload;
       } else if (response.action === "suggest_movies") {
-        // TÍNH NĂNG NÀY SẼ CATCH ĐƯỢC CÂU CẢM XÚC TỪ BACKEND TRẢ VỀ
         botMsg.type = "movies";
         botMsg.content = personalizeText(response.message);
         botMsg.payload = response.payload;
         botMsg.watchedMovie = response.watchedMovie;
-      } else if (Array.isArray(response)) {
-        if (response.length === 0) {
+      } else if (
+        Array.isArray(response) ||
+        response.action === "user_history"
+      ) {
+        const dataArr = Array.isArray(response) ? response : response.payload;
+        if (!dataArr || dataArr.length === 0) {
           botMsg.type = "text";
           botMsg.content =
-            "Mình đã tìm kỹ nhưng không thấy phim nào khớp. Bạn thử đổi từ khóa xem sao nhé!";
+            "Mình đã tìm kỹ nhưng không thấy dữ liệu nào khớp. Bạn thử lại xem sao nhé!";
         } else {
           botMsg.type = "movies";
           botMsg.content = "DevChill tìm thấy các kết quả này cho bạn:";
-          botMsg.payload = response.slice(0, 10);
+          botMsg.payload = dataArr.slice(0, 10);
         }
       } else {
         botMsg.type = "text";
@@ -330,19 +337,53 @@ export default function DevChillBot() {
       }
 
       setMessages((prev) => [...prev, botMsg]);
-    } catch (error) {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now() + 1,
-          sender: "bot",
-          type: "text",
-          content:
-            "Đường truyền tới hệ thống AI đang gián đoạn do quá tải, bạn chờ chút nhé!",
-        },
-      ]);
-    } finally {
+    });
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+      }
+    };
+  }, [navigate, personalizeText]);
+  const handleActionSend = (textToProcess) => {
+    if (!textToProcess.trim() || isTyping) return;
+
+    const userMsg = {
+      id: Date.now(),
+      sender: "user",
+      type: "text",
+      content: textToProcess.trim(),
+    };
+
+    const currentMessages = [...messages];
+
+    setMessages((prev) => [
+      ...prev.map((m) => ({ ...m, options: undefined })),
+      userMsg,
+    ]);
+    setIsTyping(true);
+
+    const chatHistory = currentMessages.slice(-4).map((m) => {
+      let text = m.content || "";
+      if (m.type === "movies" && m.payload) {
+        const movieNames = m.payload.map((p) => p.name || p.title).join(", ");
+        text = `[Hệ thống đã trả về danh sách phim: ${movieNames}]`;
+      }
+      return {
+        role: m.sender === "user" ? "user" : "assistant",
+        content: text,
+      };
+    });
+
+    const currentUser = getMe() || {};
+    if (socketRef.current) {
+      socketRef.current.emit("ask_ai_bot", {
+        message: userMsg.content,
+        history: chatHistory,
+        user: currentUser,
+      });
+    } else {
       setIsTyping(false);
+      toast.error("Mất kết nối đến máy chủ AI, vui lòng tải lại trang!");
     }
   };
 
