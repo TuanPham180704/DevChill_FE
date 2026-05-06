@@ -121,11 +121,13 @@ export default function InfoTab({ edit, onChange, contracts, errors }) {
                   <option value="" disabled>
                     --- Liên kết hợp đồng bản quyền ---
                   </option>
-                  {contracts.map((c) => (
-                    <option key={`contract-${c.id}`} value={c.id}>
-                      {c.name} {c.status === "expired" ? "(Hết hạn)" : ""}
-                    </option>
-                  ))}
+                  {contracts
+                    .filter((c) => c.status === "active") 
+                    .map((c) => (
+                      <option key={`contract-${c.id}`} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
                 </select>
                 <FaChevronDown
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-slate-600 transition-colors"
