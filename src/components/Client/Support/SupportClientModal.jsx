@@ -16,11 +16,9 @@ export default function SupportClientModal({
 }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
-
-  // States cho Form Reply
   const [replyContent, setReplyContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [previewImages, setPreviewImages] = useState([]); // Thêm state chứa ảnh đính kèm
+  const [previewImages, setPreviewImages] = useState([]); 
 
   useEffect(() => {
     if (isOpen && ticketId) fetchDetail();
@@ -31,8 +29,9 @@ export default function SupportClientModal({
       setLoading(true);
       const res = await getTicketDetailClient(ticketId);
       setData(res?.data || res);
-
-      // Reset form khi load vé mới
+      window.dispatchEvent(
+        new CustomEvent("client_ticket_viewed", { detail: ticketId }),
+      );
       setReplyContent("");
       setPreviewImages([]);
     } catch (err) {
@@ -42,8 +41,6 @@ export default function SupportClientModal({
       setLoading(false);
     }
   };
-
-  // Hàm xử lý convert ảnh sang Base64 cho User
   const handleImageChange = async (e) => {
     const files = Array.from(e.target.files);
     if (files.length + previewImages.length > 3) {

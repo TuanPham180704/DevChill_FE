@@ -134,6 +134,39 @@ export default function Header() {
       }
     }
   };
+  useEffect(() => {
+    const handleTicketViewed = async (e) => {
+      const viewedTicketId = e.detail;
+      let foundNotifId = null;
+      setNotifications((prevNotifs) => {
+        const isExistUnread = prevNotifs.find(
+          (n) =>
+            String(n.reference_id) === String(viewedTicketId) && !n.is_read,
+        );
+
+        if (isExistUnread) {
+          foundNotifId = isExistUnread.id;
+          setUnreadCount((prevCount) => Math.max(0, prevCount - 1));
+          return prevNotifs.map((n) =>
+            n.id === isExistUnread.id ? { ...n, is_read: true } : n,
+          );
+        }
+        return prevNotifs;
+      });
+      if (foundNotifId) {
+        try {
+          await markNotificationReadClient(foundNotifId);
+        } catch (error) {
+          console.error("Lỗi khi đánh dấu thông báo đã đọc từ Modal:", error);
+        }
+      }
+    };
+
+    window.addEventListener("client_ticket_viewed", handleTicketViewed);
+    return () => {
+      window.removeEventListener("client_ticket_viewed", handleTicketViewed);
+    };
+  }, []);
 
   const timeAgo = (dateStr) => {
     if (!dateStr) return "";

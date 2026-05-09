@@ -61,6 +61,27 @@ export default function AdminHeader({ toggleSidebar, user }) {
 
   useEffect(() => {
     fetchNotifications();
+    const handleTicketUpdated = () => {
+      fetchNotifications();
+    };
+    const handleTicketViewed = (e) => {
+      const viewedTicketId = e.detail;
+      setNotifications((prevNotifs) =>
+        prevNotifs.map((notif) => {
+          if (notif.id === viewedTicketId && notif.status === "open") {
+            setUnreadCount((prevCount) => Math.max(0, prevCount - 1));
+            return { ...notif, status: "read" };
+          }
+          return notif;
+        })
+      );
+    };
+    window.addEventListener("support_ticket_updated", handleTicketUpdated);
+    window.addEventListener("support_ticket_viewed", handleTicketViewed);
+    return () => {
+      window.removeEventListener("support_ticket_updated", handleTicketUpdated);
+      window.removeEventListener("support_ticket_viewed", handleTicketViewed);
+    };
   }, []);
 
   const handleLogout = () => {

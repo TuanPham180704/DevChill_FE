@@ -41,6 +41,11 @@ export default function SupportModal({ isOpen, ticketId, onClose, onReload }) {
       );
       setReplyContent("");
       setPreviewImages([]);
+      if (ticketData.status === "open") {
+        window.dispatchEvent(
+          new CustomEvent("support_ticket_viewed", { detail: ticketId }),
+        );
+      }
     } catch (err) {
       toast.error(
         err?.response?.data?.message ||
@@ -77,26 +82,23 @@ export default function SupportModal({ isOpen, ticketId, onClose, onReload }) {
 
   const handleReplySubmit = async (e) => {
     e.preventDefault();
-
-    // Kiểm tra: Nếu không có chữ VÀ cũng không có ảnh thì mới chặn
     if (!replyContent.trim() && previewImages.length === 0) {
       toast.warning("Vui lòng nhập nội dung phản hồi hoặc đính kèm ảnh!");
       return;
     }
-
-    // TẠO BIẾN TRUNG GIAN: Nếu chỉ gửi ảnh, tự động điền text mặc định để không bị lỗi 400 Backend
     const finalContent =
       replyContent.trim() === "" ? "Đã gửi tệp đính kèm." : replyContent;
 
     try {
       setIsSubmitting(true);
       await replySupportTicketAdmin(ticketId, {
-        content_response: finalContent, // Sử dụng biến finalContent ở đây
+        content_response: finalContent,
         status: replyStatus,
         attachments: previewImages,
       });
 
       toast.success("Đã gửi phản hồi thành công!");
+      window.dispatchEvent(new Event("support_ticket_updated"));
       if (onReload) onReload();
       onClose();
     } catch (err) {
