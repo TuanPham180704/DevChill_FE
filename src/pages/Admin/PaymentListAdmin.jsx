@@ -175,6 +175,11 @@ export default function PaymentListAdmin() {
           class: `${baseStyle} bg-slate-100 text-slate-500 border-slate-200`,
           text: "Đã huỷ",
         };
+      case "expired":
+        return {
+          class: `${baseStyle} bg-orange-50 text-orange-600 border-orange-100`,
+          text: "Hết hạn",
+        };
       default:
         return {
           class: `${baseStyle} bg-slate-50 text-slate-500 border-slate-100`,
