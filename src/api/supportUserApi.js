@@ -48,3 +48,13 @@ export const replyTicketClient = async (id, data) => {
   });
   return res.data;
 };
+export const closeTicketClient = async (id) => {
+  const res = await axios.put(
+    `${API_URL}/${id}/close`,
+    {},
+    {
+      headers: getAuthHeader(),
+    },
+  );
+  return res.data;
+};
