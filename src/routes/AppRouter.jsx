@@ -18,6 +18,7 @@ import MovieDetail from "@/pages/MovieDetail";
 import Support from "../pages/Client/Profile/Support";
 import CustomerList from "../pages/Admin/CustomerList";
 import ContractList from "../pages/Admin/ContractList";
+import ReportAdmin from "../pages/Admin/ReportAdmin";
 import AdminLayout from "../layouts/AdminLayout";
 import ProtectedRoute from "../routes/ProtectedRoute";
 import DashBoard from "../pages/Admin/DashBoard";
@@ -107,6 +108,7 @@ export default function AppRouter() {
               <Route path="/admin/showtimes" element={<ShowtimeListAdmin />} />
               <Route path="/admin/support" element={<SupportAdminList />} />
               <Route path="/admin/profile" element={<AdminProfile />} />
+              <Route path="/admin/reports" element={<ReportAdmin />} />
             </Route>
           </Route>
 
