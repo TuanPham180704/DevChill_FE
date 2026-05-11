@@ -10,19 +10,17 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { toast } from "react-toastify";
-import { createTicketClient } from "../../api/supportUserApi"; // Sếp nhớ check lại đường dẫn API cho đúng thư mục nhé
+import { createTicketClient } from "../../api/supportUserApi";
 
 export default function GuestSupport() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-
-  // Form States
   const [guestEmail, setGuestEmail] = useState("");
   const [category, setCategory] = useState("Tài khoản");
   const [description, setDescription] = useState("");
   const [previewImages, setPreviewImages] = useState([]);
+  const [errors, setErrors] = useState({});
 
-  // Hàm xử lý convert ảnh sang Base64
   const handleImageChange = async (e) => {
     const files = Array.from(e.target.files);
     if (files.length + previewImages.length > 3) {
@@ -45,20 +43,39 @@ export default function GuestSupport() {
       toast.error("Lỗi khi đọc ảnh!");
     }
   };
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!guestEmail || !guestEmail.trim()) {
+      newErrors.guestEmail = "Vui lòng nhập Email liên hệ.";
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(guestEmail)) {
+        newErrors.guestEmail = "Email không hợp lệ (VD: abc@gmail.com).";
+      }
+    }
+
+    if (!description || !description.trim()) {
+      newErrors.description = "Vui lòng nhập mô tả chi tiết sự cố.";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmitTicket = async (e) => {
     e.preventDefault();
-    if (!guestEmail.trim())
-      return toast.warning("Vui lòng nhập Email liên hệ!");
-    if (!description.trim())
-      return toast.warning("Vui lòng nhập nội dung hỗ trợ!");
+    if (!validateForm()) {
+      toast.warning("Vui lòng điền đầy đủ thông tin hợp lệ!");
+      return;
+    }
 
     try {
       setLoading(true);
       await createTicketClient({
-        guest_email: guestEmail,
+        guest_email: guestEmail.trim(),
         category,
-        description,
+        description: description.trim(),
         attachments: previewImages,
       });
 
@@ -66,8 +83,6 @@ export default function GuestSupport() {
       setGuestEmail("");
       setDescription("");
       setPreviewImages([]);
-
-      // Chuyển hướng về trang chủ hoặc login sau khi gửi xong
       setTimeout(() => {
         navigate("/login");
       }, 2000);
@@ -80,12 +95,9 @@ export default function GuestSupport() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
-      {/* Background Decor (Tạo hiệu ứng mờ mờ cho sang) */}
       <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-blue-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-indigo-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
-
       <div className="sm:mx-auto sm:w-full sm:max-w-2xl relative z-10">
-        {/* TIÊU ĐỀ - Có animation fade-in nhẹ */}
         <div className="text-center mb-8 animate-in fade-in slide-in-from-top-4 duration-700 ease-out">
           <div className="mx-auto w-16 h-16 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/30 mb-4 transform -rotate-3 hover:rotate-0 transition-transform duration-300">
             <Headphones size={32} strokeWidth={2.5} className="rotate-3" />
@@ -97,8 +109,6 @@ export default function GuestSupport() {
             Chúng tôi luôn sẵn sàng hỗ trợ bạn 24/7. Vui lòng để lại thông tin!
           </p>
         </div>
-
-        {/* KHỐI FORM CHÍNH - Thêm hiệu ứng trượt lên (slide-up) & mờ dần (fade-in) cực mượt */}
         <div className="bg-white py-8 px-4 shadow-[0_20px_60px_rgba(0,0,0,0.05)] sm:rounded-[2rem] sm:px-10 border border-slate-100 animate-in fade-in zoom-in-[0.98] slide-in-from-bottom-8 duration-700 ease-out fill-mode-both delay-150">
           <div className="bg-blue-50/70 border-l-4 border-blue-500 p-4 rounded-r-xl mb-8 flex gap-3">
             <CheckCircle2 className="text-blue-500 shrink-0 mt-0.5" size={18} />
@@ -110,25 +120,35 @@ export default function GuestSupport() {
             </p>
           </div>
 
-          <form onSubmit={handleSubmitTicket} className="space-y-6">
+          <form onSubmit={handleSubmitTicket} className="space-y-6" noValidate>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <div>
-                {/* Đã sửa Label thành text-slate-900 (màu đen đậm) */}
                 <label className="block text-[12.5px] font-bold text-slate-900 uppercase tracking-wider mb-2">
                   Email liên hệ <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="email"
-                  required
                   value={guestEmail}
-                  onChange={(e) => setGuestEmail(e.target.value)}
+                  onChange={(e) => {
+                    setGuestEmail(e.target.value);
+                    if (errors.guestEmail)
+                      setErrors({ ...errors, guestEmail: null });
+                  }}
                   placeholder="VD: nguyenvana@gmail.com"
-                  className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all shadow-sm text-[14px] text-slate-900 font-medium"
+                  className={`w-full px-4 py-3.5 bg-slate-50 border rounded-xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all shadow-sm text-[14px] text-slate-900 font-medium ${
+                    errors.guestEmail
+                      ? "border-red-400! bg-red-50/30"
+                      : "border-slate-200"
+                  }`}
                 />
+                {errors.guestEmail && (
+                  <p className="text-[11px] font-medium text-red-500 mt-1.5 pl-1 italic">
+                    {errors.guestEmail}
+                  </p>
+                )}
               </div>
 
               <div>
-                {/* Đã sửa Label thành text-slate-900 (màu đen đậm) */}
                 <label className="block text-[12.5px] font-bold text-slate-900 uppercase tracking-wider mb-2">
                   Chủ đề hỗ trợ
                 </label>
@@ -156,18 +176,33 @@ export default function GuestSupport() {
                 Mô tả chi tiết <span className="text-red-500">*</span>
               </label>
               <textarea
-                required
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                onChange={(e) => {
+                  setDescription(e.target.value);
+                  if (errors.description)
+                    setErrors({ ...errors, description: null });
+                }}
                 placeholder="Vui lòng mô tả rõ sự cố bạn đang gặp phải để chúng tôi hỗ trợ tốt nhất..."
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all shadow-sm text-[14px] text-slate-900 min-h-35 resize-none font-medium"
+                className={`w-full px-4 py-3 bg-slate-50 border rounded-xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all shadow-sm text-[14px] text-slate-900 min-h-35 resize-none font-medium ${
+                  errors.description
+                    ? "border-red-400! bg-red-50/30"
+                    : "border-slate-200"
+                }`}
               />
+              {errors.description && (
+                <p className="text-[11px] font-medium text-red-500 mt-1.5 pl-1 italic">
+                  {errors.description}
+                </p>
+              )}
             </div>
 
             <div>
               <label className="block text-[12.5px] font-bold text-slate-900 uppercase tracking-wider mb-3 items-center gap-2">
-                <FileImage size={16} className="text-slate-500" /> Ảnh đính kèm
-                (Tối đa 3)
+                <FileImage
+                  size={16}
+                  className="text-slate-500 inline-block mr-1"
+                />{" "}
+                Ảnh đính kèm (Tối đa 3)
               </label>
               <div className="flex gap-4 flex-wrap">
                 {previewImages.map((src, i) => (

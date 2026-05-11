@@ -3,8 +3,15 @@ import { z } from "zod";
 const passwordRules = z
   .string()
   .min(8, "Mật khẩu phải có ít nhất 8 ký tự")
-  .regex(/[^A-Za-z0-9]/, "Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt")
-  .regex(/\d/, "Mật khẩu phải chứa ít nhất 1 chữ số");
+  .regex(/\d/, "Mật khẩu phải chứa ít nhất 1 chữ số")
+  .regex(
+    /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/,
+    "Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt",
+  )
+  .regex(
+    /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+$/,
+    "Mật khẩu không được chứa khoảng trắng hoặc ký tự có dấu",
+  );
 
 export const registerSchema = z
   .object({

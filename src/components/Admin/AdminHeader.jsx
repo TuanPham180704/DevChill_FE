@@ -73,7 +73,7 @@ export default function AdminHeader({ toggleSidebar, user }) {
             return { ...notif, status: "read" };
           }
           return notif;
-        })
+        }),
       );
     };
     window.addEventListener("support_ticket_updated", handleTicketUpdated);
@@ -171,8 +171,8 @@ export default function AdminHeader({ toggleSidebar, user }) {
                         onClick={() => handleClickNotification(notif.id)}
                         className={`relative flex gap-3 px-5 py-4 cursor-pointer border-b border-gray-50 transition-all ${
                           notif.status === "open"
-                            ? "bg-blue-50/50 hover:bg-blue-100/60" 
-                            : "bg-white hover:bg-slate-50" 
+                            ? "bg-blue-50/50 hover:bg-blue-100/60"
+                            : "bg-white hover:bg-slate-50"
                         }`}
                       >
                         {notif.status === "open" && (
@@ -182,10 +182,7 @@ export default function AdminHeader({ toggleSidebar, user }) {
                           className={`shrink-0 mt-1 ${notif.status === "open" ? "ml-2" : ""}`}
                         >
                           <img
-                            src={
-                              notif.avatar_url ||
-                              "https://res.cloudinary.com/demo/image/upload/v1/default-avatar.png"
-                            }
+                            src={notif.avatar_url}
                             alt="avatar"
                             className="w-10 h-10 rounded-full object-cover border border-gray-200"
                           />
@@ -237,10 +234,7 @@ export default function AdminHeader({ toggleSidebar, user }) {
             >
               <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-blue-500 bg-white">
                 <img
-                  src={
-                    user?.avatar_url ||
-                    "https://res.cloudinary.com/demo/image/upload/v1/default-avatar.png"
-                  }
+                  src={user?.avatar_url}
                   alt={user?.username || "Admin"}
                   className="w-full h-full object-cover"
                 />

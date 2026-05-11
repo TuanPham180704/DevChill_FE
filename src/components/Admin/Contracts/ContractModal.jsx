@@ -20,33 +20,83 @@ export default function ContractModal({
   const [file, setFile] = useState(null);
   const [createdAt, setCreatedAt] = useState("");
   const [updatedAt, setUpdatedAt] = useState("");
+  const [errors, setErrors] = useState({}); // Thêm state quản lý lỗi
 
   useEffect(() => {
-    if (contract) {
-      setName(contract.name || "");
-      setStartDate(contract.start_date ? contract.start_date.slice(0, 10) : "");
-      setEndDate(contract.end_date ? contract.end_date.slice(0, 10) : "");
-      setStatus(contract.status || "draft");
-      setFile(null); 
-      setCreatedAt(contract.created_at ? contract.created_at.slice(0, 10) : "");
-      setUpdatedAt(contract.updated_at ? contract.updated_at.slice(0, 10) : "");
-    } else {
-      setName("");
-      setStartDate("");
-      setEndDate("");
-      setStatus("draft");
-      setFile(null);
-      setCreatedAt("");
-      setUpdatedAt("");
+    if (isOpen) {
+      setErrors({}); // Reset lỗi mỗi lần mở lại modal
+      if (contract) {
+        setName(contract.name || "");
+        setStartDate(
+          contract.start_date ? contract.start_date.slice(0, 10) : "",
+        );
+        setEndDate(contract.end_date ? contract.end_date.slice(0, 10) : "");
+        setStatus(contract.status || "draft");
+        setFile(null);
+        setCreatedAt(
+          contract.created_at ? contract.created_at.slice(0, 10) : "",
+        );
+        setUpdatedAt(
+          contract.updated_at ? contract.updated_at.slice(0, 10) : "",
+        );
+      } else {
+        setName("");
+        setStartDate("");
+        setEndDate("");
+        setStatus("draft");
+        setFile(null);
+        setCreatedAt("");
+        setUpdatedAt("");
+      }
+      setIsEditMode(initialEditMode);
     }
-    setIsEditMode(initialEditMode);
-  }, [contract, initialEditMode]);
+  }, [isOpen, contract, initialEditMode]);
+
+  const validateForm = () => {
+    const newErrors = {};
+    if (!name || !name.trim()) {
+      newErrors.name = "Vui lòng nhập tên hợp đồng.";
+    }
+    if (!startDate) {
+      newErrors.startDate = "Vui lòng chọn ngày bắt đầu.";
+    }
+    if (!endDate) {
+      newErrors.endDate = "Vui lòng chọn ngày kết thúc.";
+    }
+
+    // Kiểm tra ngày bắt đầu không lớn hơn ngày kết thúc (nếu cả 2 đều đã được nhập)
+    if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+      newErrors.endDate = "Ngày kết thúc không hợp lệ (phải sau ngày bắt đầu).";
+    }
+
+    // Bắt buộc đính kèm file nếu chưa có file sẵn có
+    if (!file && !contract?.file_url) {
+      newErrors.file = "Vui lòng đính kèm tập tin (PDF).";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave({ name, start_date: startDate, end_date: endDate, status, file });
+
+    // Gọi hàm kiểm tra hợp lệ
+    if (!validateForm()) {
+      toast.warning("Vui lòng điền đầy đủ các thông tin bắt buộc!");
+      return;
+    }
+
+    onSave({
+      name: name.trim(),
+      start_date: startDate,
+      end_date: endDate,
+      status,
+      file,
+    });
     setIsEditMode(false);
   };
+
   const handleDownloadFile = async () => {
     if (!contract?.id) return;
     try {
@@ -72,6 +122,8 @@ export default function ContractModal({
     "w-full h-11 px-4 text-[13.5px] font-medium rounded-xl outline-none transition-all duration-200 border";
   const activeInputStyle =
     "bg-white border-slate-200 text-slate-700 focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10";
+  const errorInputStyle =
+    "!border-rose-400 focus:!border-rose-500 focus:!ring-rose-500/10 bg-rose-50/30"; // Style cho ô bị lỗi
   const disabledStyle =
     "bg-slate-50 border-transparent text-slate-500 cursor-not-allowed";
   const labelStyle =
@@ -116,45 +168,71 @@ export default function ContractModal({
             </button>
           </div>
         </div>
-        <form
-          onSubmit={handleSubmit}
-          className="flex-1 overflow-y-auto px-8 py-6 space-y-6"
-        >
+        <form className="flex-1 overflow-y-auto px-8 py-6 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="md:col-span-2">
-              <label className={labelStyle}>Tên hợp đồng</label>
+              <label className={labelStyle}>
+                Tên hợp đồng <span className="text-rose-500">*</span>
+              </label>
               <input
                 type="text"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => {
+                  setName(e.target.value);
+                  if (errors.name) setErrors({ ...errors, name: null });
+                }}
                 readOnly={!isEditMode}
-                required
                 placeholder="Nhập tên hợp đồng..."
-                className={`${baseInputStyle} ${isEditMode ? activeInputStyle : disabledStyle}`}
+                className={`${baseInputStyle} ${isEditMode ? activeInputStyle : disabledStyle} ${errors.name ? errorInputStyle : ""}`}
               />
+              {errors.name && (
+                <p className="text-[11px] font-medium text-rose-500 mt-1.5 pl-1 italic">
+                  {errors.name}
+                </p>
+              )}
             </div>
 
             <div>
-              <label className={labelStyle}>Ngày bắt đầu</label>
+              <label className={labelStyle}>
+                Ngày bắt đầu <span className="text-rose-500">*</span>
+              </label>
               <input
                 type="date"
                 value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
+                onChange={(e) => {
+                  setStartDate(e.target.value);
+                  if (errors.startDate)
+                    setErrors({ ...errors, startDate: null });
+                }}
                 readOnly={!isEditMode}
-                required
-                className={`${baseInputStyle} ${isEditMode ? activeInputStyle : disabledStyle} ${!startDate && !isEditMode ? "text-transparent" : ""}`}
+                className={`${baseInputStyle} ${isEditMode ? activeInputStyle : disabledStyle} ${!startDate && !isEditMode ? "text-transparent" : ""} ${errors.startDate ? errorInputStyle : ""}`}
               />
+              {errors.startDate && (
+                <p className="text-[11px] font-medium text-rose-500 mt-1.5 pl-1 italic">
+                  {errors.startDate}
+                </p>
+              )}
             </div>
 
             <div>
-              <label className={labelStyle}>Ngày kết thúc</label>
+              <label className={labelStyle}>
+                Ngày kết thúc <span className="text-rose-500">*</span>
+              </label>
               <input
                 type="date"
                 value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
+                onChange={(e) => {
+                  setEndDate(e.target.value);
+                  if (errors.endDate) setErrors({ ...errors, endDate: null });
+                }}
                 readOnly={!isEditMode}
-                className={`${baseInputStyle} ${isEditMode ? activeInputStyle : disabledStyle} ${!endDate && !isEditMode ? "text-transparent" : ""}`}
+                className={`${baseInputStyle} ${isEditMode ? activeInputStyle : disabledStyle} ${!endDate && !isEditMode ? "text-transparent" : ""} ${errors.endDate ? errorInputStyle : ""}`}
               />
+              {errors.endDate && (
+                <p className="text-[11px] font-medium text-rose-500 mt-1.5 pl-1 italic">
+                  {errors.endDate}
+                </p>
+              )}
             </div>
 
             <div>
@@ -173,7 +251,12 @@ export default function ContractModal({
             </div>
 
             <div>
-              <label className={labelStyle}>Tập tin đính kèm (PDF)</label>
+              <label className={labelStyle}>
+                Tập tin đính kèm (PDF){" "}
+                {(!contract || !contract.file_url) && (
+                  <span className="text-rose-500">*</span>
+                )}
+              </label>
               <div className="flex flex-col gap-2">
                 {contract?.file_url && (
                   <div className="flex items-center gap-2 p-2.5 bg-blue-50/50 border border-blue-100 rounded-xl">
@@ -195,15 +278,25 @@ export default function ContractModal({
                   </div>
                 )}
                 {isEditMode && (
-                  <div
-                    className={`flex items-center h-11 px-1 rounded-xl border border-slate-200 bg-white`}
-                  >
-                    <input
-                      type="file"
-                      accept="application/pdf"
-                      onChange={(e) => setFile(e.target.files[0])}
-                      className={fileInputStyle}
-                    />
+                  <div className="flex flex-col gap-1.5">
+                    <div
+                      className={`flex items-center h-11 px-1 rounded-xl border border-slate-200 bg-white ${errors.file ? "border-rose-400! bg-rose-50/30" : ""}`}
+                    >
+                      <input
+                        type="file"
+                        accept="application/pdf"
+                        onChange={(e) => {
+                          setFile(e.target.files[0]);
+                          if (errors.file) setErrors({ ...errors, file: null });
+                        }}
+                        className={fileInputStyle}
+                      />
+                    </div>
+                    {errors.file && (
+                      <p className="text-[11px] font-medium text-rose-500 pl-1 italic">
+                        {errors.file}
+                      </p>
+                    )}
                   </div>
                 )}
                 {!isEditMode && !contract?.file_url && (
