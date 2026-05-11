@@ -1,4 +1,5 @@
 import { toast } from "react-toastify";
+import { Download } from "lucide-react";
 
 export default function ExportCSV({ data, fileName = "export", fields }) {
   const handleExport = () => {
@@ -27,8 +28,9 @@ export default function ExportCSV({ data, fileName = "export", fields }) {
   return (
     <button
       onClick={handleExport}
-      className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
+      className="flex items-center justify-center gap-2 px-5 py-2.5 text-[13px] font-bold text-white bg-green-600 hover:bg-green-700 active:scale-95 rounded-xl transition-all shadow-[0_4px_15px_rgba(22,163,74,0.25)]"
     >
+      <Download size={16} strokeWidth={2.5} />
       Xuất CSV
     </button>
   );

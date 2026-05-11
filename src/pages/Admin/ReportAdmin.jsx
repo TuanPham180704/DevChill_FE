@@ -22,6 +22,7 @@ import {
   UserPlus,
   Headset,
 } from "lucide-react";
+import ExportCSV from "../../components/common/ExportCSV";
 import { getReports } from "../../api/overviewApi";
 
 const COLORS = [
@@ -99,6 +100,16 @@ export default function DashboardReports() {
         : 0,
     };
   }, [data]);
+  const csvData = useMemo(() => {
+    if (!chartData || chartData.length === 0) return [];
+    return chartData.map((row) => ({
+      "Thời gian": row.fullLabel || row.label,
+      "Lượt xem": row.views,
+      "Doanh thu (VNĐ)": row.revenue,
+      "Tài khoản mới": row.users,
+      "Yêu cầu hỗ trợ": row.tickets,
+    }));
+  }, [chartData]);
 
   const SimpleTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
@@ -167,14 +178,26 @@ export default function DashboardReports() {
             <option value="year">Hiển thị theo Năm</option>
           </select>
         </div>
-        <button
-          onClick={fetchReports}
-          disabled={loading}
-          className="flex items-center gap-2 px-6 py-2.5 text-[13px] font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-all"
-        >
-          <RefreshCw size={16} className={loading ? "animate-spin" : ""} /> Áp
-          dụng
-        </button>
+        <div className="flex items-center gap-3">
+          {data && data.views && data.views.length > 0 && (
+            <ExportCSV
+              data={csvData}
+              fileName={`Bao_Cao_Thong_Ke_${filter.from_date}_den_${filter.to_date}`}
+            />
+          )}
+          <button
+            onClick={fetchReports}
+            disabled={loading}
+            className="flex items-center justify-center gap-2 px-6 py-2.5 text-[13px] font-bold text-white bg-blue-600 hover:bg-blue-700 active:scale-95 rounded-xl transition-all shadow-[0_4px_15px_rgba(37,99,235,0.25)]"
+          >
+            <RefreshCw
+              size={16}
+              strokeWidth={2.5}
+              className={loading ? "animate-spin" : ""}
+            />
+            {loading ? "Đang xử lý..." : "Áp dụng"}
+          </button>
+        </div>
       </div>
 
       {!data ? (

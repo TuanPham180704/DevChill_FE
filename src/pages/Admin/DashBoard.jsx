@@ -20,6 +20,7 @@ import {
   Ticket,
   Activity,
 } from "lucide-react";
+import ExportCSV from "../../components/common/ExportCSV";
 import { getDashboard24h } from "../../api/overviewApi";
 
 export default function DashboardOverview() {
@@ -65,7 +66,17 @@ export default function DashboardOverview() {
       };
     });
   }, [data, currentHour]);
-
+  const csvData = useMemo(() => {
+    if (!chartData || chartData.length === 0) return [];
+    return chartData.map((row) => ({
+      "Khung giờ": row.hour,
+      "Lượt xem": row.views || 0,
+      "Doanh thu (VNĐ)": row.revenue || 0,
+      "Giao dịch": row.transactions || 0,
+      "User mới": row.users || 0,
+      "Cảnh báo/Lỗi": row.alerts || 0,
+    }));
+  }, [chartData]);
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
@@ -114,13 +125,21 @@ export default function DashboardOverview() {
 
   return (
     <div className="flex flex-col w-full min-h-screen bg-[#FCFDFE] p-6 space-y-6 font-sans">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-800">
-          Tổng quan 24 Giờ
-        </h1>
-        <p className="text-[14px] text-slate-500 font-medium">
-          Hệ thống giám sát chi tiết từ 00:00 đến hiện tại ⚡
-        </p>
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div className="flex flex-col gap-2 text-left">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-800">
+            Báo Cáo Nhanh 24H
+          </h1>
+          <p className="text-[15px] text-slate-500 font-medium">
+            Hệ thống giám sát chi tiết từ 00:00 đến hiện tại ⚡
+          </p>
+        </div>
+        <div className="shrink-0">
+          <ExportCSV
+            data={csvData}
+            fileName={`Bao_Cao_24h_${new Date().toLocaleDateString("vi-VN").replace(/\//g, "-")}`}
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-4 gap-5">
