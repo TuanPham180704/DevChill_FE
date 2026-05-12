@@ -147,7 +147,7 @@ export default function DashboardOverview() {
           <div className="flex justify-between items-start mb-4">
             <div>
               <div className="text-slate-400 text-[11px] font-bold mb-1 uppercase tracking-wider">
-                Doanh thu VNPay
+                Doanh thu
               </div>
               <div className="text-2xl font-black text-slate-800">
                 {data.kpi.revenue.toLocaleString()}₫
