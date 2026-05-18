@@ -12,8 +12,7 @@ import FloatingButton from "./FloatingButton";
 import ChatInput from "./ChatInput";
 import ChatMessage from "./ChatMessage";
 
-const BACKEND_SOCKET_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:8080";
+const BACKEND_SOCKET_URL = "http://localhost:8080";
 
 const INITIAL_OPTIONS = [
   "Gợi ý phim hay",
@@ -64,7 +63,7 @@ export default function DevChillBot() {
   const [isTyping, setIsTyping] = useState(false);
 
   const messagesEndRef = useRef(null);
-  const socketRef = useRef(null); 
+  const socketRef = useRef(null);
   const navigate = useNavigate();
 
   const customNavigate = (to, options) => {
