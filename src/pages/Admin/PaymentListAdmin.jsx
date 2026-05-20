@@ -201,10 +201,10 @@ export default function PaymentListAdmin() {
         <div className="space-y-5 flex-1 w-full">
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl font-bold tracking-tight text-slate-800">
-              Quản lý Giao dịch
+              Quản lý Thanh Toán
             </h1>
             <p className="text-[14px] text-slate-500 font-medium">
-              Kiểm tra, đối soát và xác nhận giao dịch hệ thống 💳
+              Kiểm tra, đối soát và xác nhận thanh toán hệ thống 💳
             </p>
           </div>
           <div className="grid grid-cols-4 gap-4 mb-2">

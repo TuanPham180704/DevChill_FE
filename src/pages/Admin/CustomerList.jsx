@@ -188,7 +188,7 @@ export default function CustomerList() {
           {/* Header */}
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl font-bold tracking-tight text-slate-800">
-              Quản lý khách hàng
+              Quản lý người dùng
             </h1>
             <p className="text-[14px] text-slate-500 font-medium">
               Theo dõi và quản lý tài khoản người dùng một cách chuyên nghiệp 🚀

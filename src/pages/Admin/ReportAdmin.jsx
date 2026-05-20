@@ -133,7 +133,7 @@ export default function DashboardReports() {
     <div className="flex flex-col relative w-full min-h-screen bg-[#FCFDFE] p-6 space-y-6 font-sans">
       <div className="flex flex-col gap-1">
         <h1 className="text-2xl font-bold tracking-tight text-slate-800">
-          Báo cáo & Phân tích
+          Thống Kê & Báo Cáo
         </h1>
         <p className="text-[14px] text-slate-500 font-medium">
           Chi tiết 4 biểu đồ báo cáo hiệu suất 📊
