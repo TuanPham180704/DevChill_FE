@@ -333,6 +333,7 @@ export default function PaymentListAdmin() {
                   <option value="pending">Đang xử lý</option>
                   <option value="failed">Thất bại</option>
                   <option value="cancelled">Đã huỷ</option>
+                  <option value="expired">Hết hạn</option>
                 </select>
                 {isFilterActive && (
                   <button
